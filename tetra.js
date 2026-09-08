@@ -163,7 +163,10 @@ if (window.__tetraPerfOff('caddsvg')) {
     if (heading && window.SplitText && !window.__tetraPerfOff('intro')) {
       var fill = s.getPropertyValue('--_tetra-tokens---color-ink').trim() || '#251915';
       var base = s.getPropertyValue('--_tetra-tokens---color-muted').trim() || '#9E9E9E';
-      mm.add('(min-width: 768px)', function () {
+      // Раньше эффект жил только от 768px. Теперь section_intro ведёт себя
+      // одинаково на всех ширинах, включая мобилку (<=479px): пин + пословная
+      // заливка цвета по скроллу.
+      mm.add('(min-width: 1px)', function () {
         var split = SplitText.create(heading, {
           type: 'lines,words',
           linesClass: 'section-reveal-line'
