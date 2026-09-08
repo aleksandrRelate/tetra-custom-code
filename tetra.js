@@ -278,6 +278,9 @@ if (window.__tetraPerfOff('caddsvg')) {
       pWrap.style.overflow = 'hidden';                  // обрезаем уехавшие копии
       var pLoops = [];
       function buildMarquee() {
+        var previous = pLoops.map(function (t) {
+          return { progress: t.progress(), speed: t.timeScale() };
+        });
         pLoops.forEach(function (t) { t.kill(); });
         pLoops = [];
         pRows.forEach(function (row, ri) {
@@ -304,6 +307,11 @@ if (window.__tetraPerfOff('caddsvg')) {
             { x: dir < 0 ? -w : 0, duration: w / 40, ease: 'none', repeat: -1 } // w/40 ≈ 40px/с
           );
           t.pause();
+          if (previous[ri]) {
+            t.progress(previous[ri].progress);
+            t.timeScale(previous[ri].speed);
+          }
+          if (pActive) t.resume();
           pLoops.push(t);
         });
       }
@@ -361,9 +369,17 @@ if (window.__tetraPerfOff('caddsvg')) {
         });
         pSettled = settled;
       });
-      // пересборка ленты на resize (debounce)
+      // На мобилке (<=479px) адресная строка меняет высоту viewport при скролле.
+      // Пересобираем только при смене ширины, сохраняя фазу и состояние лент.
       var rt;
-      window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(buildMarquee, 200); });
+      var pViewportWidth = document.documentElement.clientWidth;
+      window.addEventListener('resize', function () {
+        var width = document.documentElement.clientWidth;
+        if (width === pViewportWidth) return;
+        pViewportWidth = width;
+        clearTimeout(rt);
+        rt = setTimeout(buildMarquee, 200);
+      });
     }
     /* ------------------------------------------------------------------ *
      * 6. NAVBAR
