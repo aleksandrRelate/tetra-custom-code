@@ -1412,13 +1412,11 @@ if (window.__tetraPerfOff('caddsvg')) {
     loadSwiper().then(function () {
       if (!mq.matches || instance) return;         // брейкпоинт мог смениться, пока грузилось
       build(el);
-      // отступ после последней карточки (= 1rem) задаётся опцией Swiper, а не CSS —
-      // padding на .swiper-wrapper он игнорирует
-      var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       instance = new Swiper(el, {
         slidesPerView: 'auto',
         spaceBetween: 16,
-        slidesOffsetAfter: rem,
+        // отступ после последней карточки — опцией Swiper, а не CSS-паддингом
+        slidesOffsetAfter: 16,
         grabCursor: true,
         watchOverflow: true,
         resistanceRatio: 0.6
