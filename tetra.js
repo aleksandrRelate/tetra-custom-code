@@ -1459,3 +1459,341 @@ if (window.__tetraPerfOff('caddsvg')) {
     exploreCadd.addEventListener('blur', function () { api && api.clear(); });
   }
 })();
+
+/* ===== mobile menu (<=479px) — шторка + выезд пунктов из масок ===== */
+/* Needs: gsap  |  [nav-menu-mobile], .mobile-nav-bttn
+ * Lottie-иконка бургера необязательна. Чтобы она работала:
+ *   1) элемент .mobile-nav-bttn-lottie должен быть Webflow Lottie (тогда
+ *      Webflow сам подключит lottie-web и проставит data-src), ЛИБО
+ *   2) это обычный Div Block — тогда подключи lottie_light ПЕРЕД tetra.js:
+ *      <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_light.min.js"></script>
+ *      и укажи URL JSON в LOTTIE_FALLBACK_PATH (залей его в Webflow Assets).
+ * Без иконки меню всё равно работает — состояние даёт класс .active на кнопке.
+ */
+(function () {
+  if (typeof gsap === "undefined") {
+    console.warn("[mobile-menu] GSAP не найден, меню не инициализировано");
+    return;
+  }
+
+  const BREAKPOINT = 479;
+
+  // TODO: залить JSON иконки бургера в Webflow Assets и вставить URL сюда.
+  const LOTTIE_FALLBACK_PATH = "";
+
+  const mobileMenu = document.querySelector("[nav-menu-mobile]");
+  const mobileNavBtn = document.querySelector(".mobile-nav-bttn");
+  if (!mobileMenu || !mobileNavBtn) {
+    console.warn("[mobile-menu] не найден [nav-menu-mobile] или .mobile-nav-bttn");
+    return;
+  }
+
+  const lottieElement = mobileNavBtn.querySelector(".mobile-nav-bttn-lottie");
+
+  const menuLinks = mobileMenu.querySelectorAll(".nav-menu-links-wrapper .nav-link");
+  const navSocials = mobileMenu.querySelectorAll(".nav-menu-socials");
+  const navButtons = mobileMenu.querySelectorAll(".nav-bttns-wrap.is-mob .button-main");
+  // GSAP 3.15 нельзя передавать массив из NodeList: он может принять
+  // внутреннюю коллекцию за target. Передаём плоский массив DOM-элементов.
+  const items = Array.from(menuLinks).concat(
+    Array.from(navSocials),
+    Array.from(navButtons)
+  );
+
+  // Иллюстрация просто проявляется — без маски и без выезда.
+  const navHand = mobileMenu.querySelectorAll(".nav-menu-hand");
+  const fadeItems = Array.from(navHand);
+
+  const ITEM_TRAVEL = 130;
+  const ITEM_DURATION = 0.45;
+  const ITEM_EASE = "power3.out";
+
+  const FADE_DURATION = 0.6;
+
+  // Стартовый угол иллюстрации; конечный читается с самого элемента в ensureMasks.
+  const FADE_START_ROTATION = 30;
+  const FADE_EASE = "power2.out";
+
+  // Шторка. Закрытие реверсит таймлайн открытия — отдельной длительности нет.
+  const OPEN_DURATION = 0.7;
+  const CURTAIN_EASE = "power1.inOut";
+
+  let isMenuOpen = false;
+  let lottieAnimation = null;
+  let lottieTween = null;
+  const lottiePlayhead = { frame: 0 };
+  let tl = null;
+  let lockedLenis = null;
+
+  const isMobileScreen = () => window.innerWidth <= BREAKPOINT;
+
+  /* ---------- Lottie (необязательна) ---------- */
+  if (!lottieElement) {
+    console.warn("[mobile-menu] .mobile-nav-bttn-lottie не найден");
+  } else if (typeof lottie === "undefined") {
+    console.warn("[mobile-menu] lottie не загружен, иконка работать не будет");
+  } else {
+    const lottiePath =
+      lottieElement.getAttribute("data-src") || LOTTIE_FALLBACK_PATH;
+
+    const inLayout =
+      lottieElement.offsetParent !== null ||
+      lottieElement.getClientRects().length > 0;
+    const box = lottieElement.getBoundingClientRect();
+
+    if (inLayout && (!box.width || !box.height)) {
+      console.warn("[mobile-menu] у .mobile-nav-bttn-lottie нулевой размер, ставлю 2rem");
+      lottieElement.style.width = lottieElement.style.width || "2rem";
+      lottieElement.style.height = lottieElement.style.height || "2rem";
+    }
+
+    // Снимаем вебфлоувские атрибуты, пока IX2 не проснулся.
+    ["data-animation-type", "data-autoplay", "data-src", "data-w-id"].forEach((a) =>
+      lottieElement.removeAttribute(a)
+    );
+
+    lottie.getRegisteredAnimations().forEach((anim) => {
+      if (anim.wrapper === lottieElement) anim.destroy();
+    });
+    lottieElement.innerHTML = "";
+
+    if (lottiePath) {
+      lottieAnimation = lottie.loadAnimation({
+        container: lottieElement,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        name: "mobileMenuLottie",
+        path: lottiePath,
+      });
+
+      lottieAnimation.addEventListener("DOMLoaded", () => {
+        lottieAnimation.goToAndStop(0, true);
+        const last = lottieAnimation.totalFrames - 1;
+
+        lottieTween = gsap.to(lottiePlayhead, {
+          frame: last,
+          duration: 0.4,
+          ease: "power2.out",
+          paused: true,
+          onUpdate: () =>
+            lottieAnimation.goToAndStop(lottiePlayhead.frame, true),
+        });
+      });
+
+      lottieAnimation.addEventListener("data_failed", () => {
+        console.warn("[mobile-menu] не удалось загрузить JSON:", lottiePath);
+        lottieAnimation = null;
+      });
+    }
+  }
+
+  function playIcon(forward) {
+    if (!lottieTween) return;
+    if (forward) {
+      lottieTween.play();
+    } else {
+      lottieTween.reverse();
+    }
+  }
+
+  /* ---------- Лого ---------- */
+  // Пока меню открыто, секция под шапкой закрыта тёмным дровером — лого белый,
+  // на закрытии возвращается к тому, что было (navbar-color).
+  const navLogo = document.querySelector(".navbar-container .navbar-logo");
+  let logoColorBefore = null;
+
+  function whitenLogo() {
+    if (!navLogo || logoColorBefore !== null) return;
+    logoColorBefore = navLogo.style.color;
+    navLogo.style.color = "#FFFFFF";
+  }
+
+  function restoreLogo() {
+    if (!navLogo || logoColorBefore === null) return;
+    navLogo.style.color = logoColorBefore;
+    logoColorBefore = null;
+  }
+
+  /* Блокировка скролла без изменения layout: гасим сами события + Lenis.stop().
+     На мобилке Lenis у Tetra выключен, так что обычно работает только первая
+     половина — отмена wheel/touchmove. */
+  function preventScroll(event) {
+    event.preventDefault();
+  }
+
+  function lockPageScroll() {
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+
+    const lenis = window.lenis;
+    if (!lenis || typeof lenis.stop !== "function") return;
+
+    lenis.stop();
+    lockedLenis = lenis;
+  }
+
+  function unlockPageScroll() {
+    window.removeEventListener("wheel", preventScroll);
+    window.removeEventListener("touchmove", preventScroll);
+
+    if (lockedLenis && typeof lockedLenis.start === "function") {
+      lockedLenis.start();
+    }
+    lockedLenis = null;
+  }
+
+  /* ---------- Меню ---------- */
+  /* Открытие — маска, а не проявление. .nav-menu-mobile: position:fixed; top:0;
+     height:0; overflow:hidden с залитым фоном; внутренний .nav-menu-inner-wrapper
+     держит height:100svh — контент не сплющивается, высота работает как шторка.
+     Содержимое стартует ровно когда край шторки прошёл мимо него (curtainReachTime). */
+  gsap.set(mobileMenu, {
+    height: "0vh",
+    overflow: "hidden",
+    pointerEvents: "none",
+  });
+
+  function maskItem(el) {
+    const mask = document.createElement("div");
+
+    mask.className = "mob-menu-mask";
+    mask.style.overflow = "hidden";
+    mask.style.display = "flex";
+    mask.style.paddingBottom = "0.16em";
+    mask.style.marginBottom = "-0.16em";
+
+    el.parentNode.insertBefore(mask, el);
+    mask.appendChild(el);
+
+    return mask;
+  }
+
+  /* Маски строятся на первом открытии: всё, на что смотрит maskItem, живёт в
+     медиазапросе ≤479 (до него дровер display:none). Открыть меню можно только
+     на мобильной ширине — стили гарантированно применены. */
+  let itemMasks = null;
+  let fadeRotations = null;
+
+  function ensureMasks() {
+    if (itemMasks) return;
+    itemMasks = items.map(maskItem);
+    fadeRotations = fadeItems.map(function (el) {
+      return gsap.getProperty(el, "rotation") || 0;
+    });
+
+    gsap.set(items, { yPercent: ITEM_TRAVEL });
+    gsap.set(fadeItems, { opacity: 0, rotation: FADE_START_ROTATION });
+  }
+
+  const curtainEase = gsap.parseEase(CURTAIN_EASE);
+
+  function curtainReachTime(px) {
+    const full = window.innerHeight;
+    if (!full) return 0;
+
+    const target = Math.min(px / full, 1);
+
+    for (let i = 1; i <= 120; i += 1) {
+      if (curtainEase(i / 120) >= target) return (OPEN_DURATION * i) / 120;
+    }
+
+    return OPEN_DURATION;
+  }
+
+  function revealTimes(targets) {
+    return targets.map(function (el) {
+      return curtainReachTime(el.getBoundingClientRect().bottom);
+    });
+  }
+
+  function openMenu() {
+    isMenuOpen = true;
+    mobileNavBtn.classList.add("active");
+    whitenLogo();
+    lockPageScroll();
+    gsap.set(mobileMenu, { pointerEvents: "auto" });
+
+    ensureMasks();
+
+    if (tl) {
+      tl.play();
+      playIcon(true);
+      return;
+    }
+
+    const at = revealTimes(itemMasks);
+    const fadeAt = revealTimes(fadeItems);
+
+    tl = gsap.timeline();
+    tl.to(mobileMenu, {
+      height: "100vh",
+      duration: OPEN_DURATION,
+      ease: CURTAIN_EASE
+    });
+
+    items.forEach(function (el, index) {
+      tl.fromTo(
+        el,
+        { yPercent: ITEM_TRAVEL },
+        { yPercent: 0, duration: ITEM_DURATION, ease: ITEM_EASE },
+        at[index]
+      );
+    });
+
+    fadeItems.forEach(function (el, index) {
+      tl.fromTo(
+        el,
+        { opacity: 0, rotation: FADE_START_ROTATION },
+        {
+          opacity: 1,
+          rotation: fadeRotations[index],
+          duration: FADE_DURATION,
+          ease: FADE_EASE
+        },
+        fadeAt[index]
+      );
+    });
+
+    playIcon(true);
+  }
+
+  function closeMenu() {
+    isMenuOpen = false;
+    mobileNavBtn.classList.remove("active");
+    restoreLogo();
+    unlockPageScroll();
+    gsap.set(mobileMenu, { pointerEvents: "none" });
+
+    if (tl) {
+      const closingTimeline = tl;
+      closingTimeline.eventCallback("onReverseComplete", function () {
+        if (tl !== closingTimeline || isMenuOpen) return;
+        tl = null;
+      });
+      closingTimeline.reverse();
+    }
+
+    playIcon(false);
+  }
+
+  mobileNavBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (!isMobileScreen()) return;
+    isMenuOpen ? closeMenu() : openMenu();
+  });
+
+  mobileMenu.querySelectorAll(".nav-link, .button-main").forEach((el) => {
+    el.addEventListener("click", function () {
+      if (isMenuOpen) closeMenu();
+    });
+  });
+
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && isMenuOpen) closeMenu();
+  });
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > BREAKPOINT && isMenuOpen) closeMenu();
+  });
+})();
