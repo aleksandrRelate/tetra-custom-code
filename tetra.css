@@ -133,6 +133,10 @@
     margin-right: -0.72rem;
     overflow: hidden;
   }
+  /* отступ после последней карточки — лента не упирается в правый край экрана */
+  .about_content.swiper .swiper-wrapper {
+    padding-right: 1rem;
+  }
   /* Swiper-стили грузятся позже webflow.css, поэтому размеры карточки задаём с запасом по весу */
   .about_content.swiper .swiper-slide.about-card {
     display: flex;
