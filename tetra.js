@@ -1149,8 +1149,15 @@ if (window.__tetraPerfOff('caddsvg')) {
     if (state.refreshQueued) return;
     state.refreshQueued = true;
     requestAnimationFrame(function () {
-      state.refreshQueued = false;
-      window.ScrollTrigger.refresh();
+      function refreshWhenIdle() {
+        if (window.ScrollTrigger.isScrolling()) return;
+        window.ScrollTrigger.removeEventListener('scrollEnd', refreshWhenIdle);
+        state.refreshQueued = false;
+        window.ScrollTrigger.refresh();
+      }
+      // Не пересчитываем pin/scrub во время инерционного скролла.
+      window.ScrollTrigger.addEventListener('scrollEnd', refreshWhenIdle);
+      refreshWhenIdle();
     });
   }
   function initParallax(node) {
@@ -1232,21 +1239,30 @@ if (window.__tetraPerfOff('caddsvg')) {
         });
       }
     );
+    return true;
   }
   function scan(root) {
     if (!root) return;
+    var initialized = false;
+    function initialize(node) {
+      if (initParallax(node)) initialized = true;
+    }
     if (
       root.nodeType === 1 &&
       root.matches(SELECTOR)
     ) {
-      initParallax(root);
+      initialize(root);
     }
+    // Картинка может быть добавлена позже внутрь уже существующего wrapper.
+    if (root.nodeType === 1 && root.closest) initialize(root.closest(SELECTOR));
     if (root.querySelectorAll) {
       root
         .querySelectorAll(SELECTOR)
-        .forEach(initParallax);
+        .forEach(initialize);
     }
-    queueRefresh();
+    // SplitText, Swiper и pin-spacer тоже меняют DOM, но не требуют
+    // глобального refresh от параллакса. Иначе возможен цикл refresh → DOM → refresh.
+    if (initialized) queueRefresh();
   }
   function installObserver() {
     if (state.observer) return;
@@ -1266,12 +1282,14 @@ if (window.__tetraPerfOff('caddsvg')) {
     });
   }
   function boot() {
+    if (state.booted) return;
     if (!window.gsap || !window.ScrollTrigger) {
       console.warn(
         "Image parallax: GSAP or ScrollTrigger is missing."
       );
       return;
     }
+    state.booted = true;
     window.gsap.registerPlugin(
       window.ScrollTrigger
     );
