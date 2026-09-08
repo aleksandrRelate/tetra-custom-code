@@ -415,23 +415,26 @@ if (window.__tetraPerfOff('caddsvg')) {
       var scrollTicking = false;
       navWrapper.style.willChange = 'transform';
       navWrapper.style.transition = 'transform 350ms ease';
-      if (scrollLogo) {
-        scrollLogo.style.willChange = 'transform, opacity';
-        scrollLogo.style.transition = 'transform 350ms ease, opacity 250ms ease';
+      var logoMobileMq = window.matchMedia('(max-width: 479px)');
+      function updateScrollLogo() {
+        if (!scrollLogo) return;
+        var mobile = logoMobileMq.matches;
+        var hidden = !mobile && navCompact;
+        scrollLogo.style.willChange = mobile ? 'auto' : 'transform, opacity';
+        scrollLogo.style.transition = mobile ? 'none' : 'transform 350ms ease, opacity 250ms ease';
+        scrollLogo.style.opacity = hidden ? '0' : '1';
+        scrollLogo.style.transform = hidden ? 'translate3d(0, -100%, 0)' : 'none';
+        scrollLogo.style.pointerEvents = hidden ? 'none' : '';
       }
+      updateScrollLogo();
+      logoMobileMq.addEventListener('change', updateScrollLogo);
       function setNavbarPosition(compactNavbar) {
         if (navCompact === compactNavbar) return;
         navCompact = compactNavbar;
         navWrapper.style.transform = compactNavbar
           ? 'translate3d(0, -' + bannerH + 'px, 0)'
           : 'translate3d(0, 0, 0)';
-        if (scrollLogo) {
-          scrollLogo.style.opacity = compactNavbar ? '0' : '1';
-          scrollLogo.style.transform = compactNavbar
-            ? 'translate3d(0, -100%, 0)'
-            : 'translate3d(0, 0, 0)';
-          scrollLogo.style.pointerEvents = compactNavbar ? 'none' : '';
-        }
+        updateScrollLogo();
       }
       function updateNavbarPosition() {
         var currentScrollY = window.scrollY;
