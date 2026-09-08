@@ -2,6 +2,25 @@
 // Source of truth: this repo. Webflow only links to the built file.
 // Depends on jQuery, Webflow, GSAP + ScrollTrigger + SplitText and Lenis,
 // all of which are loaded by tags placed BEFORE this file.
+//
+// PERF BISECT: add ?perf=<name>[,<name>] to the URL to switch subsystems off
+// while diagnosing scroll jank. Names: partners, reveal, benefits, intro,
+// trust, swiper, caddsvg, all. Example: ?perf=partners,caddsvg
+window.__tetraPerfOff = (function () {
+  try {
+    var raw = (new URLSearchParams(location.search).get('perf') || '').toLowerCase();
+    var set = {};
+    raw.split(',').forEach(function (k) { k = k.trim(); if (k) set[k] = true; });
+    return function (name) { return !!(set[name] || set.all); };
+  } catch (e) {
+    return function () { return false; };
+  }
+})();
+if (window.__tetraPerfOff('caddsvg')) {
+  var __cs = document.createElement('style');
+  __cs.textContent = '#caddNetwork,.hero_bg-image.is-svg{display:none!important}';
+  (document.head || document.documentElement).appendChild(__cs);
+}
 
 
 /* ===== Home scroll interactions (GSAP + ScrollTrigger + SplitText + Lenis) ===== */
@@ -141,7 +160,7 @@
      * ------------------------------------------------------------------ */
     var intro = document.querySelector('.section_intro');
     var heading = intro && intro.querySelector('.intro_heading');
-    if (heading && window.SplitText) {
+    if (heading && window.SplitText && !window.__tetraPerfOff('intro')) {
       var fill = s.getPropertyValue('--_tetra-tokens---color-ink').trim() || '#251915';
       var base = s.getPropertyValue('--_tetra-tokens---color-muted').trim() || '#9E9E9E';
       mm.add('(min-width: 768px)', function () {
@@ -188,7 +207,7 @@
      *  • у уходящей карточки затухает только .benefits_item-content (opacity + лёгкий scale)
      * ------------------------------------------------------------------ */
     var items = gsap.utils.toArray('.section_benefits .benefits_item');
-    if (items.length > 1) {
+    if (items.length > 1 && !window.__tetraPerfOff('benefits')) {
       mm.add('(min-width: 480px)', function () {
         var cardTop = 0;                                // карточки упираются в верх вьюпорта
         var tw = [];
@@ -224,7 +243,7 @@
      * 4. SECTION_TRUST — scale 0.95 → 1 напрямую по скроллу
      * ------------------------------------------------------------------ */
     var trust = document.querySelector('.section_trust');
-    if (trust) {
+    if (trust && !window.__tetraPerfOff('trust')) {
       // Только от 480px: scrub-масштабирование секции во весь экран заставляет
       // телефон перерисовывать огромную площадь на каждом кадре скролла.
       mm.add('(min-width: 480px)', function () {
@@ -254,7 +273,7 @@
      *  • скорость зависит от скорости скролла: вниз — быстрее, вверх — разворот
      * ------------------------------------------------------------------ */
     var pWrap = document.querySelector('.section_partners .partners_grid');
-    if (pWrap) {
+    if (pWrap && !window.__tetraPerfOff('partners')) {
       var pRows = Array.prototype.slice.call(pWrap.querySelectorAll('.partners-row'));
       pWrap.style.overflow = 'hidden';                  // обрезаем уехавшие копии
       var pLoops = [];
@@ -454,7 +473,7 @@
      * Общие параметры: слова 0.555s / stagger 0.05s;
      * кнопки — как hero, сверху вниз через маску, 0.9s / 0.12s.
      */
-    if (window.SplitText) {
+    if (window.SplitText && !window.__tetraPerfOff('reveal')) {
       mm.add('(prefers-reduced-motion: no-preference)', function () {
         var splits = [];
         var reveals = [];
@@ -1339,6 +1358,7 @@
   function apply() {
     var el = document.querySelector(SELECTOR);
     if (!el) return;
+    if (window.__tetraPerfOff && window.__tetraPerfOff('swiper')) { teardown(el); return; }
     if (!mq.matches) { teardown(el); return; }
     loadSwiper().then(function () {
       if (!mq.matches || instance) return;         // брейкпоинт мог смениться, пока грузилось
