@@ -225,17 +225,26 @@
      * ------------------------------------------------------------------ */
     var trust = document.querySelector('.section_trust');
     if (trust) {
-      gsap.fromTo(trust, { scale: 0.95 }, {
-        scale: 1,
-        transformOrigin: '50% 50%',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: trust,
-          start: 'top bottom',
-          end: 'top 50%',
-          scrub: true,
-          invalidateOnRefresh: true
-        }
+      // Только от 480px: scrub-масштабирование секции во весь экран заставляет
+      // телефон перерисовывать огромную площадь на каждом кадре скролла.
+      mm.add('(min-width: 480px)', function () {
+        var trustScale = gsap.fromTo(trust, { scale: 0.95 }, {
+          scale: 1,
+          transformOrigin: '50% 50%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: trust,
+            start: 'top bottom',
+            end: 'top 50%',
+            scrub: true,
+            invalidateOnRefresh: true
+          }
+        });
+        return function () {
+          if (trustScale.scrollTrigger) trustScale.scrollTrigger.kill();
+          trustScale.kill();
+          gsap.set(trust, { clearProps: 'transform' });
+        };
       });
     }
     /* ------------------------------------------------------------------ *
@@ -288,6 +297,7 @@
       //  • скролл остановился — плавно возвращается к обычному ходу
       var pActive = false;
       var pTarget = 1;                 // желаемый timeScale (может быть < 0 → реверс)
+      var pSettled = true;             // нечего анимировать — тикер можно пропускать
       var pLastY = window.scrollY;
       var pLastT = (window.performance && performance.now()) || Date.now();
       ScrollTrigger.create({
@@ -312,17 +322,25 @@
         var cap = down ? 24 : 12;
         var mag = 1 + Math.min(v / div, cap);
         pTarget = down ? mag : -mag;                // вверх → разворот ленты
+        pSettled = false;
       }
       window.addEventListener('scroll', pOnScroll, { passive: true });
       if (window.lenis && window.lenis.on) window.lenis.on('scroll', pOnScroll);
       gsap.ticker.add(function () {
-        if (!pLoops.length) return;
+        // В покое (скорость уже вернулась к 1) выходим сразу — иначе этот колбэк
+        // дёргает твины каждый кадр всю жизнь страницы и ест кадры на скролле.
+        if (!pLoops.length || pSettled) return;
         pTarget += (1 - pTarget) * 0.05;            // цель плавно оседает к +1 → инерция
         if (Math.abs(pTarget - 1) < 0.001) pTarget = 1;
+        var settled = pTarget === 1;
         pLoops.forEach(function (t) {
           var cur = t.timeScale();
-          t.timeScale(cur + (pTarget - cur) * 0.12);
+          var next = cur + (pTarget - cur) * 0.12;
+          if (Math.abs(next - pTarget) < 0.001) next = pTarget;
+          if (next !== cur) t.timeScale(next);
+          if (Math.abs(next - 1) > 0.001) settled = false;
         });
+        pSettled = settled;
       });
       // пересборка ленты на resize (debounce)
       var rt;

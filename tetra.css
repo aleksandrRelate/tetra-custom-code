@@ -145,3 +145,18 @@
     margin-top: 0;
   }
 }
+
+/* ===== mobile scroll performance (<=479px) ===== */
+@media screen and (max-width: 479px) {
+  /* backdrop-filter внутри фиксированной шапки — главный тормоз скролла на телефоне:
+     браузер пересчитывает блюр фона на каждом кадре. Фоны под ними и так почти
+     непрозрачные, в макете блюра нет — визуально ничего не теряем. */
+  .nav-menu,
+  .nav-bttns-wrap.is-mob,
+  .mobile-nav-bttn,
+  .button.is-secondary,
+  .button.is-secondary-dark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
