@@ -1,0 +1,147 @@
+/* Tetra — custom styles for the Webflow site.
+   Source of truth: this repo. Webflow only links to the built file.
+   Blocks below are concatenated in their original order. */
+
+
+/* ===== Lenis base + navbar theme + reveal masks + button mask ===== */
+  /* Lenis базовые стили (из пакета lenis) */
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+  .lenis.lenis-stopped { overflow: hidden; }
+  .lenis.lenis-smooth iframe { pointer-events: none; }
+  /* плавное переключение цвета текста/лого навбара по секциям */
+  .nav-link, .navbar-logo-svg { transition: color .35s ease; }
+  /* тёмная тема навбара */
+  .navbar.is-theme-dark .nav-menu {
+    background-color: rgba(37, 25, 21, 0.04);
+  }
+  .navbar.is-theme-dark .nav-link:hover,
+  .navbar.is-theme-dark .nav-link:focus-visible {
+    background-color: rgba(37, 25, 21, 0.06);
+  }
+  /* маска каждой строки для появления слов hero heading */
+  .hero-heading-line,
+  .section-reveal-line {
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+  .button-entry-mask {
+    display: inline-grid;
+    overflow: hidden;
+    max-width: 100%;
+    vertical-align: bottom;
+  }
+  /* на мобиле кнопки в макете во всю ширину — маска не должна ужимать их по контенту */
+  @media screen and (max-width: 479px) {
+    .button-entry-mask { width: 100%; }
+  }
+
+/* ===== buttons animation ===== */
+/* Даже до выполнения JS на touch видна только исходная строка. */
+@media (hover: none), (pointer: coarse), (pointer: none) {
+  .btn-reveal__line--second { display: none !important; }
+  .btn-reveal__track { transform: none !important; transition: none !important; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-reveal__viewport {
+    display: inline-block;
+    height: 1.25em;
+    line-height: 1.25em;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .btn-reveal__track {
+    position: relative;
+    display: block;
+    height: 2.5em;
+    line-height: 1.25em;
+    transform: translateY(0);
+    will-change: transform;
+  }
+  .btn-reveal__line {
+    display: block;
+    height: 1.25em;
+    line-height: 1.25em;
+    white-space: nowrap;
+  }
+  /* Сохраняем исходную высоту строки баннера и убираем inline-baseline. */
+  .section_banner .banner_link .btn-reveal__viewport {
+    display: block;
+    height: 1.43em;
+    line-height: 1.43em;
+  }
+  .section_banner .banner_link .btn-reveal__track {
+    height: 2.86em;
+    line-height: 1.43em;
+  }
+  .section_banner .banner_link .btn-reveal__line {
+    height: 1.43em;
+    line-height: 1.43em;
+  }
+}
+@media
+  (hover: hover)
+  and (pointer: fine)
+  and (prefers-reduced-motion: no-preference) {
+  .btn-reveal__track {
+    transition:
+      transform 950ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-reveal:hover .btn-reveal__track,
+  .btn-reveal:focus-visible .btn-reveal__track {
+    transform: translateY(-1.25em);
+  }
+  .section_banner .banner_link:hover .btn-reveal__track,
+  .section_banner .banner_link:focus-visible .btn-reveal__track {
+    transform: translateY(-1.43em);
+  }
+  [data-btn-nav-root] .btn-nav-reveal {
+    transition:
+      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 350ms ease;
+  }
+  [data-btn-nav-root].nav-engaged .btn-nav-reveal:not(.is-nav-bttn) {
+    opacity: 0.65;
+  }
+  [data-btn-nav-root].nav-engaged
+  .btn-nav-reveal.is-nav-active {
+    opacity: 1;
+  }
+}
+
+/* ===== image parallax ===== */
+  [data-parallax] {
+    position: absolute;
+    overflow: hidden;
+  }
+  [data-parallax] img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: transform;
+    transform-origin: center center;
+    backface-visibility: hidden;
+  }
+
+/* ===== about swiper (mobile portrait) ===== */
+@media screen and (max-width: 479px) {
+  /* лента выходит на правый край экрана — компенсируем 12px паддинга секции */
+  .about_content.swiper {
+    width: calc(100% + 0.72rem);
+    margin-right: -0.72rem;
+    overflow: hidden;
+  }
+  /* Swiper-стили грузятся позже webflow.css, поэтому размеры карточки задаём с запасом по весу */
+  .about_content.swiper .swiper-slide.about-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 18.17rem;
+    height: 12.03rem;
+    flex-shrink: 0;
+    margin-top: 0;
+  }
+}
