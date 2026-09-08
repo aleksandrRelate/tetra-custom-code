@@ -573,7 +573,8 @@ if (window.__tetraPerfOff('caddsvg')) {
           revealText(headerTimeline, trustSection.querySelector('.trust_intro-text'), 0.22);
           revealButtons(headerTimeline, trustSection.querySelectorAll('.button'), 0.3);
           trustSection.querySelectorAll('.trust_card').forEach(function (card, index) {
-            var cardTimeline = timelineFor(card);
+            // раньше стартовали на 'top 80%' — карточки появлялись слишком поздно
+            var cardTimeline = timelineFor(card, 'top 95%');
             var delay = index * 0.12;
             gsap.set(card, { autoAlpha: 0, y: 32, scale: 0.98, transformOrigin: '50% 100%' });
             cardTimeline.to(card, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7 }, delay);
