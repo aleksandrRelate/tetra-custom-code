@@ -17,14 +17,37 @@
     /* ------------------------------------------------------------------ *
      * 1. LENIS — плавный скролл, заведён на GSAP-тикер (без rAF-гонки)
      * не запускаем повторно и не конфликтуем с GSAP ScrollSmoother
+     * На мобилке (<=479px) выключен: там нативный скролл телефона ведёт себя
+     * лучше — не ломает скрытие адресной строки, системную инерцию и overscroll.
+     * Слушаем брейкпоинт, чтобы ресайз через границу тоже отрабатывал.
      * ------------------------------------------------------------------ */
-    if (window.Lenis && !window.lenis && !(window.ScrollSmoother && ScrollSmoother.get && ScrollSmoother.get())) {
+    var lenisMq = window.matchMedia('(max-width: 479px)');
+    var lenisTick = null;
+
+    function startLenis() {
+      if (!window.Lenis || window.lenis) return;
+      if (window.ScrollSmoother && ScrollSmoother.get && ScrollSmoother.get()) return;
       var lenis = new Lenis({ lerp: 0.16, smoothWheel: true, wheelMultiplier: 1 });
       lenis.on('scroll', ScrollTrigger.update);                 // ST следит за lenis-скроллом
-      gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      lenisTick = function (time) { lenis.raf(time * 1000); };
+      gsap.ticker.add(lenisTick);
       gsap.ticker.lagSmoothing(0);
       window.lenis = lenis;                                     // доступ снаружи: lenis.scrollTo(...)
     }
+
+    function stopLenis() {
+      if (!window.lenis) return;
+      if (lenisTick) { gsap.ticker.remove(lenisTick); lenisTick = null; }
+      window.lenis.destroy();                                   // снимает слушатели и классы .lenis
+      window.lenis = null;
+      gsap.ticker.lagSmoothing(500, 33);                        // дефолт GSAP обратно
+      ScrollTrigger.refresh();
+    }
+
+    function syncLenis() { lenisMq.matches ? stopLenis() : startLenis(); }
+
+    syncLenis();
+    lenisMq.addEventListener('change', syncLenis);
     /* ------------------------------------------------------------------ *
      * 1b. HERO — единая хореография при загрузке страницы
      * background → heading → text → buttons → navbar
