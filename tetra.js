@@ -304,11 +304,20 @@ if (window.__tetraPerfOff('caddsvg')) {
           var dir = ri % 2 === 0 ? -1 : 1;              // чётный ряд — влево, нечётный — вправо
           var t = gsap.fromTo(row,
             { x: dir < 0 ? 0 : -w },
-            { x: dir < 0 ? -w : 0, duration: w / 40, ease: 'none', repeat: -1 } // w/40 ≈ 40px/с
+            {
+              x: dir < 0 ? -w : 0,
+              duration: w / 40, ease: 'none', repeat: -1, // ≈ 40px/с
+              // repeat бесконечен вперёд, но reverse упирается в totalTime = 0.
+              // Перенос на целые циклы сохраняет позицию и продолжает движение.
+              onReverseComplete: function () {
+                this.totalTime(this.rawTime() + this.duration() * 100);
+              }
+            }
           );
           t.pause();
+          t.totalTime(t.duration() * 100, true);
           if (previous[ri]) {
-            t.progress(previous[ri].progress);
+            t.totalTime(t.duration() * (100 + previous[ri].progress), true);
             t.timeScale(previous[ri].speed);
           }
           if (pActive) t.resume();
@@ -331,6 +340,8 @@ if (window.__tetraPerfOff('caddsvg')) {
         trigger: '.section_partners', start: 'top bottom', end: 'bottom top',
         onToggle: function (self) {
           pActive = self.isActive;
+          pLastY = window.scrollY;
+          pLastT = (window.performance && performance.now()) || Date.now();
           pLoops.forEach(function (t) { pActive ? t.resume() : t.pause(); });
         }
       });
