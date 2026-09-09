@@ -178,8 +178,26 @@
      * lottie-web часто появляется ПОЗЖE нашего скрипта: у Webflow-Lottie
      * элемента библиотеку поднимает IX2 на `window load`, а внешний
      * lottie_light мог быть подключён с defer или ниже по документу.
-     * Поэтому не ругаемся сразу — один раз ждём load и пробуем снова.
+     * Поэтому не ругаемся сразу — ждём load, а если библиотеки всё равно нет,
+     * но JSON-путь задан — подгружаем lottie_light сами.
      * Путь к JSON берётся из data-src элемента (или LOTTIE_FALLBACK_PATH). */
+    const LOTTIE_LIGHT_CDN =
+      "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_light.min.js";
+
+    function loadLottieLib() {
+      return new Promise(function (resolve, reject) {
+        var existing = document.querySelector('script[data-tetra-lottie]');
+        if (existing) { existing.addEventListener("load", resolve); existing.addEventListener("error", reject); return; }
+        var script = document.createElement("script");
+        script.src = LOTTIE_LIGHT_CDN;
+        script.async = true;
+        script.setAttribute("data-tetra-lottie", "");
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
     function initLottieIcon() {
       if (!lottieElement) {
         console.warn("[mobile-menu] .mobile-nav-bttn-lottie не найден");
@@ -187,11 +205,15 @@
       }
       if (typeof lottie !== "undefined") { setupLottieIcon(); return; }
       window.addEventListener("load", function () {
-        if (typeof lottie !== "undefined") {
-          setupLottieIcon();
-        } else {
-          console.warn("[mobile-menu] lottie-web не найден на странице — иконка бургера без анимации (меню работает)");
+        if (typeof lottie !== "undefined") { setupLottieIcon(); return; }
+        var path = lottieElement.getAttribute("data-src") || LOTTIE_FALLBACK_PATH;
+        if (!path) {
+          console.warn("[mobile-menu] lottie-web не найден и путь к JSON не задан — иконка без анимации (меню работает)");
+          return;
         }
+        loadLottieLib().then(setupLottieIcon)['catch'](function () {
+          console.warn("[mobile-menu] не удалось подгрузить lottie_light — иконка без анимации (меню работает)");
+        });
       }, { once: true });
     }
 
