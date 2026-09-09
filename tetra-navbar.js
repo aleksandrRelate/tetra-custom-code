@@ -174,12 +174,28 @@
 
     const isMobileScreen = () => window.innerWidth <= BREAKPOINT;
 
-    /* ---------- Lottie (необязательна) ---------- */
-    if (!lottieElement) {
-      console.warn("[mobile-menu] .mobile-nav-bttn-lottie не найден");
-    } else if (typeof lottie === "undefined") {
-      console.warn("[mobile-menu] lottie не загружен, иконка работать не будет");
-    } else {
+    /* ---------- Lottie (необязательна) ---------- *
+     * lottie-web часто появляется ПОЗЖE нашего скрипта: у Webflow-Lottie
+     * элемента библиотеку поднимает IX2 на `window load`, а внешний
+     * lottie_light мог быть подключён с defer или ниже по документу.
+     * Поэтому не ругаемся сразу — один раз ждём load и пробуем снова.
+     * Путь к JSON берётся из data-src элемента (или LOTTIE_FALLBACK_PATH). */
+    function initLottieIcon() {
+      if (!lottieElement) {
+        console.warn("[mobile-menu] .mobile-nav-bttn-lottie не найден");
+        return;
+      }
+      if (typeof lottie !== "undefined") { setupLottieIcon(); return; }
+      window.addEventListener("load", function () {
+        if (typeof lottie !== "undefined") {
+          setupLottieIcon();
+        } else {
+          console.warn("[mobile-menu] lottie-web не найден на странице — иконка бургера без анимации (меню работает)");
+        }
+      }, { once: true });
+    }
+
+    function setupLottieIcon() {
       const lottiePath =
         lottieElement.getAttribute("data-src") || LOTTIE_FALLBACK_PATH;
 
@@ -233,6 +249,8 @@
         });
       }
     }
+
+    initLottieIcon();
 
     function playIcon(forward) {
       if (!lottieTween) return;
@@ -316,8 +334,8 @@
         return gsap.getProperty(el, "rotation") || 0;
       });
 
-      gsap.set(items, { yPercent: ITEM_TRAVEL });
-      gsap.set(fadeItems, { opacity: 0, rotation: FADE_START_ROTATION });
+      if (items.length) gsap.set(items, { yPercent: ITEM_TRAVEL });
+      if (fadeItems.length) gsap.set(fadeItems, { opacity: 0, rotation: FADE_START_ROTATION });
     }
 
     const curtainEase = gsap.parseEase(CURTAIN_EASE);
