@@ -144,14 +144,10 @@
             }
           }, 1.35);
         }
-        function playHeroTimeline() {
-          heroTimeline.play(0);
-        }
-        if (document.readyState === 'complete') {
-          playHeroTimeline();
-        } else {
-          window.addEventListener('load', playHeroTimeline, { once: true });
-        }
+        // Играем сразу (не ждём window load) — иначе на медленной загрузке
+        // hero долго висит скрытым под анти-FOUC гейтом. Фон-картинка
+        // подхватится своим декодом по ходу автоальфы.
+        heroTimeline.play(0);
       }
       /* ------------------------------------------------------------------ *
        * 2. SECTION_INTRO — pin + пословная заливка цветом intro_heading
@@ -387,6 +383,10 @@
           };
         });
       }
+      // Все стартовые gsap.set() проставлены — снимаем анти-FOUC гейт ДО
+      // refresh(), чтобы above-the-fold reveal-триггеры (once:true) отыграли
+      // на видимом контенте, а не впустую под скрытым.
+      document.documentElement.classList.remove('tetra-anim');
       ScrollTrigger.refresh();
     }
     T.ready(init);

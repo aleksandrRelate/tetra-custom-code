@@ -42,6 +42,7 @@
  * tetra-core.js снимает класс через кадр после DOMContentLoaded (когда все
  * gsap.set() уже отработали); setTimeout — failsafe на случай сбоя JS.
  * ================================================================== */
+.tetra-anim .navbar-wrapper,
 .tetra-anim .hero_heading,
 .tetra-anim .hero_text,
 .tetra-anim .hero_button-group,
