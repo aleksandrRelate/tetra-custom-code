@@ -205,7 +205,9 @@
        * ------------------------------------------------------------------ */
       var items = gsap.utils.toArray('.section_benefits .benefits_item');
       if (items.length > 1 && !T.off('benefits')) {
-        mm.add('(min-width: 480px)', function () {
+        // Работает на всех ширинах, включая мобилку (<=479px): карточки
+        // залипают в верх вьюпорта и стэкаются — так же, как на десктопе.
+        mm.add('(min-width: 1px)', function () {
           var cardTop = 0;
           var tw = [];
           items.forEach(function (item, i) {
