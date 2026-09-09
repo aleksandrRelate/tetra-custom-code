@@ -315,8 +315,12 @@
       if (aboutAnim) {
         mm.add('(prefers-reduced-motion: no-preference)', function () {
           var linesWrapper = aboutAnim.querySelector('.about-card-lines-wrapper');
-          var hubDot = linesWrapper && linesWrapper.querySelector('.about-card-dot');
-          var lines = linesWrapper
+          // На мобилке (<=479px) .about-card-lines-wrapper скрыт (display:none) —
+          // тогда не анимируем невидимые хаб-точку и линии и не держим карточки
+          // в паузе на ~1.35s, а показываем их сразу.
+          var linesVisible = !!linesWrapper && linesWrapper.getClientRects().length > 0;
+          var hubDot = linesVisible && linesWrapper.querySelector('.about-card-dot');
+          var lines = linesVisible
             ? Array.prototype.slice.call(linesWrapper.querySelectorAll('line, path'))
             : [];
           var cards = Array.prototype.slice.call(aboutAnim.querySelectorAll('.about_content .about-card'));
@@ -354,7 +358,7 @@
               ease: 'power2.inOut'
             }, 0.35);
           }
-          var cardsStart = 0.35 + 0.9 + 0.1;
+          var cardsStart = linesVisible ? (0.35 + 0.9 + 0.1) : 0;
           cardParts.forEach(function (part, i) {
             var at = cardsStart + i * 0.22;
             tl.to(part.card, { borderColor: 'rgba(229, 229, 229, 1)', duration: 0.45 }, at);
