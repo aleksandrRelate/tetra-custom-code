@@ -20,3 +20,56 @@
 @media screen and (max-width: 479px) {
   .button-entry-mask { width: 100%; }
 }
+
+/* ================================================================== *
+ * Анти-FOUC для scroll-reveal.
+ *
+ * ВАЖНО: эти правила ДОЛЖНЫ быть продублированы ИНЛАЙН в <head> каждой
+ * страницы Webflow вместе с синхронным скриптом, который ставит класс —
+ * иначе к моменту, когда подтянется этот файл, флеш уже случится.
+ * Здесь блок держим как единый источник правды.
+ *
+ * Вставить в Webflow → Page Settings → Inside <head> tag (Home и CADD):
+ *
+ *   <script>
+ *     document.documentElement.classList.add('tetra-anim');
+ *     setTimeout(function () {
+ *       document.documentElement.classList.remove('tetra-anim');
+ *     }, 2500);
+ *   </script>
+ *   <style> …правила ниже… </style>
+ *
+ * tetra-core.js снимает класс через кадр после DOMContentLoaded (когда все
+ * gsap.set() уже отработали); setTimeout — failsafe на случай сбоя JS.
+ * ================================================================== */
+.tetra-anim .hero_heading,
+.tetra-anim .hero_text,
+.tetra-anim .hero_button-group,
+.tetra-anim .hero_bg-image,
+.tetra-anim .intro_heading,
+.tetra-anim .section_benefits .eyebrow_text,
+.tetra-anim .benefits_item-heading,
+.tetra-anim .benefits_item-copy,
+.tetra-anim .benefits_item-image-text,
+.tetra-anim .trust_heading,
+.tetra-anim .trust_intro-text,
+.tetra-anim .trust_card,
+.tetra-anim .about_heading,
+.tetra-anim .about_text,
+.tetra-anim .about-card,
+.tetra-anim .about-card-animation,
+.tetra-anim .cadd-gap_text,
+.tetra-anim .cadd-fundamentals_copy,
+.tetra-anim .cadd-practice_heading,
+.tetra-anim .cadd-practice_card,
+.tetra-anim .cta_heading,
+.tetra-anim .cta_text,
+.tetra-anim .partners_heading,
+.tetra-anim .footer_wordmark,
+.tetra-anim .footer_wordmark-mob,
+.tetra-anim .footer_menu-link,
+.tetra-anim [data-reveal] {
+  opacity: 0 !important;
+}
+/* строки-маски, которые режет SplitText в заголовках */
+.tetra-anim .section-reveal-line { opacity: 0 !important; }
