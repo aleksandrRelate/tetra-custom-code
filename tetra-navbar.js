@@ -154,7 +154,7 @@
     const fadeItems = Array.from(navHand);
 
     const ITEM_TRAVEL = 130;
-    const ITEM_DURATION = 1.45;
+    const ITEM_DURATION = 0.45;
     const ITEM_EASE = "power3.out";
 
     const FADE_DURATION = 0.6;
