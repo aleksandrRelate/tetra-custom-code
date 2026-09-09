@@ -14,6 +14,12 @@
   var T = window.Tetra || {};
   var off = T.off || function () { return false; };
 
+  // Мост между скролл-поведением навбара (6a) и мобильным меню:
+  // пока меню открыто, навбар держим раскрытым, иначе .navbar-wrapper
+  // сдвинут вверх на высоту баннера и fixed-шторка меню (она внутри
+  // трансформированного .navbar-wrapper) не достаёт до низа экрана.
+  var navbarApi = null;
+
   /* ------------------------------------------------------------------ *
    * 6a/6b. NAVBAR — скролл-поведение и переключение темы
    * ------------------------------------------------------------------ */
@@ -29,6 +35,7 @@
       var scrollLogo = navWrapper.querySelector('.navbar-logo');
       var bannerH = navBanner ? navBanner.offsetHeight : 0;
       var navCompact = false;
+      var navHeldExpanded = false;
       var lastScrollY = window.scrollY;
       var scrollTicking = false;
       navWrapper.style.willChange = 'transform';
@@ -52,6 +59,7 @@
         updateScrollLogo();
       }
       function updateNavbarPosition() {
+        if (navHeldExpanded) { scrollTicking = false; return; }
         var currentScrollY = window.scrollY;
         if (currentScrollY <= 0) {
           setNavbarPosition(false);
@@ -79,6 +87,25 @@
           }
         }, 200);
       });
+
+      // API для мобильного меню: раскрыть навбар без анимации и удержать.
+      navbarApi = {
+        holdExpanded: function () {
+          navHeldExpanded = true;
+          if (!navCompact) return;
+          var prev = navWrapper.style.transition;
+          navWrapper.style.transition = 'none';
+          setNavbarPosition(false);
+          navWrapper.offsetHeight;                       // reflow — фиксируем без transition
+          navWrapper.style.transition = prev || 'transform 350ms ease';
+        },
+        release: function () {
+          navHeldExpanded = false;
+          var y = window.scrollY;
+          lastScrollY = y;
+          setNavbarPosition(y > 0);                      // прокручено вниз → снова компактный
+        }
+      };
     }
 
     // 6b. Переключение цвета навбара по секциям [navbar-color] — нужен ScrollTrigger.
@@ -384,6 +411,7 @@
     function openMenu() {
       isMenuOpen = true;
       mobileNavBtn.classList.add("active");
+      if (navbarApi) navbarApi.holdExpanded();   // иначе шторка не достаёт до низа экрана
       whitenLogo();
       lockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "auto" });
@@ -439,13 +467,20 @@
       unlockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "none" });
 
+      // Навбар отпускаем только когда шторка полностью уехала — иначе на
+      // ретракте fixed-меню внутри .navbar-wrapper дёрнется вверх.
+      function releaseNavbar() { if (!isMenuOpen && navbarApi) navbarApi.release(); }
+
       if (tl) {
         const closingTimeline = tl;
         closingTimeline.eventCallback("onReverseComplete", function () {
           if (tl !== closingTimeline || isMenuOpen) return;
           tl = null;
+          releaseNavbar();
         });
         closingTimeline.reverse();
+      } else {
+        releaseNavbar();
       }
 
       playIcon(false);
