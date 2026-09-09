@@ -257,7 +257,7 @@
 
           lottieTween = gsap.to(lottiePlayhead, {
             frame: last,
-            duration: 0.4,
+            duration: 1.4,
             ease: "power2.out",
             paused: true,
             onUpdate: () =>
