@@ -88,19 +88,30 @@
         }, 200);
       });
 
-      // API для мобильного меню: заморозить текущее положение навбара, пока
-      // меню открыто (не двигаем его — только не даём скроллу переключать),
-      // и сообщить на сколько px .navbar-wrapper сейчас сдвинут вверх, чтобы
-      // fixed-шторка меню внутри него скомпенсировала этот сдвиг.
+      // API для мобильного меню.
+      // openWith: навбар раскрывается (баннер + строка навбара выезжают вниз),
+      //   а fixed-шторка синхронно компенсирует сдвиг .navbar-wrapper своим
+      //   top — итог: контент меню стоит на месте, «выезжает» только навбар.
+      // closeWith: навбар обратно по текущему скроллу.
       navbarApi = {
-        freeze: function () { navHeldExpanded = true; },
-        release: function () {
+        openWith: function (curtain) {
+          navHeldExpanded = true;
+          var offset = navCompact ? bannerH : 0;
+          curtain.style.transition = 'none';
+          curtain.style.top = offset + 'px';
+          curtain.offsetHeight;                       // reflow — фиксируем старт на offset
+          curtain.style.transition = 'top 350ms ease';
+          curtain.style.top = '0px';                  // едет к 0 синхронно с .navbar-wrapper
+          setNavbarPosition(false);
+        },
+        closeWith: function (curtain) {
           navHeldExpanded = false;
           var y = window.scrollY;
           lastScrollY = y;
           setNavbarPosition(y > 0);
-        },
-        wrapperOffset: function () { return navCompact ? bannerH : 0; }
+          curtain.style.transition = '';
+          curtain.style.top = '';
+        }
       };
     }
 
@@ -407,12 +418,8 @@
     function openMenu() {
       isMenuOpen = true;
       mobileNavBtn.classList.add("active");
-      if (navbarApi) {
-        navbarApi.freeze();                       // навбар не дёргаем, только замораживаем
-        // .navbar-wrapper сдвинут вверх на высоту баннера при скролле —
-        // компенсируем, чтобы fixed-шторка накрыла весь экран без гэпа снизу.
-        mobileMenu.style.top = navbarApi.wrapperOffset() + "px";
-      }
+      // Навбар раскрывается (баннер выезжает), шторка компенсирует сдвиг.
+      if (navbarApi) navbarApi.openWith(mobileMenu);
       whitenLogo();
       lockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "auto" });
@@ -468,12 +475,11 @@
       unlockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "none" });
 
-      // Навбар размораживаем и убираем компенсацию top только когда шторка
-      // полностью уехала — иначе на ретракте fixed-меню дёрнется.
+      // Навбар возвращаем к скролл-состоянию только когда шторка полностью
+      // уехала — иначе баннер/навбар дёрнутся под ещё видимой шторкой.
       function releaseNavbar() {
         if (isMenuOpen) return;
-        mobileMenu.style.top = "";
-        if (navbarApi) navbarApi.release();
+        if (navbarApi) navbarApi.closeWith(mobileMenu);
       }
 
       if (tl) {
