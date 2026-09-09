@@ -1,0 +1,25 @@
+/* Tetra — стили компонента NAVBAR. */
+
+/* плавное переключение цвета текста/лого навбара по секциям */
+.nav-link, .navbar-logo-svg { transition: color .35s ease; }
+
+/* тёмная тема навбара (класс .is-theme-dark ставит tetra-navbar.js) */
+.navbar.is-theme-dark .nav-menu {
+  background-color: rgba(37, 25, 21, 0.04);
+}
+.navbar.is-theme-dark .nav-link:hover,
+.navbar.is-theme-dark .nav-link:focus-visible {
+  background-color: rgba(37, 25, 21, 0.06);
+}
+
+/* ===== mobile scroll performance (<=479px) ===== */
+@media screen and (max-width: 479px) {
+  /* backdrop-filter внутри фиксированной шапки — главный тормоз скролла на
+     телефоне: браузер пересчитывает блюр фона на каждом кадре. */
+  .nav-menu,
+  .nav-bttns-wrap.is-mob,
+  .mobile-nav-bttn {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

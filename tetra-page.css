@@ -1,44 +1,15 @@
-/* Tetra — custom styles for the Webflow site.
-   Source of truth: this repo. Webflow only links to the built file.
-   Blocks below are concatenated in their original order. */
+/* Tetra — стили уровня всей страницы (Lenis, hover-reveal кнопок, parallax,
+   swiper на About, мобильная производительность). Стили навбара — в
+   tetra-navbar.css. */
 
+/* ===== Lenis база (из пакета lenis) ===== */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
 
-/* ===== Lenis base + navbar theme + reveal masks + button mask ===== */
-  /* Lenis базовые стили (из пакета lenis) */
-  html.lenis, html.lenis body { height: auto; }
-  .lenis.lenis-smooth { scroll-behavior: auto !important; }
-  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-  .lenis.lenis-stopped { overflow: hidden; }
-  .lenis.lenis-smooth iframe { pointer-events: none; }
-  /* плавное переключение цвета текста/лого навбара по секциям */
-  .nav-link, .navbar-logo-svg { transition: color .35s ease; }
-  /* тёмная тема навбара */
-  .navbar.is-theme-dark .nav-menu {
-    background-color: rgba(37, 25, 21, 0.04);
-  }
-  .navbar.is-theme-dark .nav-link:hover,
-  .navbar.is-theme-dark .nav-link:focus-visible {
-    background-color: rgba(37, 25, 21, 0.06);
-  }
-  /* маска каждой строки для появления слов hero heading */
-  .hero-heading-line,
-  .section-reveal-line {
-    overflow: hidden;
-    padding-bottom: 0.08em;
-    margin-bottom: -0.08em;
-  }
-  .button-entry-mask {
-    display: inline-grid;
-    overflow: hidden;
-    max-width: 100%;
-    vertical-align: bottom;
-  }
-  /* на мобиле кнопки в макете во всю ширину — маска не должна ужимать их по контенту */
-  @media screen and (max-width: 479px) {
-    .button-entry-mask { width: 100%; }
-  }
-
-/* ===== buttons animation ===== */
+/* ===== buttons animation (hover-reveal строки) ===== */
 /* Даже до выполнения JS на touch видна только исходная строка. */
 @media (hover: none), (pointer: coarse), (pointer: none) {
   .btn-reveal__line--second { display: none !important; }
@@ -112,18 +83,18 @@
 }
 
 /* ===== image parallax ===== */
-  [data-parallax] {
-    position: absolute;
-    overflow: hidden;
-  }
-  [data-parallax] img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    will-change: transform;
-    transform-origin: center center;
-    backface-visibility: hidden;
-  }
+[data-parallax] {
+  position: absolute;
+  overflow: hidden;
+}
+[data-parallax] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
 
 /* ===== about swiper (mobile portrait) ===== */
 @media screen and (max-width: 479px) {
@@ -148,12 +119,8 @@
 
 /* ===== mobile scroll performance (<=479px) ===== */
 @media screen and (max-width: 479px) {
-  /* backdrop-filter внутри фиксированной шапки — главный тормоз скролла на телефоне:
-     браузер пересчитывает блюр фона на каждом кадре. Фоны под ними и так почти
-     непрозрачные, в макете блюра нет — визуально ничего не теряем. */
-  .nav-menu,
-  .nav-bttns-wrap.is-mob,
-  .mobile-nav-bttn,
+  /* backdrop-filter — главный тормоз скролла на телефоне. Фоны под этими
+     элементами и так почти непрозрачные, в макете блюра нет. */
   .button.is-secondary,
   .button.is-secondary-dark {
     -webkit-backdrop-filter: none;

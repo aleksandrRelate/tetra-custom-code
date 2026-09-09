@@ -1,18 +1,24 @@
 # Tetra — custom code
 
-Кастомный CSS/JS для сайта Tetra на Webflow. Раньше этот код лежал целиком
-в Page Settings → Custom Code (~50 КБ инлайном). Теперь он живёт здесь,
-а Webflow только подключает два файла по ссылке.
+Кастомный CSS/JS для сайта Tetra на Webflow. Код живёт здесь, а Webflow
+только подключает файлы по ссылке (GitHub Pages).
 
-## Что где
+## Структура
+
+Код разделён на **страницу** и **компоненты** (navbar / footer / CTA / partners —
+это Webflow-компоненты, их анимации ездят вместе с ними).
 
 | Файл | Что внутри |
 |---|---|
-| `tetra.css` | стили Lenis, тема навбара, маски для reveal-анимаций, анимация кнопок, parallax, swiper на About |
-| `tetra.js` | скролл-интеракции (GSAP + ScrollTrigger + SplitText + Lenis), анимация кнопок, parallax картинок, swiper на About, контроллер графики CADD |
+| `tetra-core.css` / `tetra-core.js` | общий фундамент: perf-килл-свитч, общий `gsap.matchMedia`, фабрика reveal-анимаций (`window.Tetra`), маски строк/кнопок. **Подключать первым.** |
+| `tetra-page.css` / `tetra-page.js` | анимации всей страницы: Lenis, hero-хореография, `section_intro` (pin + заливка), benefits (sticky), trust (scale), about-card-animation, reveal benefits/trust/about, hover-reveal всех кнопок, image parallax, About-swiper, контроллер CADD |
+| `tetra-navbar.css` / `tetra-navbar.js` | навбар: скрытие banner+logo на скролле, переключение цвета по `[navbar-color]`, мобильное меню (шторка + выезд пунктов) |
+| `tetra-footer.js` | футер: reveal колонок/wordmark/legal, пульс обводки wordmark по ховеру |
+| `tetra-cta.js` | CTA: reveal heading → text → кнопки |
+| `tetra-partners.js` | partners: бесконечная лента логотипов + reveal заголовка |
 
-Блоки внутри файлов идут в том же порядке, что и раньше в Webflow, и помечены
-комментариями `/* ===== ... ===== */`.
+`window.Tetra` (из `tetra-core.js`) должен загрузиться раньше всех остальных
+`tetra-*.js`. Порядок остальных между собой не важен.
 
 ## Как это подключено в Webflow
 
@@ -22,33 +28,43 @@
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.26/dist/lenis.css">
-<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-core.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-page.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-navbar.css">
 ```
 
 **Before `</body>` tag:**
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
-<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-core.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-page.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-navbar.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-footer.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-cta.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-partners.js"></script>
 ```
 
-Порядок важен: `tetra.js` рассчитывает, что jQuery, webflow.js, GSAP
-(+ ScrollTrigger, SplitText) и Lenis уже загружены — все они подключаются выше.
+Порядок важен: `tetra-*.js` рассчитывают, что jQuery, webflow.js, GSAP
+(+ ScrollTrigger, SplitText) и Lenis уже загружены (подключаются выше),
+и что `tetra-core.js` идёт до остальных `tetra-*.js`.
+
+Если компонента (navbar / footer / CTA / partners) на странице нет — его файл
+можно не подключать, ошибок не будет.
 
 ## Как править
 
-По согласованию с владельцем готовые проверенные правки коммитим и пушим в `main` без отдельного подтверждения на каждый пуш. Незавершённые и посторонние изменения не включаем.
+По согласованию с владельцем готовые проверенные правки коммитим и пушим в `main`
+без отдельного подтверждения на каждый пуш. Незавершённые и посторонние изменения
+не включаем.
 
 Пуш в `main` → GitHub Pages пересобирается за ~минуту → изменения на сайте.
 **Перепубликовывать Webflow при этом не нужно** — он отдаёт ссылку, а не копию кода.
 
-Быстрая правка в браузере: открыть репозиторий и нажать `.` — откроется
-VS Code прямо в GitHub.
-
 ## Важно
 
 - Мобилка в этом проекте — всегда ширина **479px и меньше**; от 480px — не мобильный portrait-брейкпоинт.
-- Репозиторий публичный: GitHub Pages не отдаёт файлы из приватных репозиториев
-  на бесплатном тарифе. Секретов в этом коде нет — он и так уходит в браузер.
-- Если правится **вёрстка** (классы, структура), это по-прежнему делается
-  в Webflow. Здесь только поведение и стили поверх неё.
+- `?perf=<name>[,<name>]` в URL выключает подсистемы для диагностики джанка.
+  Имена: `partners`, `reveal`, `benefits`, `intro`, `trust`, `swiper`, `caddsvg`, `all`.
+- Репозиторий публичный: GitHub Pages не отдаёт файлы из приватных репозиториев на бесплатном тарифе. Секретов в коде нет.
+- Если правится **вёрстка** (классы, структура), это по-прежнему делается в Webflow. Здесь только поведение и стили поверх неё.

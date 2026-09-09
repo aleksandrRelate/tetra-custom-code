@@ -1,0 +1,22 @@
+/* Tetra — общие стили под reveal-анимации (нужны tetra-page.js и файлам
+   компонентов). Подключается ПЕРВЫМ среди tetra-*.css. */
+
+/* маска каждой строки для появления слов (hero heading + section reveals) */
+.hero-heading-line,
+.section-reveal-line {
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* маска для въезда кнопок сверху вниз */
+.button-entry-mask {
+  display: inline-grid;
+  overflow: hidden;
+  max-width: 100%;
+  vertical-align: bottom;
+}
+/* на мобиле кнопки в макете во всю ширину — маска не должна ужимать их по контенту */
+@media screen and (max-width: 479px) {
+  .button-entry-mask { width: 100%; }
+}
