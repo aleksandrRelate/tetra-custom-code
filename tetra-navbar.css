@@ -1,14 +1,37 @@
 /* Tetra — стили компонента NAVBAR. */
 
-/* плавное переключение цвета текста/лого навбара по секциям */
-.nav-link, .navbar-logo-svg { transition: color .35s ease; }
+/* плавное переключение цвета текста/лого и фона меню по секциям.
+   Классы темы (`is-theme-light`) ставит tetra-navbar.js по атрибуту
+   [navbar-color] на секциях. База (без класса) = тёмная тема. */
+.navbar-container .nav-link,
+.navbar-container .navbar-logo-svg { transition: color .35s ease; }
+.navbar .nav-menu,
+.navbar-container .nav-link:hover,
+.navbar-container .nav-link:focus-visible { transition: background-color .35s ease; }
 
-/* тёмная тема навбара (класс .is-theme-dark ставит tetra-navbar.js) */
-.navbar.is-theme-dark .nav-menu {
+/* --- тёмная тема навбара (над тёмными секциями): белый текст --- */
+.navbar-container .nav-link,
+.navbar-container .navbar-logo-svg {
+  color: #FFFFFF;
+}
+.navbar .nav-menu {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* --- светлая тема навбара (над светлыми секциями): тёмный текст по токену --- */
+.navbar.is-theme-light .navbar-container .nav-link,
+.navbar.is-theme-light .navbar-container .navbar-logo-svg {
+  color: var(--_tetra-tokens---color-dark, #090e13);
+}
+.navbar.is-theme-light .nav-menu {
   background-color: rgba(37, 25, 21, 0.04);
 }
-.navbar.is-theme-dark .nav-link:hover,
-.navbar.is-theme-dark .nav-link:focus-visible {
+.navbar.is-theme-light .nav-link:hover,
+.navbar.is-theme-light .nav-link:focus-visible {
   background-color: rgba(37, 25, 21, 0.06);
 }
 

@@ -84,17 +84,12 @@
     // 6b. Переключение цвета навбара по секциям [navbar-color] — нужен ScrollTrigger.
     if (navRoot && window.ScrollTrigger) {
       gsap.registerPlugin(ScrollTrigger);
-      var navLinks = navRoot.querySelectorAll('.navbar-container .nav-link');
-      var navLogo = navRoot.querySelector('.navbar-container .navbar-logo-svg');
-      var WHITE = '#FFFFFF';
-      var DARK = s.getPropertyValue('--_tetra-tokens---color-dark').trim() || '#110E0C';
       var navOffset = 6 * (parseFloat(s.fontSize) || 16); // линия переключения цвета, px (= 6rem)
+      // Цвет текста/лого и фон меню задаёт tetra-navbar.css по классу темы.
+      // База (без класса) = тёмная тема (белый текст); navbar-color="black"
+      // на секции → светлая тема (тёмный текст по токену).
       function applyNav(key) {
-        var dark = key === 'black';
-        var text = dark ? DARK : WHITE;
-        navRoot.classList.toggle('is-theme-dark', dark);
-        navLinks.forEach(function (el) { el.style.color = text; });
-        if (navLogo) navLogo.style.color = text;
+        navRoot.classList.toggle('is-theme-light', key === 'black');
       }
       var navSecs = gsap.utils.toArray('[navbar-color]');
       navSecs.forEach(function (sec) {
