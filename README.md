@@ -16,13 +16,14 @@
 | `tetra-footer.js` | футер: reveal колонок/wordmark/legal, пульс обводки wordmark по ховеру |
 | `tetra-cta.js` | CTA: reveal heading → text → кнопки |
 | `tetra-partners.js` | partners: бесконечная лента логотипов + reveal заголовка |
+| `tetra-cadd.js` | только для страницы **CADD**: залипающая стопка карточек `section_cadd-practice` (>=992px) + reveal секций cadd-gap / cadd-fundamentals / cadd-practice |
 
 `window.Tetra` (из `tetra-core.js`) должен загрузиться раньше всех остальных
 `tetra-*.js`. Порядок остальных между собой не важен.
 
 ## Как это подключено в Webflow
 
-Страница Home → Page Settings → Custom Code.
+### Home → Page Settings → Custom Code
 
 **Inside `<head>` tag:**
 
@@ -51,6 +52,36 @@
 
 Если компонента (navbar / footer / CTA / partners) на странице нет — его файл
 можно не подключать, ошибок не будет.
+
+### CADD → Page Settings → Custom Code
+
+То же самое, что на Home, но `tetra-page.js` меняется на `tetra-cadd.js`
+(секции CADD), а компоненты переиспользуются как есть:
+
+**Inside `<head>` tag:**
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.3.26/dist/lenis.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-core.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-page.css">
+<link rel="stylesheet" href="https://aleksandrrelate.github.io/tetra-custom-code/tetra-navbar.css">
+```
+
+**Before `</body>` tag:**
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-core.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-page.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-cadd.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-navbar.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-footer.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-cta.js"></script>
+<script src="https://aleksandrrelate.github.io/tetra-custom-code/tetra-partners.js"></script>
+```
+
+`tetra-page.js` на CADD даёт общие hero / trust / parallax / hover-reveal кнопок
+(секции, которых нет, просто пропускаются). `tetra-cadd.js` — только CADD-секции.
 
 ## Как править
 
