@@ -144,7 +144,7 @@
 
     const menuLinks = mobileMenu.querySelectorAll(".nav-menu-links-wrapper .nav-link");
     const navSocials = mobileMenu.querySelectorAll(".nav-menu-socials");
-    const navButtons = mobileMenu.querySelectorAll(".nav-bttns-wrap.is-mob .button-main");
+    const navButtons = mobileMenu.querySelectorAll(".nav-bttns-wrap.is-mob-menu .button");
     const items = Array.from(menuLinks).concat(
       Array.from(navSocials),
       Array.from(navButtons)
