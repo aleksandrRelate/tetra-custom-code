@@ -131,7 +131,7 @@
     const BREAKPOINT = 479;
 
     // TODO: залить JSON иконки бургера в Webflow Assets и вставить URL сюда.
-    const LOTTIE_FALLBACK_PATH = "https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6aa1121a953e04e73c971990_menu-burger-1.json";
+    const LOTTIE_FALLBACK_PATH = "https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6aa11312b1f08c18d83f056a_menu-burger-2.json";
 
     const mobileMenu = document.querySelector("[nav-menu-mobile]");
     const mobileNavBtn = document.querySelector(".mobile-nav-bttn");
