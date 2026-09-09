@@ -88,23 +88,19 @@
         }, 200);
       });
 
-      // API для мобильного меню: раскрыть навбар без анимации и удержать.
+      // API для мобильного меню: заморозить текущее положение навбара, пока
+      // меню открыто (не двигаем его — только не даём скроллу переключать),
+      // и сообщить на сколько px .navbar-wrapper сейчас сдвинут вверх, чтобы
+      // fixed-шторка меню внутри него скомпенсировала этот сдвиг.
       navbarApi = {
-        holdExpanded: function () {
-          navHeldExpanded = true;
-          if (!navCompact) return;
-          var prev = navWrapper.style.transition;
-          navWrapper.style.transition = 'none';
-          setNavbarPosition(false);
-          navWrapper.offsetHeight;                       // reflow — фиксируем без transition
-          navWrapper.style.transition = prev || 'transform 350ms ease';
-        },
+        freeze: function () { navHeldExpanded = true; },
         release: function () {
           navHeldExpanded = false;
           var y = window.scrollY;
           lastScrollY = y;
-          setNavbarPosition(y > 0);                      // прокручено вниз → снова компактный
-        }
+          setNavbarPosition(y > 0);
+        },
+        wrapperOffset: function () { return navCompact ? bannerH : 0; }
       };
     }
 
@@ -411,7 +407,12 @@
     function openMenu() {
       isMenuOpen = true;
       mobileNavBtn.classList.add("active");
-      if (navbarApi) navbarApi.holdExpanded();   // иначе шторка не достаёт до низа экрана
+      if (navbarApi) {
+        navbarApi.freeze();                       // навбар не дёргаем, только замораживаем
+        // .navbar-wrapper сдвинут вверх на высоту баннера при скролле —
+        // компенсируем, чтобы fixed-шторка накрыла весь экран без гэпа снизу.
+        mobileMenu.style.top = navbarApi.wrapperOffset() + "px";
+      }
       whitenLogo();
       lockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "auto" });
@@ -467,9 +468,13 @@
       unlockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "none" });
 
-      // Навбар отпускаем только когда шторка полностью уехала — иначе на
-      // ретракте fixed-меню внутри .navbar-wrapper дёрнется вверх.
-      function releaseNavbar() { if (!isMenuOpen && navbarApi) navbarApi.release(); }
+      // Навбар размораживаем и убираем компенсацию top только когда шторка
+      // полностью уехала — иначе на ретракте fixed-меню дёрнется.
+      function releaseNavbar() {
+        if (isMenuOpen) return;
+        mobileMenu.style.top = "";
+        if (navbarApi) navbarApi.release();
+      }
 
       if (tl) {
         const closingTimeline = tl;
