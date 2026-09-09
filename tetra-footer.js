@@ -41,15 +41,17 @@
             columnTimeline.to(links, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.12);
           }
         });
-        var wordmark = footer.querySelector('.footer_wordmark');
-        if (wordmark) {
+        // На мобилке (<=479px) видимый знак — .footer_wordmark-mob, десктопный
+        // .footer_wordmark спрятан (и наоборот). Анимируем тот, что отрисован.
+        footer.querySelectorAll('.footer_wordmark, .footer_wordmark-mob').forEach(function (wordmark) {
+          if (!wordmark.getClientRects().length) return;
           gsap.set(wordmark, { clipPath: 'inset(100% 0% 0% 0%)' });
           timelineFor(wordmark, 'clamp(top 80%)').to(wordmark, {
             clipPath: 'inset(0% 0% 0% 0%)',
             duration: 1.1,
             onComplete: function () { gsap.set(wordmark, { clearProps: 'clipPath' }); }
           }, 0);
-        }
+        });
         footer.querySelectorAll('.footer_legal-text').forEach(function (el) {
           revealText(timelineFor(el, 'clamp(top 80%)'), el, 0);
         });
@@ -58,8 +60,14 @@
       });
     }
 
-    /* ---- пульс обводки wordmark по ховеру ---- */
-    var footerWordmark = document.querySelector('.section_footer .footer_wordmark');
+    /* ---- пульс обводки wordmark по ховеру (ховер-девайсы) ---- */
+    var footerWordmark = (function () {
+      var candidates = document.querySelectorAll('.section_footer .footer_wordmark, .section_footer .footer_wordmark-mob');
+      for (var i = 0; i < candidates.length; i++) {
+        if (candidates[i].getClientRects().length) return candidates[i];
+      }
+      return candidates[0] || null;
+    })();
     if (footerWordmark) {
       mm.add('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)', function () {
         var SVGNS = 'http://www.w3.org/2000/svg';
