@@ -1,0 +1,49 @@
+/* Tetra — CADD: FAQ-аккордеон (.cadd-faq_list). Состояния по Figma 12221:20280.
+   Классы ставит tetra-cadd-faq.js:
+     .is-faq-ready — на списке после инициализации (до неё всё раскрыто как в Webflow)
+     .is-expanded  — на открытом пункте .cadd-faq_item
+   Высоту ответа (0 ↔ высота контента) JS задаёт инлайном, CSS её анимирует.
+   Custom code в Designer не выполняется — там все пункты остаются раскрытыми. */
+
+/* закрытый пункт: 26 + 44 + 26 = 96px, ответ скрыт */
+.cadd-faq_list.is-faq-ready .cadd-faq_item {
+  padding-top: 1.625rem;
+  padding-bottom: 1.625rem;
+  grid-row-gap: 0rem;
+  row-gap: 0rem;
+  transition: padding .45s cubic-bezier(.22, 1, .36, 1),
+              row-gap .45s cubic-bezier(.22, 1, .36, 1);
+}
+.cadd-faq_list.is-faq-ready .cadd-faq_answer {
+  overflow: hidden;
+  height: 0;
+  opacity: 0;
+  transition: height .45s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+}
+
+/* открытый пункт: отступы 24px, 20px до ответа */
+.cadd-faq_list.is-faq-ready .cadd-faq_item.is-expanded {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  grid-row-gap: 1.25rem;
+  row-gap: 1.25rem;
+}
+.cadd-faq_list.is-faq-ready .cadd-faq_item.is-expanded .cadd-faq_answer {
+  opacity: 1;
+  transition: height .45s cubic-bezier(.22, 1, .36, 1), opacity .35s ease .1s;
+}
+
+.cadd-faq_list.is-faq-ready .cadd-faq_question {
+  cursor: pointer;
+}
+.cadd-faq_list.is-faq-ready .cadd-faq_question:focus-visible {
+  outline: 0.125rem solid #4d65ff;
+  outline-offset: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cadd-faq_list.is-faq-ready .cadd-faq_item,
+  .cadd-faq_list.is-faq-ready .cadd-faq_answer {
+    transition: none !important;
+  }
+}
