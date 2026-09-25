@@ -50,7 +50,7 @@
       });
     }
 
-    section.style.setProperty('--cadd-tab-duration', DURATION + 'ms');
+    var bars = tabs.map(function (tab) { return tab.querySelector('.cadd-features_progress-bar'); });
     var list = tabs[0].parentNode;
     list.setAttribute('role', 'tablist');
 
@@ -108,12 +108,33 @@
       }, 250);
     }
 
+    /* ---- таймер пункта: время копится только пока секция видна ---- */
+    var paused = true;
+    var elapsed = 0;
+    var lastTs = null;
+
+    function setBar(i, p) {
+      if (bars[i]) bars[i].style.transform = 'scaleX(' + p + ')';
+    }
+
+    function tick(now) {
+      var dt = lastTs === null ? 0 : Math.min(now - lastTs, 100); // после скрытой вкладки — без скачка
+      lastTs = now;
+      if (!paused && current !== -1) {
+        elapsed += dt;
+        if (elapsed >= DURATION) activate((current + 1) % tabs.length);
+        else setBar(current, elapsed / DURATION);
+      }
+      requestAnimationFrame(tick);
+    }
+
     function activate(i) {
-      tabs.forEach(function (tab) {
+      tabs.forEach(function (tab, j) {
         tab.classList.remove('is-active');
         tab.setAttribute('aria-selected', 'false');
+        setBar(j, 0);
       });
-      void tabs[i].offsetWidth; // перезапуск CSS-анимации бара при повторном выборе
+      elapsed = 0;
       tabs[i].classList.add('is-active');
       tabs[i].setAttribute('aria-selected', 'true');
 
@@ -131,25 +152,23 @@
       });
     });
 
-    // бар дошёл до конца — следующий пункт
-    section.addEventListener('animationend', function (e) {
-      if (e.animationName !== 'cadd-features-progress') return;
-      if (!tabs[current] || !tabs[current].contains(e.target)) return;
-      activate((current + 1) % tabs.length);
-    });
-
-    // автоплей только пока секция видна
-    section.classList.add('is-paused');
+    // автоплей и бегущая строка — только пока секция видна
+    function setPaused(v) {
+      paused = v;
+      section.classList.toggle('is-paused', v);
+    }
+    setPaused(true);
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
-        section.classList.toggle('is-paused', !entries[0].isIntersecting);
+        setPaused(!entries[0].isIntersecting);
       }, { threshold: 0.35 }).observe(section);
     } else {
-      section.classList.remove('is-paused');
+      setPaused(false);
     }
 
     section.classList.add('is-tabs-ready');
     activate(0);
+    requestAnimationFrame(tick);
   }
 
   if (document.readyState === 'loading') {

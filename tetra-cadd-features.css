@@ -2,7 +2,7 @@
    Состояния по Figma 12221:19712. Классы ставит tetra-cadd-features.js:
      .is-tabs-ready — на секции после инициализации
      .is-active     — на активном пункте .cadd-features_tab-active
-     .is-paused     — на секции, пока она вне экрана (бар стоит)
+     .is-paused     — на секции, пока она вне экрана (таймер и бегущая строка стоят)
    Custom code в Designer не выполняется — там все пункты остаются раскрытыми. */
 
 .section_cadd-features .cadd-features_tabs { gap: 1.125rem; }
@@ -56,24 +56,12 @@
               opacity .4s ease .15s;
 }
 
-/* --- прогресс-бар: заполняется за --cadd-tab-duration, по окончании
-       JS переключает следующий пункт (animationend) --- */
+/* --- прогресс-бар: заполнение (scaleX 0→1) рисует JS по таймеру пункта;
+       таймер идёт только пока секция в зоне видимости --- */
 .section_cadd-features .cadd-features_progress-bar {
   width: 100%;
   transform: scaleX(0);
   transform-origin: 0% 50%;
-}
-.section_cadd-features .cadd-features_tab-active.is-active .cadd-features_progress-bar {
-  animation: cadd-features-progress var(--cadd-tab-duration, 5s) linear forwards;
-}
-/* специфичность выше правила с шорткатом animation, иначе он сбрасывает
-   play-state в running и бар (а с ним переключение) идёт вне экрана */
-.section_cadd-features.is-paused .cadd-features_tab-active.is-active .cadd-features_progress-bar {
-  animation-play-state: paused;
-}
-@keyframes cadd-features-progress {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
 }
 
 /* --- сцена справа: кроссфейд скринов телефона и смена фонового слова --- */
