@@ -4,8 +4,8 @@
 // здесь только то, чего нет на других страницах:
 //   • SECTION_CADD-PRACTICE — залипающая стопка карточек (>=992px)
 //   • reveal секций cadd-gap / cadd-fundamentals / cadd-practice
-//   • SECTION_CADD-PEG — pin + scrub по раскадровке (Figma 12221:20524)
-//   • SECTION_CADD-CTA — бесконечная лента платформ (механика как у PARTNERS)
+//   • SECTION_CADD-PEG — непрерывный scroll-scrub + SplitText (Figma 12221:20524)
+//   • ленты CTA-платформ и логотипов консорциума (механика как у PARTNERS)
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger
 // (+ SplitText для reveal).
@@ -62,22 +62,21 @@
     }
 
     /* ------------------------------------------------------------------ *
-     * SECTION_CADD-PEG — «1 CADD = $1 CAD», pin + scrub (Figma 12221:20524)
-     *  0–30%   надпись 180px по центру экрана, монет нет
-     *  30–55%  надпись → 86px и вверх; снизу въезжают луни и CADD-монета
-     *  55–80%  надпись → 32px/80% на своё место, монеты сходятся в пару,
-     *          проявляются строки заголовка
-     *  80–100% пауза на финальном кадре
-     *  Финальный кадр = вёрстка в Webflow, поэтому всё анимируется «из» смещений.
-     *  Смещения — в rem (1rem = 16px на 1440), пересчитываются на refresh.
+     * SECTION_CADD-PEG — «1 CADD = $1 CAD», непрерывный скролл (Figma 12221:20524)
+     *  1) секция въезжает: слова надписи поднимаются из маски (SplitText),
+     *     надпись крупная (180px) по центру экрана — scrub по скроллу
+     *  2) секция закреплена: надпись непрерывно уменьшается до 32px/80% на своё
+     *     место, монеты вылетают снизу и сходятся в пару, строки заголовка
+     *     проявляются построчно из маски (SplitText)
+     *  Финальный кадр = вёрстка в Webflow. Смещения — в rem (1rem = 16px на 1440).
      * ------------------------------------------------------------------ */
     var peg = document.querySelector('.section_cadd-peg');
-    if (peg && !T.off('peg')) {
+    if (peg && window.SplitText && !T.off('peg')) {
       mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', function () {
         var label = peg.querySelector('.cadd-peg_label');
         var loonie = peg.querySelector('.cadd-peg_loonie');
         var coin = peg.querySelector('.cadd-peg_coin');
-        var lines = peg.querySelectorAll('.cadd-peg_line');
+        var heading = peg.querySelector('.cadd-peg_heading');
         if (!label || !loonie || !coin) return;
 
         function rem(v) {
@@ -86,60 +85,86 @@
           };
         }
 
+        var splits = [];
+        var labelSplit = SplitText.create(label, { type: 'lines,words', linesClass: 'section-reveal-line' });
+        splits.push(labelSplit);
+        // строки заголовка уже разбиты в вёрстке (.cadd-peg_line) — маской служит
+        // сама строка, внутрь кладём слой, который едет снизу. Так сохраняются
+        // центрирование и прозрачность строк (SplitText их ломает).
+        var headLines = heading ? Array.prototype.map.call(heading.querySelectorAll('.cadd-peg_line'), function (line) {
+          var inner = document.createElement('span');
+          inner.style.display = 'block';
+          while (line.firstChild) inner.appendChild(line.firstChild);
+          line.appendChild(inner);
+          line.classList.add('section-reveal-line');
+          return inner;
+        }) : [];
+
+        // стартовое состояние надписи: крупная, по центру экрана
+        gsap.set(label, { y: rem(20), scale: 5.625, opacity: 1, transformOrigin: '50% 50%' });
+
+        // 1) слова надписи — пока секция въезжает
+        var intro = gsap.fromTo(labelSplit.words,
+          { yPercent: 101 },
+          {
+            yPercent: 0, ease: 'none', stagger: 0.15,
+            scrollTrigger: { trigger: peg, start: 'top 75%', end: 'top 15%', scrub: 1 }
+          });
+
+        // 2) закреплённая часть — одна непрерывная сцена
         var tl = gsap.timeline({
-          defaults: { ease: 'power2.inOut' },
+          defaults: { ease: 'none' },
           scrollTrigger: {
             trigger: peg,
             start: 'top top',
-            end: '+=200%',
+            end: '+=180%',
             pin: true,
             scrub: 1,
             invalidateOnRefresh: true
           }
         });
-
-        // кадр 1 → 2
-        tl.fromTo(label,
-          { y: rem(20), scale: 5.625, opacity: 1 },
-          { y: rem(10.3125), scale: 2.698, opacity: 1, duration: 0.25 }, 0.3);
-        tl.fromTo(loonie, { y: rem(48) }, { y: rem(11.5), duration: 0.25 }, 0.3);
-        tl.fromTo(coin, { x: rem(-0.25), y: rem(60) }, { x: rem(-0.25), y: rem(29.875), duration: 0.25 }, 0.3);
-
-        // кадр 2 → 3 (финал = вёрстка)
-        tl.to(label, { y: 0, scale: 1, opacity: 0.8, duration: 0.25 }, 0.55);
-        tl.to(loonie, { y: 0, duration: 0.25 }, 0.55);
-        tl.to(coin, { x: 0, y: 0, duration: 0.25 }, 0.55);
-        if (lines.length) {
-          tl.from(lines, { yPercent: 40, opacity: 0, stagger: 0.04, duration: 0.17, ease: 'power2.out' }, 0.6);
+        tl.to(label, { y: 0, scale: 1, opacity: 0.8, duration: 1, ease: 'power1.inOut' }, 0);
+        tl.fromTo(loonie, { y: rem(48) }, { y: 0, duration: 0.75, ease: 'power2.out' }, 0.1);
+        tl.fromTo(coin, { x: rem(-0.25), y: rem(60) }, { x: 0, y: 0, duration: 0.75, ease: 'power2.out' }, 0.2);
+        if (headLines.length) {
+          tl.fromTo(headLines, { yPercent: 101 }, { yPercent: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, 0.7);
         }
-        tl.to({}, { duration: 0.2 }, 0.8);
 
         return function () {
-          if (tl.scrollTrigger) tl.scrollTrigger.kill();
-          tl.kill();
+          [intro, tl].forEach(function (a) {
+            if (a.scrollTrigger) a.scrollTrigger.kill();
+            a.kill();
+          });
+          splits.forEach(function (s) { s.revert(); });
+          headLines.forEach(function (inner) {
+            var line = inner.parentNode;
+            while (inner.firstChild) line.insertBefore(inner.firstChild, inner);
+            line.removeChild(inner);
+            line.classList.remove('section-reveal-line');
+          });
           gsap.set([label, loonie, coin], { clearProps: 'transform,opacity' });
-          if (lines.length) gsap.set(lines, { clearProps: 'transform,opacity' });
         };
       });
     }
 
     /* ------------------------------------------------------------------ *
-     * SECTION_CADD-CTA — бесконечная лента платформ
-     * Механика 1:1 с PARTNERS_GRID (tetra-partners.js): ряд 1 влево, ряд 2
-     * вправо, бесшовно; скорость модулируется скоростью скролла.
+     * Бесконечные ленты — механика 1:1 с PARTNERS_GRID (tetra-partners.js):
+     * чётные ряды влево, нечётные вправо, бесшовно (контент дублируется);
+     * скорость модулируется скоростью скролла (вниз — быстрее, вверх — разворот).
+     *   scrollMarquee({ rows, trigger, prepare })
+     *   prepare(row) — опционально, вызывается перед каждым замером ряда
      * ------------------------------------------------------------------ */
-    var cWrap = document.querySelector('.section_cadd-cta .cadd-cta_marquee');
-    if (cWrap && !T.off('cadd-cta')) {
-      var cRows = Array.prototype.slice.call(cWrap.querySelectorAll('.cadd-cta_row'));
-      var cLoops = [];
-      var cActive = false;
-      function buildCtaMarquee() {
-        var previous = cLoops.map(function (t) {
+    function scrollMarquee(opts) {
+      var rows = opts.rows;
+      var loops = [];
+      var active = false;
+      function build() {
+        var previous = loops.map(function (t) {
           return { progress: t.progress(), speed: t.timeScale() };
         });
-        cLoops.forEach(function (t) { t.kill(); });
-        cLoops = [];
-        cRows.forEach(function (row, ri) {
+        loops.forEach(function (t) { t.kill(); });
+        loops = [];
+        rows.forEach(function (row, ri) {
           if (!row.dataset.cloned) {
             var kids = Array.prototype.slice.call(row.children);
             kids.forEach(function (n) {
@@ -154,6 +179,7 @@
           row.style.flexWrap = 'nowrap';
           row.style.width = 'max-content';
           gsap.set(row, { x: 0 });
+          if (opts.prepare) opts.prepare(row);
           var cs = getComputedStyle(row);
           var gap = parseFloat(cs.columnGap || cs.gap) || 0;
           var n = parseInt(row.dataset.count, 10);
@@ -176,68 +202,91 @@
             t.totalTime(t.duration() * (100 + previous[ri].progress), true);
             t.timeScale(previous[ri].speed);
           }
-          if (cActive) t.resume();
-          cLoops.push(t);
+          if (active) t.resume();
+          loops.push(t);
         });
       }
-      buildCtaMarquee();
-      var cTarget = 1;
-      var cSettled = true;
-      var cLastY = window.scrollY;
-      var cLastT = (window.performance && performance.now()) || Date.now();
+      build();
+      var target = 1;
+      var settled = true;
+      var lastY = window.scrollY;
+      var lastT = (window.performance && performance.now()) || Date.now();
       ScrollTrigger.create({
-        trigger: '.section_cadd-cta', start: 'top bottom', end: 'bottom top',
+        trigger: opts.trigger, start: 'top bottom', end: 'bottom top',
         onToggle: function (self) {
-          cActive = self.isActive;
-          cLastY = window.scrollY;
-          cLastT = (window.performance && performance.now()) || Date.now();
-          cLoops.forEach(function (t) { cActive ? t.resume() : t.pause(); });
+          active = self.isActive;
+          lastY = window.scrollY;
+          lastT = (window.performance && performance.now()) || Date.now();
+          loops.forEach(function (t) { active ? t.resume() : t.pause(); });
         }
       });
-      function cOnScroll() {
-        if (!cActive) return;
+      function onScroll() {
+        if (!active) return;
         var y = window.scrollY;
         var now = (window.performance && performance.now()) || Date.now();
-        var dt = Math.max(now - cLastT, 16) / 1000;
-        var dy = y - cLastY;
-        cLastY = y;
-        cLastT = now;
+        var dt = Math.max(now - lastT, 16) / 1000;
+        var dy = y - lastY;
+        lastY = y;
+        lastT = now;
         if (!dy) return;
         var v = Math.abs(dy) / dt;
         var down = dy > 0;
         var div = down ? 140 : 190;
         var cap = down ? 24 : 12;
         var mag = 1 + Math.min(v / div, cap);
-        cTarget = down ? mag : -mag;
-        cSettled = false;
+        target = down ? mag : -mag;
+        settled = false;
       }
-      window.addEventListener('scroll', cOnScroll, { passive: true });
-      if (window.lenis && window.lenis.on) window.lenis.on('scroll', cOnScroll);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if (window.lenis && window.lenis.on) window.lenis.on('scroll', onScroll);
       gsap.ticker.add(function () {
-        if (!cLoops.length || cSettled) return;
-        cTarget += (1 - cTarget) * 0.05;
-        if (Math.abs(cTarget - 1) < 0.001) cTarget = 1;
-        var settled = cTarget === 1;
-        cLoops.forEach(function (t) {
+        if (!loops.length || settled) return;
+        target += (1 - target) * 0.05;
+        if (Math.abs(target - 1) < 0.001) target = 1;
+        var done = target === 1;
+        loops.forEach(function (t) {
           var cur = t.timeScale();
-          var next = cur + (cTarget - cur) * 0.12;
-          if (Math.abs(next - cTarget) < 0.001) next = cTarget;
+          var next = cur + (target - cur) * 0.12;
+          if (Math.abs(next - target) < 0.001) next = target;
           if (next !== cur) t.timeScale(next);
-          if (Math.abs(next - 1) > 0.001) settled = false;
+          if (Math.abs(next - 1) > 0.001) done = false;
         });
-        cSettled = settled;
+        settled = done;
       });
-      var cRt;
-      var cViewportWidth = document.documentElement.clientWidth;
+      var rt;
+      var viewportWidth = document.documentElement.clientWidth;
       window.addEventListener('resize', function () {
         var width = document.documentElement.clientWidth;
-        if (width === cViewportWidth) return;
-        cViewportWidth = width;
-        clearTimeout(cRt);
-        cRt = setTimeout(buildCtaMarquee, 200);
+        if (width === viewportWidth) return;
+        viewportWidth = width;
+        clearTimeout(rt);
+        rt = setTimeout(build, 200);
       });
     }
 
+    // SECTION_CADD-CTA — два ряда платформ
+    var ctaRows = document.querySelectorAll('.section_cadd-cta .cadd-cta_row');
+    if (ctaRows.length && !T.off('cadd-cta')) {
+      scrollMarquee({
+        rows: Array.prototype.slice.call(ctaRows),
+        trigger: '.section_cadd-cta'
+      });
+    }
+
+    // HERO — ряд логотипов консорциума: лента начинается от левого края экрана
+    var consortiumRow = document.querySelector('.section_cadd-hero .cadd-consortium_row');
+    if (consortiumRow && !T.off('consortium')) {
+      scrollMarquee({
+        rows: [consortiumRow],
+        trigger: consortiumRow,
+        prepare: function (row) {
+          row.style.alignSelf = 'flex-start';
+          row.style.justifyContent = 'flex-start';
+          row.style.marginLeft = '0px';
+          row.style.marginLeft = -row.getBoundingClientRect().left + 'px';
+        }
+      });
+    }
     /* ------------------------------------------------------------------ *
      * REVEAL секций CADD (cadd-gap / cadd-fundamentals / cadd-practice)
      * ------------------------------------------------------------------ */
