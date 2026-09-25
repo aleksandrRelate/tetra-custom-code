@@ -69,6 +69,13 @@
 .tetra-anim .footer_wordmark,
 .tetra-anim .footer_wordmark-mob,
 .tetra-anim .footer_menu-link,
+.tetra-anim .cadd-hero_eyebrow,
+.tetra-anim .cadd-hero_heading,
+.tetra-anim .cadd-hero_text,
+.tetra-anim .cadd-hero_coin,
+.tetra-anim .cadd-hero_glow,
+.tetra-anim .cadd-activity-card,
+.tetra-anim .cadd-consortium,
 .tetra-anim [data-reveal] {
   opacity: 0 !important;
 }

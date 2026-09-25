@@ -62,6 +62,77 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * SECTION_CADD-HERO — хореография при загрузке, как HERO лендинга
+     * (tetra-page.js 1b): визуал → eyebrow → слова заголовка из маски → текст
+     * → кнопки сверху через маску → карточки → navbar → консорциум.
+     * Тайминги и изинг — те же, что на лендинге.
+     * ------------------------------------------------------------------ */
+    var caddHero = document.querySelector('.section_cadd-hero');
+    var caddHeroHeading = caddHero && caddHero.querySelector('.cadd-hero_heading');
+    if (caddHeroHeading && window.SplitText && !T.off('hero')) {
+      // перенос строки в Webflow — символ \n (white-space: pre-line); SplitText
+      // его схлопывает, поэтому превращаем в <br> до разбиения
+      if (caddHeroHeading.textContent.indexOf('\n') !== -1) {
+        var chParts = caddHeroHeading.textContent.split('\n');
+        caddHeroHeading.textContent = '';
+        chParts.forEach(function (part, i) {
+          if (i) caddHeroHeading.appendChild(document.createElement('br'));
+          caddHeroHeading.appendChild(document.createTextNode(part.trim()));
+        });
+      }
+      var chSplit = SplitText.create(caddHeroHeading, {
+        type: 'lines,words',
+        linesClass: 'hero-heading-line',
+        wordsClass: 'hero-heading-word'
+      });
+      var chVisual = caddHero.querySelectorAll('.cadd-hero_coin, .cadd-hero_glow');
+      var chEyebrow = caddHero.querySelector('.cadd-hero_eyebrow');
+      var chText = caddHero.querySelector('.cadd-hero_text');
+      var chButtons = caddHero.querySelectorAll('.hero_button-group .hero-button');
+      var chCards = caddHero.querySelectorAll('.cadd-activity-card');
+      var chConsortium = caddHero.querySelector('.cadd-consortium');
+      var chNavbar = document.querySelector('.navbar-wrapper');
+      var chTl = gsap.timeline({ paused: true, defaults: { ease: 'power4.out' } });
+
+      if (chVisual.length) {
+        gsap.set(chVisual, { autoAlpha: 0, scale: 1.08, transformOrigin: '50% 50%' });
+        chTl.to(chVisual, { autoAlpha: 1, scale: 1, duration: 1.4 }, 0);
+      }
+      if (chEyebrow) {
+        gsap.set(chEyebrow, { autoAlpha: 0, yPercent: 50 });
+        chTl.to(chEyebrow, { autoAlpha: 1, yPercent: 0, duration: 0.9 }, 0.25);
+      }
+      gsap.set(chSplit.words, { yPercent: 101 });
+      chTl.to(chSplit.words, { yPercent: 0, duration: 1.109, stagger: 0.1, force3D: true }, 0.35);
+      if (chText) {
+        gsap.set(chText, { autoAlpha: 0, yPercent: 50 });
+        chTl.to(chText, { autoAlpha: 1, yPercent: 0, duration: 0.9 }, 0.85);
+      }
+      if (chButtons.length) {
+        gsap.set(chButtons, { yPercent: -110 });
+        chTl.to(chButtons, { yPercent: 0, duration: 0.9, stagger: 0.12, force3D: true }, 1.1);
+      }
+      if (chCards.length) {
+        gsap.set(chCards, { autoAlpha: 0, y: '1.5rem' });
+        chTl.to(chCards, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12 }, 1.2);
+      }
+      if (chNavbar) {
+        gsap.set(chNavbar, { clipPath: 'inset(0% 0% 100% 0%)' });
+        chTl.to(chNavbar, {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          duration: 1.1,
+          onComplete: function () { gsap.set(chNavbar, { clearProps: 'clipPath' }); }
+        }, 1.35);
+      }
+      if (chConsortium) {
+        gsap.set(chConsortium, { autoAlpha: 0, y: '1.5rem' });
+        chTl.to(chConsortium, { autoAlpha: 1, y: 0, duration: 0.9 }, 1.5);
+      }
+      // играем сразу, не ждём window load (как на лендинге)
+      chTl.play(0);
+    }
+
+    /* ------------------------------------------------------------------ *
      * SECTION_CADD-PEG — «1 CADD = $1 CAD», непрерывный скролл (Figma 12221:20524)
      *  1) секция въезжает: слова надписи по очереди поднимаются снизу вверх
      *     с opacity (SplitText, без маски), надпись крупная (180px) по центру
