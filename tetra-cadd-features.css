@@ -88,6 +88,29 @@
   opacity: 0;
 }
 
+/* бегущая строка: JS кладёт слова в .cadd-features_stage-track (копий на 2
+   ширины сцены), дорожка бесконечно едет влево на 50% своей ширины */
+.section_cadd-features.is-tabs-ready .cadd-features_stage-word {
+  left: 0;
+  transform: none;
+}
+.section_cadd-features .cadd-features_stage-track {
+  display: flex;
+  flex: none;
+  will-change: transform;
+  animation: cadd-features-marquee var(--cadd-marquee-duration, 20s) linear infinite;
+}
+.section_cadd-features .cadd-features_stage-track > span {
+  flex: none;
+}
+.section_cadd-features.is-paused .cadd-features_stage-track {
+  animation-play-state: paused;
+}
+@keyframes cadd-features-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .section_cadd-features .cadd-features_tab-active,
   .section_cadd-features .cadd-features_tab-title,
@@ -95,5 +118,8 @@
   .section_cadd-features .cadd-features_phone,
   .section_cadd-features .cadd-features_stage-word {
     transition: none !important;
+  }
+  .section_cadd-features .cadd-features_stage-track {
+    animation: none;
   }
 }

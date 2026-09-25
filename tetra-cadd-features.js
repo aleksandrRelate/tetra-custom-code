@@ -3,9 +3,11 @@
 //     следующий пункт (по кругу); пока секция вне экрана — бар на паузе
 //   • клик / Enter / Space по пункту — переключает на него и перезапускает бар
 //   • справа: кроссфейд скрина телефона и смена фонового слова (Send → Hold…)
+//   • фоновое слово — бесконечная бегущая строка
 // Стили — tetra-cadd-features.css. Без зависимостей; ?perf=features выключает.
 (function () {
-  var DURATION = 5000; // мс на пункт
+  var DURATION = 5000;       // мс на пункт
+  var MARQUEE_SPEED = 60;    // px/с — скорость бегущей строки
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
@@ -24,7 +26,6 @@
     if (tabs.length < 2) return;
 
     var word = section.querySelector('.cadd-features_stage-word');
-    var wordSpans = word ? [].slice.call(word.children) : [];
     var titles = tabs.map(function (tab) {
       var t = tab.querySelector('.cadd-features_tab-title');
       return t ? t.textContent.trim() : '';
@@ -56,12 +57,53 @@
     var current = -1;
     var wordTimer = null;
 
+    /* ---- бегущая строка: слова в дорожке .cadd-features_stage-track,
+       копий хватает на 2 ширины сцены, CSS сдвигает дорожку на -50% ---- */
+    var track = null;
+    var stage = word ? word.parentNode : null;
+    var wordText = titles[0];
+
+    function buildMarquee(text) {
+      if (!track) return;
+      wordText = text;
+      track.innerHTML = '';
+      var probe = document.createElement('span');
+      probe.textContent = text;
+      track.appendChild(probe);
+      var unit = probe.getBoundingClientRect().width || 1;
+      var perHalf = Math.ceil(stage.clientWidth / unit) + 1;
+      for (var k = 1; k < perHalf * 2; k++) {
+        var s = document.createElement('span');
+        s.textContent = text;
+        s.setAttribute('aria-hidden', 'true');
+        track.appendChild(s);
+      }
+      track.style.setProperty('--cadd-marquee-duration', (unit * perHalf / MARQUEE_SPEED) + 's');
+    }
+
+    if (word && stage) {
+      track = document.createElement('div');
+      track.className = 'cadd-features_stage-track';
+      word.innerHTML = '';
+      word.appendChild(track);
+      buildMarquee(wordText);
+      // ширина слова зависит от шрифта и rem (вьюпорт) — пересобрать
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { buildMarquee(wordText); });
+      }
+      var resizeTimer = null;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () { buildMarquee(wordText); }, 200);
+      });
+    }
+
     function setWord(text) {
-      if (!word) return;
+      if (!track) return;
       clearTimeout(wordTimer);
       word.classList.add('is-switching');
       wordTimer = setTimeout(function () {
-        wordSpans.forEach(function (s) { s.textContent = text; });
+        buildMarquee(text);
         word.classList.remove('is-switching');
       }, 250);
     }
