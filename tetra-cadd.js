@@ -63,11 +63,11 @@
 
     /* ------------------------------------------------------------------ *
      * SECTION_CADD-PEG — «1 CADD = $1 CAD», непрерывный скролл (Figma 12221:20524)
-     *  1) секция въезжает: слова надписи проявляются по очереди из opacity
-     *     (SplitText, без маски), надпись крупная (180px) по центру экрана
-     *  2) секция закреплена: надпись непрерывно уменьшается до 32px/80% на своё
-     *     место, монеты вылетают снизу (стартуют невидимыми) и сходятся в пару,
-     *     строки заголовка проявляются построчно из opacity
+     *  1) секция въезжает: слова надписи по очереди поднимаются снизу вверх
+     *     с opacity (SplitText, без маски), надпись крупная (180px) по центру
+     *  2) секция закреплена: надпись быстро уменьшается до 32px/80% и уходит
+     *     на своё место, монеты выезжают снизу и сходятся в пару; с середины
+     *     их движения строки заголовка поднимаются снизу вверх с opacity
      *  Всё — scrub по скроллу. Финальный кадр = вёрстка в Webflow.
      *  Смещения — в rem (1rem = 16px на 1440).
      * ------------------------------------------------------------------ */
@@ -93,9 +93,9 @@
 
         // 1) слова надписи — пока секция въезжает
         var intro = gsap.fromTo(labelSplit.words,
-          { opacity: 0 },
+          { yPercent: 100, opacity: 0 },
           {
-            opacity: 1, ease: 'none', stagger: 0.15,
+            yPercent: 0, opacity: 1, ease: 'none', stagger: 0.15,
             scrollTrigger: { trigger: peg, start: 'top 75%', end: 'top 15%', scrub: 1 }
           });
 
@@ -111,14 +111,14 @@
             invalidateOnRefresh: true
           }
         });
-        tl.to(label, { y: 0, scale: 1, opacity: 0.8, duration: 1, ease: 'power1.inOut' }, 0);
-        tl.fromTo(loonie, { y: rem(48) }, { y: 0, duration: 0.75, ease: 'power2.out' }, 0.1);
-        tl.fromTo(loonie, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.1);
-        tl.fromTo(coin, { x: rem(-0.25), y: rem(60) }, { x: 0, y: 0, duration: 0.75, ease: 'power2.out' }, 0.2);
-        tl.fromTo(coin, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.2);
+        // надпись уменьшается и уходит наверх быстрее монет — без наложения
+        tl.to(label, { y: 0, scale: 1, opacity: 0.8, duration: 0.45, ease: 'power2.inOut' }, 0);
+        // монеты выезжают снизу (стартуют полностью за нижним краем секции)
+        tl.fromTo(loonie, { y: rem(60) }, { y: 0, duration: 0.7, ease: 'power2.out' }, 0.15);
+        tl.fromTo(coin, { x: rem(-0.25), y: rem(72) }, { x: 0, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25);
         if (lines.length) {
-          // from(): конечная прозрачность строк берётся из вёрстки (1 / 0.5 / 0.15)
-          tl.from(lines, { opacity: 0, duration: 0.25, stagger: 0.08 }, 0.7);
+          // с середины движения монет; from(): конечная прозрачность строк — из вёрстки (1 / 0.5 / 0.15)
+          tl.from(lines, { yPercent: 60, opacity: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, 0.5);
         }
 
         return function () {
@@ -127,8 +127,8 @@
             a.kill();
           });
           labelSplit.revert();
-          gsap.set([label, loonie, coin], { clearProps: 'transform,opacity,visibility' });
-          if (lines.length) gsap.set(lines, { clearProps: 'opacity' });
+          gsap.set([label, loonie, coin], { clearProps: 'transform,opacity' });
+          if (lines.length) gsap.set(lines, { clearProps: 'transform,opacity' });
         };
       });
     }
