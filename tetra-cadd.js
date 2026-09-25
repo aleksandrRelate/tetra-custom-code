@@ -85,7 +85,8 @@
         linesClass: 'hero-heading-line',
         wordsClass: 'hero-heading-word'
       });
-      var chVisual = caddHero.querySelectorAll('.cadd-hero_coin, .cadd-hero_glow');
+      var chCoin = caddHero.querySelector('.cadd-hero_coin');
+      var chGlow = caddHero.querySelector('.cadd-hero_glow');
       var chEyebrow = caddHero.querySelector('.cadd-hero_eyebrow');
       var chText = caddHero.querySelector('.cadd-hero_text');
       var chButtons = caddHero.querySelectorAll('.hero_button-group .hero-button');
@@ -94,9 +95,20 @@
       var chNavbar = document.querySelector('.navbar-wrapper');
       var chTl = gsap.timeline({ paused: true, defaults: { ease: 'power4.out' } });
 
-      if (chVisual.length) {
-        gsap.set(chVisual, { autoAlpha: 0, scale: 1.08, transformOrigin: '50% 50%' });
-        chTl.to(chVisual, { autoAlpha: 1, scale: 1, duration: 1.4 }, 0);
+      if (chGlow) {
+        gsap.set(chGlow, { autoAlpha: 0 });
+        chTl.to(chGlow, { autoAlpha: 1, duration: 1.4 }, 0);
+      }
+      if (chCoin) {
+        // монета выезжает снизу вверх (y относительный — сохраняем её
+        // центрирование translate(-50%, -50%) из вёрстки)
+        var chRem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        gsap.set(chCoin, { autoAlpha: 0 });
+        chTl.from(chCoin, {
+          y: '+=' + 12 * chRem, duration: 1.4, immediateRender: true,
+          onComplete: function () { gsap.set(chCoin, { clearProps: 'transform' }); }
+        }, 0);
+        chTl.to(chCoin, { autoAlpha: 1, duration: 0.8 }, 0);
       }
       if (chEyebrow) {
         gsap.set(chEyebrow, { autoAlpha: 0, yPercent: 50 });
