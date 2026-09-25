@@ -117,8 +117,10 @@
         tl.fromTo(loonie, { y: rem(60) }, { y: 0, duration: 0.7, ease: 'power2.out' }, 0.15);
         tl.fromTo(coin, { x: rem(-0.25), y: rem(72) }, { x: 0, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25);
         if (lines.length) {
-          // с середины движения монет; from(): конечная прозрачность строк — из вёрстки (1 / 0.5 / 0.15)
-          tl.from(lines, { yPercent: 60, opacity: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, 0.5);
+          // с середины движения монет; стартуют глубоко снизу и едут синхронно с
+          // монетой, оставаясь под ней (без наложения). from(): конечная
+          // прозрачность строк — из вёрстки (1 / 0.5 / 0.15)
+          tl.from(lines, { y: rem(30), opacity: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out' }, 0.5);
         }
 
         return function () {
