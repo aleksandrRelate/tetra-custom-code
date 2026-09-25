@@ -63,12 +63,13 @@
 
     /* ------------------------------------------------------------------ *
      * SECTION_CADD-PEG — «1 CADD = $1 CAD», непрерывный скролл (Figma 12221:20524)
-     *  1) секция въезжает: слова надписи поднимаются из маски (SplitText),
-     *     надпись крупная (180px) по центру экрана — scrub по скроллу
+     *  1) секция въезжает: слова надписи проявляются по очереди из opacity
+     *     (SplitText, без маски), надпись крупная (180px) по центру экрана
      *  2) секция закреплена: надпись непрерывно уменьшается до 32px/80% на своё
-     *     место, монеты вылетают снизу и сходятся в пару, строки заголовка
-     *     проявляются построчно из маски (SplitText)
-     *  Финальный кадр = вёрстка в Webflow. Смещения — в rem (1rem = 16px на 1440).
+     *     место, монеты вылетают снизу (стартуют невидимыми) и сходятся в пару,
+     *     строки заголовка проявляются построчно из opacity
+     *  Всё — scrub по скроллу. Финальный кадр = вёрстка в Webflow.
+     *  Смещения — в rem (1rem = 16px на 1440).
      * ------------------------------------------------------------------ */
     var peg = document.querySelector('.section_cadd-peg');
     if (peg && window.SplitText && !T.off('peg')) {
@@ -76,7 +77,7 @@
         var label = peg.querySelector('.cadd-peg_label');
         var loonie = peg.querySelector('.cadd-peg_loonie');
         var coin = peg.querySelector('.cadd-peg_coin');
-        var heading = peg.querySelector('.cadd-peg_heading');
+        var lines = peg.querySelectorAll('.cadd-peg_heading .cadd-peg_line');
         if (!label || !loonie || !coin) return;
 
         function rem(v) {
@@ -85,29 +86,16 @@
           };
         }
 
-        var splits = [];
-        var labelSplit = SplitText.create(label, { type: 'lines,words', linesClass: 'section-reveal-line' });
-        splits.push(labelSplit);
-        // строки заголовка уже разбиты в вёрстке (.cadd-peg_line) — маской служит
-        // сама строка, внутрь кладём слой, который едет снизу. Так сохраняются
-        // центрирование и прозрачность строк (SplitText их ломает).
-        var headLines = heading ? Array.prototype.map.call(heading.querySelectorAll('.cadd-peg_line'), function (line) {
-          var inner = document.createElement('span');
-          inner.style.display = 'block';
-          while (line.firstChild) inner.appendChild(line.firstChild);
-          line.appendChild(inner);
-          line.classList.add('section-reveal-line');
-          return inner;
-        }) : [];
+        var labelSplit = SplitText.create(label, { type: 'words' });
 
         // стартовое состояние надписи: крупная, по центру экрана
         gsap.set(label, { y: rem(20), scale: 5.625, opacity: 1, transformOrigin: '50% 50%' });
 
         // 1) слова надписи — пока секция въезжает
         var intro = gsap.fromTo(labelSplit.words,
-          { yPercent: 101 },
+          { opacity: 0 },
           {
-            yPercent: 0, ease: 'none', stagger: 0.15,
+            opacity: 1, ease: 'none', stagger: 0.15,
             scrollTrigger: { trigger: peg, start: 'top 75%', end: 'top 15%', scrub: 1 }
           });
 
@@ -125,9 +113,12 @@
         });
         tl.to(label, { y: 0, scale: 1, opacity: 0.8, duration: 1, ease: 'power1.inOut' }, 0);
         tl.fromTo(loonie, { y: rem(48) }, { y: 0, duration: 0.75, ease: 'power2.out' }, 0.1);
+        tl.fromTo(loonie, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.1);
         tl.fromTo(coin, { x: rem(-0.25), y: rem(60) }, { x: 0, y: 0, duration: 0.75, ease: 'power2.out' }, 0.2);
-        if (headLines.length) {
-          tl.fromTo(headLines, { yPercent: 101 }, { yPercent: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, 0.7);
+        tl.fromTo(coin, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.2);
+        if (lines.length) {
+          // from(): конечная прозрачность строк берётся из вёрстки (1 / 0.5 / 0.15)
+          tl.from(lines, { opacity: 0, duration: 0.25, stagger: 0.08 }, 0.7);
         }
 
         return function () {
@@ -135,14 +126,9 @@
             if (a.scrollTrigger) a.scrollTrigger.kill();
             a.kill();
           });
-          splits.forEach(function (s) { s.revert(); });
-          headLines.forEach(function (inner) {
-            var line = inner.parentNode;
-            while (inner.firstChild) line.insertBefore(inner.firstChild, inner);
-            line.removeChild(inner);
-            line.classList.remove('section-reveal-line');
-          });
-          gsap.set([label, loonie, coin], { clearProps: 'transform,opacity' });
+          labelSplit.revert();
+          gsap.set([label, loonie, coin], { clearProps: 'transform,opacity,visibility' });
+          if (lines.length) gsap.set(lines, { clearProps: 'opacity' });
         };
       });
     }
