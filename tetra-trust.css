@@ -1,0 +1,35 @@
+/* Tetra — страница TETRA TRUST.
+   Класс .is-pulsing на .section_tt-hero ставит tetra-trust.js после старта hero;
+   .is-paused — пока hero вне экрана (пульс стоит). */
+
+/* ===== HERO — shield pulse (Figma 12255:6, цикл 3s) =====
+   Волна яркости изнутри наружу: каждый щит поднимает opacity в ~3.2 раза
+   от базовой и возвращается; базовые значения заданы в Webflow (.is-1…6).
+   Проценты и изинги — из get_motion_context, без изменений. */
+.section_tt-hero.is-pulsing .tt-hero_shield { animation: 3s linear infinite; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-1 { animation-name: tt-shield-pulse-1; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-2 { animation-name: tt-shield-pulse-2; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-3 { animation-name: tt-shield-pulse-3; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-4 { animation-name: tt-shield-pulse-4; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-5 { animation-name: tt-shield-pulse-5; }
+.section_tt-hero.is-pulsing .tt-hero_shield.is-6 { animation-name: tt-shield-pulse-6; }
+.section_tt-hero.is-paused .tt-hero_shield { animation-play-state: paused; }
+
+@keyframes tt-shield-pulse-1 { 0% { opacity: 0.18; } 5% { animation-timing-function: ease-out; opacity: 0.18; } 16.667% { animation-timing-function: ease-in-out; opacity: 0.576; } 48.333% { opacity: 0.18; } 100% { opacity: 0.18; } }
+@keyframes tt-shield-pulse-2 { 0% { opacity: 0.156; } 12.333% { animation-timing-function: ease-out; opacity: 0.156; } 24% { animation-timing-function: ease-in-out; opacity: 0.499; } 55.667% { opacity: 0.156; } 100% { opacity: 0.156; } }
+@keyframes tt-shield-pulse-3 { 0% { opacity: 0.132; } 19.667% { animation-timing-function: ease-out; opacity: 0.132; } 31.333% { animation-timing-function: ease-in-out; opacity: 0.422; } 63% { opacity: 0.132; } 100% { opacity: 0.132; } }
+@keyframes tt-shield-pulse-4 { 0% { opacity: 0.108; } 27% { animation-timing-function: ease-out; opacity: 0.108; } 38.667% { animation-timing-function: ease-in-out; opacity: 0.346; } 70.333% { opacity: 0.108; } 100% { opacity: 0.108; } }
+@keyframes tt-shield-pulse-5 { 0% { opacity: 0.084; } 34.333% { animation-timing-function: ease-out; opacity: 0.084; } 46% { animation-timing-function: ease-in-out; opacity: 0.269; } 77.667% { opacity: 0.084; } 100% { opacity: 0.084; } }
+@keyframes tt-shield-pulse-6 { 0% { opacity: 0.06; } 41.667% { animation-timing-function: ease-out; opacity: 0.06; } 53.333% { animation-timing-function: ease-in-out; opacity: 0.192; } 85% { opacity: 0.06; } 100% { opacity: 0.06; } }
+
+/* ===== CANADA — фоновое видео проявляется поверх фото, когда пошло ===== */
+.section_tt-canada .tt-canada_video {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.section_tt-canada .tt-canada_video.is-playing { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .section_tt-hero .tt-hero_shield { animation: none !important; }
+  .section_tt-canada .tt-canada_video { display: none; }
+}
