@@ -73,10 +73,11 @@
       else el.style.opacity = 0;
     });
     gsap.set(fills, { opacity: 0 });
-    var tl = gsap.timeline({
+    // без trigger — таймлайн на паузе, его запускает вызывающий код
+    var tl = gsap.timeline(trigger ? {
       defaults: { ease: 'power2.inOut' },
       scrollTrigger: { trigger: trigger, start: opts.start || 'top 75%', once: true }
-    });
+    } : { defaults: { ease: 'power2.inOut' }, paused: true });
     var dashed = strokes.filter(function (el) { return el.getAttribute('stroke-dasharray'); });
     var solid = strokes.filter(function (el) { return !el.getAttribute('stroke-dasharray'); });
     tl.to(solid, { strokeDashoffset: 0, duration: opts.lineDuration || 1.1, stagger: opts.stagger || 0.06 }, 0);
@@ -261,8 +262,9 @@
           var cliTl = timelineFor(clients.querySelector('.tt-split') || clients);
           badge(cliTl, clients);
           revealText(cliTl, clients.querySelector('.tt-clients_heading'), 0.08);
+          var singleColumn = window.matchMedia('(max-width: 479px)').matches;
           clients.querySelectorAll('.tt-clients_card').forEach(function (card, index) {
-            var delay = (index % 3) * 0.12;
+            var delay = singleColumn ? 0 : (index % 3) * 0.12;   // на мобилке карточки в одну колонку — без лесенки
             var cardTl = timelineFor(card, 'top 90%');
             gsap.set(card, { autoAlpha: 0, y: 32 });
             cardTl.to(card, { autoAlpha: 1, y: 0, duration: 0.7 }, delay);
@@ -295,17 +297,87 @@
      * и custody (поток cold → warm → policy → hot → network слева направо).
      * ------------------------------------------------------------------ */
     if (!T.off('trustsvg')) {
-      var secImg = document.querySelector('.section_tt-security img.tt-security_graphic');
+      var secSection = document.querySelector('.section_tt-security');
+      var secCard = secSection && secSection.querySelector('.tt-security_graphic-card');
+      var secItems = secSection ? gsap.utils.toArray(secSection.querySelectorAll('.tt-security_item')) : [];
+      var SEC_DRAW = { lineDuration: 1.2, stagger: 0.04, fillsAt: 0.8 };
+
+      // ДЕСКТОП (>=480): в закреплённой карточке 5 схем стопкой; активный пункт
+      // списка (его верх пересёк 60% экрана) показывает свою схему — кроссфейд,
+      // при первом показе схема прорисовывается
+      if (secCard && secItems.length) {
+        mm.add('(min-width: 480px) and ' + NO_MOTION, function () {
+          var alive = true;
+          var triggers = [];
+          var imgs = gsap.utils.toArray(secCard.querySelectorAll('.tt-security_graphic'));
+          Promise.all(imgs.map(function (el) {
+            return el.nodeName.toLowerCase() === 'svg' ? Promise.resolve(el) : inlineSvg(el);
+          })).then(function (svgs) {
+            if (!alive) return;
+            svgs = svgs.filter(Boolean);
+            if (!svgs.length) return;
+            var draws = svgs.map(function (svg) { return drawSvg(svg, null, SEC_DRAW); });
+            var current = -1;
+            function show(i) {
+              if (i === current || !svgs[i]) return;
+              current = i;
+              svgs.forEach(function (svg, j) {
+                gsap.to(svg, { opacity: j === i ? 1 : 0, duration: 0.5, ease: 'power1.inOut', overwrite: true });
+              });
+              if (!draws[i].progress()) draws[i].play(0);
+            }
+            gsap.set(svgs, { opacity: 0 });
+            triggers.push(ScrollTrigger.create({
+              trigger: secCard, start: 'top 80%', once: true,
+              onEnter: function () { if (current === -1) show(0); }
+            }));
+            secItems.forEach(function (item, i) {
+              triggers.push(ScrollTrigger.create({
+                trigger: item,
+                start: 'top 60%',
+                end: 'bottom 60%',
+                onToggle: function (self) { if (self.isActive) show(i); }
+              }));
+            });
+            ScrollTrigger.refresh();
+            triggers.draws = draws;
+            triggers.svgs = svgs;
+          });
+          return function () {
+            alive = false;
+            triggers.forEach(function (st) { st.kill(); });
+            (triggers.draws || []).forEach(function (tl) { tl.progress(1).kill(); });
+            // без JS-логики видна только первая схема (как в вёрстке)
+            (triggers.svgs || []).forEach(function (svg, j) { gsap.set(svg, { opacity: j === 0 ? 1 : 0 }); });
+          };
+        });
+      }
+
+      // МОБИЛКА (<=479): у каждого пункта своя схема под текстом — прорисовываем
+      // её, когда она появляется на экране
+      if (secItems.length) {
+        mm.add('(max-width: 479px) and ' + NO_MOTION, function () {
+          var alive = true;
+          var tls = [];
+          secItems.forEach(function (item) {
+            var img = item.querySelector('.tt-security_item-img');
+            if (!img) return;
+            (img.nodeName.toLowerCase() === 'svg' ? Promise.resolve(img) : inlineSvg(img)).then(function (svg) {
+              if (!svg || !alive) return;
+              tls.push(drawSvg(svg, svg.closest('.tt-security_item-visual') || svg, Object.assign({ start: 'top 85%' }, SEC_DRAW)));
+              ScrollTrigger.refresh();
+            });
+          });
+          return function () {
+            alive = false;
+            tls.forEach(function (tl) { if (tl.scrollTrigger) tl.scrollTrigger.kill(); tl.progress(1).kill(); });
+          };
+        });
+      }
+
       var cusImg = document.querySelector('.section_tt-custody img.tt-custody_graphic');
       mm.add(NO_MOTION, function () {
         var tls = [];
-        inlineSvg(secImg).then(function (svg) {
-          if (!svg) return;
-          tls.push(drawSvg(svg, svg.closest('.tt-security_graphic-card') || svg, {
-            start: 'top 80%', lineDuration: 1.2, stagger: 0.07, fillsAt: 0.9
-          }));
-          ScrollTrigger.refresh();
-        });
         inlineSvg(cusImg).then(function (svg) {
           if (!svg) return;
           tls.push(drawSvg(svg, svg.closest('.tt-custody_visual') || svg, {
