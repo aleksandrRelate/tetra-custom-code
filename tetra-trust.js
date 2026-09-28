@@ -8,7 +8,6 @@
 //     (Tetra.createReveal: слова из маски, кнопки сверху через маску)
 //   • схемы security и custody: SVG инлайнится из <img>, линии прорисовываются
 //     (stroke-dashoffset), заливки/подписи проявляются — custody слева направо
-//   • SECTION_TT-CUSTODY — scale 0.95 → 1 по скроллу (как trust на лендинге)
 //   • SECTION_TT-CANADA — фоновое видео (грузится у экрана) + параллакс
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
 //
@@ -465,25 +464,6 @@
           if (px.scrollTrigger) px.scrollTrigger.kill();
           px.kill();
           gsap.set(canadaLayers, { clearProps: 'transform' });
-        };
-      });
-    }
-
-    /* ------------------------------------------------------------------ *
-     * SECTION_TT-CUSTODY — тёмная секция въезжает scale 0.95 → 1 по скроллу
-     * (как SECTION_TRUST на лендинге, от 480px)
-     * ------------------------------------------------------------------ */
-    var ttCustody = document.querySelector('.section_tt-custody');
-    if (ttCustody) {
-      mm.add('(min-width: 480px) and ' + NO_MOTION, function () {
-        var sc = gsap.fromTo(ttCustody, { scale: 0.95 }, {
-          scale: 1, transformOrigin: '50% 50%', ease: 'none',
-          scrollTrigger: { trigger: ttCustody, start: 'top bottom', end: 'top 50%', scrub: true, invalidateOnRefresh: true }
-        });
-        return function () {
-          if (sc.scrollTrigger) sc.scrollTrigger.kill();
-          sc.kill();
-          gsap.set(ttCustody, { clearProps: 'transform' });
         };
       });
     }
