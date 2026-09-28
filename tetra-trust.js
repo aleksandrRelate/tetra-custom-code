@@ -10,7 +10,7 @@
 //     (stroke-dashoffset), заливки/подписи проявляются — custody слева направо
 //   • SECTION_TT-CANADA — фоновое видео (грузится у экрана) + параллакс
 //   • SECTION_TT-SECURITY — sticky-стопка пунктов (как benefits на Home)
-//   • SECTION_TT-TESTIMONIAL — Swiper (CDN), стрелки из вёрстки
+//   • SECTION_TT-TESTIMONIAL — Swiper (CDN); классы swiper/-wrapper/-slide — в Webflow, стрелки из вёрстки
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger + SplitText.
@@ -557,16 +557,21 @@
     }
 
     /* ------------------------------------------------------------------ *
-     * SECTION_TT-TESTIMONIAL — Swiper: .tt-testimonial_slider / _track / _slide,
-     * стрелки .tt-testimonial_arrow (is-prev — назад). Грузится с CDN.
+     * SECTION_TT-TESTIMONIAL — Swiper. Разметка Swiper задана в Webflow
+     * комбо-классами: .tt-testimonial_slider.swiper > .tt-testimonial_track.swiper-wrapper
+     * > .tt-testimonial_slide.swiper-slide; стрелки — .tt-testimonial_arrow
+     * (is-prev — назад), свои, не swiper-button-*. Swiper грузится с CDN.
      * ------------------------------------------------------------------ */
     var tSlider = document.querySelector('.section_tt-testimonial .tt-testimonial_slider');
     if (tSlider && tSlider.querySelectorAll('.tt-testimonial_slide').length > 1 && !T.off('swiper')) {
       loadSwiper().then(function () {
         var section = tSlider.closest('.section_tt-testimonial');
-        tSlider.classList.add('swiper');
-        tSlider.querySelector('.tt-testimonial_track').classList.add('swiper-wrapper');
-        tSlider.querySelectorAll('.tt-testimonial_slide').forEach(function (s) { s.classList.add('swiper-slide'); });
+        // фолбэк для страницы, опубликованной до появления классов в Webflow
+        if (!tSlider.classList.contains('swiper')) {
+          tSlider.classList.add('swiper');
+          tSlider.querySelector('.tt-testimonial_track').classList.add('swiper-wrapper');
+          tSlider.querySelectorAll('.tt-testimonial_slide').forEach(function (s) { s.classList.add('swiper-slide'); });
+        }
         new Swiper(tSlider, {
           slidesPerView: 1,
           spaceBetween: 32,
