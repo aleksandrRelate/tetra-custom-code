@@ -388,13 +388,15 @@
             }));
             // схема пункта включается, когда пункт закрепился наверху стопки
             // (его верх дошёл до top карточки со схемой — там же залипают пункты)
-            var stuckAt = getComputedStyle(secCard).top;
+            var stuckAt = (parseFloat(getComputedStyle(secCard).top) + 30) + 'px'; // на 30px раньше закрепа
             secItems.forEach(function (item, i) {
               triggers.push(ScrollTrigger.create({
                 trigger: item,
                 start: 'top ' + stuckAt,
                 end: 'bottom ' + stuckAt,
-                onToggle: function (self) { if (self.isActive) show(i); }
+                onToggle: function (self) { if (self.isActive) show(i); },
+                // скролл вверх: пункт ушёл вниз за линию — сразу схема предыдущего
+                onLeaveBack: function () { if (i) show(i - 1); }
               }));
             });
             ScrollTrigger.refresh();
