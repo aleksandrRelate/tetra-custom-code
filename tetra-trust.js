@@ -231,6 +231,15 @@
     if (window.SplitText && !T.off('reveal')) {
       mm.add(NO_MOTION, function () {
         var r = T.createReveal();
+        // строки из маски (SplitText mask), для текста карточек clients
+        var lineSplits = [];
+        function revealLines(tl, el, position) {
+          if (!el) return;
+          var sp = SplitText.create(el, { type: 'lines', mask: 'lines' });
+          lineSplits.push(sp);
+          gsap.set(sp.lines, { yPercent: 101 });
+          tl.to(sp.lines, { yPercent: 0, duration: 0.7, stagger: 0.08, force3D: true }, position);
+        }
         var timelineFor = r.timelineFor;
         var revealText = r.revealText;
         var revealButtons = r.revealButtons;
@@ -300,14 +309,18 @@
           var cliTl = timelineFor(clients.querySelector('.tt-split') || clients);
           badge(cliTl, clients);
           revealText(cliTl, clients.querySelector('.tt-clients_heading'), 0.08);
+          // карточки — по стаггеру одна за другой, текст в них — по строкам (маска на строку);
+          // на мобилке карточки в одну колонку — каждая по своему скроллу
           var singleColumn = window.matchMedia('(max-width: 479px)').matches;
-          clients.querySelectorAll('.tt-clients_card').forEach(function (card, index) {
-            var delay = singleColumn ? 0 : (index % 3) * 0.12;   // на мобилке карточки в одну колонку — без лесенки
-            var cardTl = timelineFor(card, 'top 90%');
+          var cards = clients.querySelectorAll('.tt-clients_card');
+          var gridTl = singleColumn ? null : timelineFor(clients.querySelector('.tt-clients_grid') || clients, 'top 85%');
+          cards.forEach(function (card, index) {
+            var delay = singleColumn ? 0 : index * 0.15;
+            var cardTl = gridTl || timelineFor(card, 'top 90%');
             gsap.set(card, { autoAlpha: 0, y: 32 });
             cardTl.to(card, { autoAlpha: 1, y: 0, duration: 0.7 }, delay);
-            revealText(cardTl, card.querySelector('.tt-clients_card-title'), delay + 0.12);
-            revealText(cardTl, card.querySelector('.tt-clients_card-text'), delay + 0.22);
+            revealLines(cardTl, card.querySelector('.tt-clients_card-title'), delay + 0.12);
+            revealLines(cardTl, card.querySelector('.tt-clients_card-text'), delay + 0.22);
           });
         }
 
@@ -326,7 +339,10 @@
           }
         }
 
-        return r.destroy;
+        return function () {
+          lineSplits.forEach(function (sp) { sp.revert(); });
+          r.destroy();
+        };
       });
     }
 
