@@ -6,6 +6,7 @@
 //   • reveal секций cadd-gap / cadd-fundamentals / cadd-practice
 //   • SECTION_CADD-PEG — непрерывный scroll-scrub + SplitText (Figma 12221:20524)
 //   • ленты CTA-платформ и логотипов консорциума (механика как у PARTNERS)
+//   • SECTION_CADD-NETWORKS — логотипы качаются по орбитам, hover — стоп + плашка
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger
 // (+ SplitText для reveal).
@@ -410,6 +411,116 @@
         });
 
         return r.destroy;
+      });
+    }
+
+    /* ------------------------------------------------------------------ *
+     * SECTION_CADD-NETWORKS — логотипы сетей плавают по своим орбитам
+     *  • каждый качается по своей орбите вокруг CADD (±15–18°, свой период,
+     *    соседи — в разные стороны); пунктир к центру поворачивается следом
+     *  • hover — логотип плавно останавливается, чуть увеличивается и над ним
+     *    появляется плашка с названием сети (фидбэк Sept 21, «5. Networks»);
+     *    на тач-экранах — по тапу
+     *  • тикер крутится, только пока секция на экране
+     * ------------------------------------------------------------------ */
+    var netDiagram = document.querySelector('.section_cadd-networks .cadd-networks_diagram');
+    if (netDiagram && !T.off('networks')) {
+      var NET_NAMES = { solana: 'Solana', ethereum: 'Ethereum', blue: 'Base', t: 'Tempo' };
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var nets = gsap.utils.toArray(netDiagram.querySelectorAll('.cadd-networks_badge')).map(function (badge, i) {
+        var key = (badge.className.match(/\bis-([a-z0-9-]+)/) || [])[1] || '';
+        var alt = badge.getAttribute('alt') || '';
+        var name = NET_NAMES[key] || (alt && alt !== 'Network' ? alt : '');
+        var label = null;
+        if (name) {
+          label = document.createElement('div');
+          label.className = 'cadd-networks_label';
+          label.textContent = name;
+          label.setAttribute('aria-hidden', 'true');
+          Object.assign(label.style, {
+            position: 'absolute', zIndex: '5', pointerEvents: 'none', whiteSpace: 'nowrap',
+            padding: '0.375rem 0.625rem', borderRadius: '0.25rem',
+            background: '#fff', border: '1px solid #ebedf4', color: '#090e13',
+            fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '450',
+            visibility: 'hidden', opacity: '0'
+          });
+          netDiagram.appendChild(label);
+        }
+        return {
+          badge: badge,
+          line: key ? netDiagram.querySelector('.cadd-networks_line.is-' + key) : null,
+          label: label,
+          amp: (15 + (i % 3) * 1.5) * Math.PI / 180,   // размах качания, рад
+          period: 10 + (i % 4) * 1.4,                  // сек на полный цикл
+          dir: i % 2 ? -1 : 1,                          // соседи — в разные стороны
+          t: 0, factor: 1, bx: 0, by: 0, r: 0, base: 0, x: 0, y: 0
+        };
+      });
+
+      var cx = 0, cy = 0;
+      function measureNets() {
+        var anyLine = netDiagram.querySelector('.cadd-networks_line');
+        cx = anyLine ? anyLine.offsetLeft : netDiagram.offsetWidth / 2;
+        cy = anyLine ? anyLine.offsetTop : netDiagram.offsetHeight / 2;
+        nets.forEach(function (n) {
+          n.bx = n.badge.offsetLeft + n.badge.offsetWidth / 2 - cx;
+          n.by = n.badge.offsetTop + n.badge.offsetHeight / 2 - cy;
+          n.r = Math.sqrt(n.bx * n.bx + n.by * n.by);
+          n.base = Math.atan2(n.by, n.bx);
+        });
+      }
+      function placeNet(n) {
+        var a = n.base + n.dir * n.amp * Math.sin(n.t / n.period * Math.PI * 2);
+        n.x = n.r * Math.cos(a) - n.bx;
+        n.y = n.r * Math.sin(a) - n.by;
+        gsap.set(n.badge, { x: n.x, y: n.y });
+        if (n.line) gsap.set(n.line, { rotation: a * 180 / Math.PI });
+      }
+      function tickNets(time, dt) {
+        var sec = Math.min(dt, 100) / 1000;
+        nets.forEach(function (n) {
+          if (!n.factor) return;
+          n.t += sec * n.factor;
+          placeNet(n);
+        });
+      }
+      measureNets();
+      window.addEventListener('resize', function () { measureNets(); nets.forEach(placeNet); });
+      if (!reduce) {
+        ScrollTrigger.create({
+          trigger: netDiagram, start: 'top bottom', end: 'bottom top',
+          onToggle: function (self) {
+            if (self.isActive) gsap.ticker.add(tickNets); else gsap.ticker.remove(tickNets);
+          }
+        });
+      }
+
+      function showNet(n) {
+        gsap.to(n, { factor: 0, duration: 0.5, ease: 'power2.out', overwrite: true });
+        n.badge.style.zIndex = '4';
+        gsap.to(n.badge, { scale: 1.08, duration: 0.4, ease: 'power2.out' });
+        if (!n.label) return;
+        // плашка — над логотипом, по центру; позиция на момент остановки
+        var w = n.badge.offsetWidth;
+        n.label.style.left = (n.badge.offsetLeft + w / 2 + n.x) + 'px';
+        n.label.style.top = (n.badge.offsetTop + n.y - w * 0.04) + 'px';
+        gsap.fromTo(n.label, { autoAlpha: 0, xPercent: -50, yPercent: -100, y: 6 },
+          { autoAlpha: 1, y: -8, duration: 0.35, ease: 'power2.out', overwrite: true });
+      }
+      function hideNet(n) {
+        gsap.to(n, { factor: 1, duration: 0.8, ease: 'power2.inOut', overwrite: true });
+        gsap.to(n.badge, { scale: 1, duration: 0.4, ease: 'power2.out', onComplete: function () { n.badge.style.zIndex = ''; } });
+        if (n.label) gsap.to(n.label, { autoAlpha: 0, y: 0, duration: 0.25, ease: 'power1.out', overwrite: true });
+      }
+      var tapped = null;
+      nets.forEach(function (n) {
+        n.badge.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') showNet(n); });
+        n.badge.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hideNet(n); });
+        n.badge.addEventListener('click', function () {
+          if (window.matchMedia('(hover: hover)').matches) return;
+          if (tapped && tapped !== n) hideNet(tapped);
+          if (tapped === n) { hideNet(n); tapped = null; } else { showNet(n); tapped = n; }
+        });
       });
     }
 
