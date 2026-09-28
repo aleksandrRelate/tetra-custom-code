@@ -358,7 +358,7 @@
       var SEC_SPEED = 1.5; // схемы security проигрываются в 1.5 раза быстрее
 
       // ДЕСКТОП (>=480): в закреплённой карточке 5 схем стопкой; активный пункт
-      // списка (его верх пересёк 60% экрана) показывает свою схему — кроссфейд,
+      // списка (закрепился наверху стопки) показывает свою схему — кроссфейд,
       // при первом показе схема прорисовывается
       if (secCard && secItems.length) {
         mm.add('(min-width: 480px) and ' + NO_MOTION, function () {
@@ -386,11 +386,14 @@
               trigger: secCard, start: 'top 80%', once: true,
               onEnter: function () { if (current === -1) show(0); }
             }));
+            // схема пункта включается, когда пункт закрепился наверху стопки
+            // (его верх дошёл до top карточки со схемой — там же залипают пункты)
+            var stuckAt = getComputedStyle(secCard).top;
             secItems.forEach(function (item, i) {
               triggers.push(ScrollTrigger.create({
                 trigger: item,
-                start: 'top 60%',
-                end: 'bottom 60%',
+                start: 'top ' + stuckAt,
+                end: 'bottom ' + stuckAt,
                 onToggle: function (self) { if (self.isActive) show(i); }
               }));
             });
@@ -457,6 +460,12 @@
         var card = document.querySelector('.section_tt-security .tt-security_graphic-card');
         var top = card && getComputedStyle(card).display !== 'none' ? getComputedStyle(card).top : '0px';
         var tw = [];
+        // ScrollTrigger считает позиции по «естественной» вёрстке: на время
+        // refresh снимаем sticky, иначе залипший пункт даёт неверный start
+        function unstick() { stackItems.forEach(function (item) { item.style.position = ''; item.style.top = ''; }); }
+        function stick() { stackItems.forEach(function (item) { item.style.position = 'sticky'; item.style.top = top; }); }
+        ScrollTrigger.addEventListener('refreshInit', unstick);
+        ScrollTrigger.addEventListener('refresh', stick);
         stackItems.forEach(function (item, i) {
           item.style.position = 'sticky';
           item.style.top = top;
@@ -473,6 +482,8 @@
           }));
         });
         return function () {
+          ScrollTrigger.removeEventListener('refreshInit', unstick);
+          ScrollTrigger.removeEventListener('refresh', stick);
           tw.forEach(function (t) { if (t.scrollTrigger) t.scrollTrigger.kill(); t.kill(); });
           stackItems.forEach(function (item) {
             item.style.position = ''; item.style.top = '';
