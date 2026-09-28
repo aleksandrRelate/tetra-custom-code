@@ -8,7 +8,6 @@
 //     (Tetra.createReveal: слова из маски, кнопки сверху через маску)
 //   • схемы security и custody: SVG инлайнится из <img>, линии прорисовываются
 //     (stroke-dashoffset), заливки/подписи проявляются — custody слева направо
-//   • SECTION_TT-INTRO — pin + пословная заливка цветом (как intro лендинга)
 //   • SECTION_TT-CUSTODY — scale 0.95 → 1 по скроллу (как trust на лендинге)
 //   • SECTION_TT-CANADA — фоновое видео (грузится у экрана) + параллакс
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
@@ -224,6 +223,7 @@
         if (intro) {
           var introTl = timelineFor(intro.querySelector('.tt-intro_layout') || intro);
           badge(introTl, intro);
+          revealText(introTl, intro.querySelector('.tt-heading-40'), 0.08);
           revealText(timelineFor(intro.querySelector('.tt-intro_text'), 'top 90%'), intro.querySelector('.tt-intro_text'), 0);
         }
 
@@ -465,48 +465,6 @@
           if (px.scrollTrigger) px.scrollTrigger.kill();
           px.kill();
           gsap.set(canadaLayers, { clearProps: 'transform' });
-        };
-      });
-    }
-
-    /* ------------------------------------------------------------------ *
-     * SECTION_TT-INTRO — как SECTION_INTRO лендинга (tetra-page.js п.2):
-     * слова заголовка выезжают из маски, секция пинится на 150vh и слова
-     * по скроллу заливаются цветом muted → ink
-     * ------------------------------------------------------------------ */
-    var ttIntro = document.querySelector('.section_tt-intro');
-    var ttIntroHeading = ttIntro && ttIntro.querySelector('.tt-heading-40');
-    if (ttIntroHeading && window.SplitText && !T.off('intro')) {
-      var rootStyle = getComputedStyle(document.documentElement);
-      var inkColor = rootStyle.getPropertyValue('--_tetra-tokens---color-ink').trim() || '#090e13';
-      var mutedColor = rootStyle.getPropertyValue('--_tetra-tokens---color-muted').trim() || '#9E9E9E';
-      mm.add(NO_MOTION, function () {
-        var split = SplitText.create(ttIntroHeading, { type: 'lines,words', linesClass: 'section-reveal-line' });
-        gsap.set(split.words, { color: mutedColor });
-        var enter = gsap.from(split.words, {
-          yPercent: 101, duration: 0.555, stagger: 0.05, ease: 'power4.out',
-          immediateRender: true, lazy: false,
-          scrollTrigger: { trigger: ttIntroHeading, start: 'top 80%', once: true }
-        });
-        var fillTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: ttIntro,
-            start: 'top top',
-            end: '+=150%',
-            pin: true,
-            scrub: 0.5,
-            anticipatePin: 1,
-            refreshPriority: 1,
-            invalidateOnRefresh: true
-          }
-        });
-        fillTl.to(split.words, { color: inkColor, ease: 'none', duration: 0.6, stagger: 1 });
-        return function () {
-          if (enter.scrollTrigger) enter.scrollTrigger.kill();
-          enter.kill();
-          if (fillTl.scrollTrigger) fillTl.scrollTrigger.kill();
-          fillTl.kill();
-          split.revert();
         };
       });
     }
