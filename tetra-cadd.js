@@ -451,7 +451,7 @@
           line: key ? netDiagram.querySelector('.cadd-networks_line.is-' + key) : null,
           label: label,
           amp: (15 + (i % 3) * 1.5) * Math.PI / 180,   // размах качания, рад
-          period: 10 + (i % 4) * 1.4,                  // сек на полный цикл
+          period: 20 + (i % 4) * 2.8,                  // сек на полный цикл
           dir: i % 2 ? -1 : 1,                          // соседи — в разные стороны
           t: 0, factor: 1, bx: 0, by: 0, r: 0, base: 0, x: 0, y: 0
         };
