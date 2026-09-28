@@ -9,6 +9,8 @@
 //   • схемы security и custody: SVG инлайнится из <img>, линии прорисовываются
 //     (stroke-dashoffset), заливки/подписи проявляются — custody слева направо
 //   • SECTION_TT-CANADA — фоновое видео (грузится у экрана) + параллакс
+//   • SECTION_TT-SECURITY — sticky-стопка пунктов (как benefits на Home)
+//   • SECTION_TT-TESTIMONIAL — Swiper (CDN), стрелки из вёрстки
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger + SplitText.
@@ -18,6 +20,26 @@
   if (!T) { console.warn('[tetra-trust] window.Tetra не найден — подключи tetra-core.js первым'); return; }
 
   var NO_MOTION = '(prefers-reduced-motion: no-preference)';
+
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+  var swiperPending = null;
+  function loadSwiper() {
+    if (window.Swiper) return Promise.resolve();
+    if (swiperPending) return swiperPending;
+    swiperPending = new Promise(function (resolve, reject) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = SWIPER_CSS;
+      document.head.appendChild(link);
+      var script = document.createElement('script');
+      script.src = SWIPER_JS;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return swiperPending;
+  }
 
   // <img src="….svg"> → инлайн <svg> с теми же классами (чтобы рисовать линии)
   function inlineSvg(img) {
@@ -294,11 +316,11 @@
         if (testi) {
           var tTl = timelineFor(testi.querySelector('.tt-testimonial_layout') || testi);
           badge(tTl, testi);
-          revealText(tTl, testi.querySelector('.tt-quote'), 0.08);
-          var bottom = testi.querySelector('.tt-testimonial_bottom');
+          testi.querySelectorAll('.tt-quote').forEach(function (q) { revealText(tTl, q, 0.08); });
+          var bottom = testi.querySelector('.tt-testimonial_nav');
           if (bottom) {
             var bTl = timelineFor(bottom, 'top 95%');
-            var bits = bottom.querySelectorAll('.tt-testimonial_author > *, .tt-testimonial_arrow');
+            var bits = testi.querySelectorAll('.tt-testimonial_author > *, .tt-testimonial_arrow');
             gsap.set(bits, { autoAlpha: 0, y: 16 });
             bTl.to(bits, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0);
           }
@@ -317,6 +339,7 @@
       var secCard = secSection && secSection.querySelector('.tt-security_graphic-card');
       var secItems = secSection ? gsap.utils.toArray(secSection.querySelectorAll('.tt-security_item')) : [];
       var SEC_DRAW = { lineDuration: 1.2, stagger: 0.04, fillsAt: 0.8 };
+      var SEC_SPEED = 1.5; // схемы security проигрываются в 1.5 раза быстрее
 
       // ДЕСКТОП (>=480): в закреплённой карточке 5 схем стопкой; активный пункт
       // списка (его верх пересёк 60% экрана) показывает свою схему — кроссфейд,
@@ -332,13 +355,13 @@
             if (!alive) return;
             svgs = svgs.filter(Boolean);
             if (!svgs.length) return;
-            var draws = svgs.map(function (svg) { return drawSvg(svg, null, SEC_DRAW); });
+            var draws = svgs.map(function (svg) { return drawSvg(svg, null, SEC_DRAW).timeScale(SEC_SPEED); });
             var current = -1;
             function show(i) {
               if (i === current || !svgs[i]) return;
               current = i;
               svgs.forEach(function (svg, j) {
-                gsap.to(svg, { opacity: j === i ? 1 : 0, duration: 0.5, ease: 'power1.inOut', overwrite: true });
+                gsap.to(svg, { opacity: j === i ? 1 : 0, duration: 0.5 / SEC_SPEED, ease: 'power1.inOut', overwrite: true });
               });
               if (!draws[i].progress()) draws[i].play(0);
             }
@@ -380,7 +403,7 @@
             if (!img) return;
             (img.nodeName.toLowerCase() === 'svg' ? Promise.resolve(img) : inlineSvg(img)).then(function (svg) {
               if (!svg || !alive) return;
-              tls.push(drawSvg(svg, svg.closest('.tt-security_item-visual') || svg, Object.assign({ start: 'top 85%' }, SEC_DRAW)));
+              tls.push(drawSvg(svg, svg.closest('.tt-security_item-visual') || svg, Object.assign({ start: 'top 85%' }, SEC_DRAW)).timeScale(SEC_SPEED));
               ScrollTrigger.refresh();
             });
           });
@@ -403,6 +426,42 @@
         });
         return function () {
           tls.forEach(function (tl) { if (tl.scrollTrigger) tl.scrollTrigger.kill(); tl.progress(1).kill(); });
+        };
+      });
+    }
+
+    /* ------------------------------------------------------------------ *
+     * SECTION_TT-SECURITY — sticky-стопка пунктов, как .benefits_item на Home:
+     * пункт залипает, следующий наезжает сверху, предыдущий гаснет до 0.18.
+     * На десктопе залипают на уровне карточки со схемой (её top), на мобилке — к верху.
+     * ------------------------------------------------------------------ */
+    var stackItems = gsap.utils.toArray('.section_tt-security .tt-security_item');
+    if (stackItems.length > 1 && !T.off('secstack')) {
+      mm.add('(min-width: 1px)', function () {
+        var card = document.querySelector('.section_tt-security .tt-security_graphic-card');
+        var top = card && getComputedStyle(card).display !== 'none' ? getComputedStyle(card).top : '0px';
+        var tw = [];
+        stackItems.forEach(function (item, i) {
+          item.style.position = 'sticky';
+          item.style.top = top;
+          if (i === stackItems.length - 1) return;
+          tw.push(gsap.to(item.children, {
+            opacity: 0.18, scale: 0.985, transformOrigin: '50% 0%', ease: 'none',
+            scrollTrigger: {
+              trigger: stackItems[i + 1],
+              start: 'top center',
+              end: 'top ' + top,
+              scrub: true,
+              invalidateOnRefresh: true
+            }
+          }));
+        });
+        return function () {
+          tw.forEach(function (t) { if (t.scrollTrigger) t.scrollTrigger.kill(); t.kill(); });
+          stackItems.forEach(function (item) {
+            item.style.position = ''; item.style.top = '';
+            gsap.set(item.children, { clearProps: 'opacity,transform' });
+          });
         };
       });
     }
@@ -466,6 +525,31 @@
           gsap.set(canadaLayers, { clearProps: 'transform' });
         };
       });
+    }
+
+    /* ------------------------------------------------------------------ *
+     * SECTION_TT-TESTIMONIAL — Swiper: .tt-testimonial_slider / _track / _slide,
+     * стрелки .tt-testimonial_arrow (is-prev — назад). Грузится с CDN.
+     * ------------------------------------------------------------------ */
+    var tSlider = document.querySelector('.section_tt-testimonial .tt-testimonial_slider');
+    if (tSlider && tSlider.querySelectorAll('.tt-testimonial_slide').length > 1 && !T.off('swiper')) {
+      loadSwiper().then(function () {
+        var section = tSlider.closest('.section_tt-testimonial');
+        tSlider.classList.add('swiper');
+        tSlider.querySelector('.tt-testimonial_track').classList.add('swiper-wrapper');
+        tSlider.querySelectorAll('.tt-testimonial_slide').forEach(function (s) { s.classList.add('swiper-slide'); });
+        new Swiper(tSlider, {
+          slidesPerView: 1,
+          spaceBetween: 32,
+          speed: 700,
+          rewind: true,
+          grabCursor: true,
+          navigation: {
+            prevEl: section.querySelector('.tt-testimonial_arrow.is-prev'),
+            nextEl: section.querySelector('.tt-testimonial_arrow:not(.is-prev)')
+          }
+        });
+      })['catch'](function () { /* нет сети — виден первый слайд */ });
     }
   }
 

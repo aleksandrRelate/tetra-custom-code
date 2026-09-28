@@ -29,6 +29,10 @@
 }
 .section_tt-canada .tt-canada_video.is-playing { opacity: 1; }
 
+/* ===== TESTIMONIAL — Swiper-стили грузятся позже webflow.css и ставят слайду
+   display:block; возвращаем колонку (цитата сверху, автор внизу) ===== */
+.tt-testimonial_slider .tt-testimonial_slide.swiper-slide { display: flex; }
+
 @media (prefers-reduced-motion: reduce) {
   .section_tt-hero .tt-hero_shield { animation: none !important; }
   .section_tt-canada .tt-canada_video { display: none; }
