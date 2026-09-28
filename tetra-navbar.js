@@ -126,23 +126,35 @@
         navRoot.classList.toggle('is-theme-light', key === 'black');
       }
       var navSecs = gsap.utils.toArray('[navbar-color]');
+      // Закреплённая (pin) секция живёт внутри .pin-spacer, который на время
+      // pin длиннее самой секции — считаем её зону по спейсеру, иначе на
+      // закреплённом участке ни одна секция не «активна» и при скролле вверх
+      // навбар застревает в теме следующей секции (CADD peg).
+      function zoneOf(sec) {
+        var p = sec.parentElement;
+        return p && p.classList.contains('pin-spacer') ? p : sec;
+      }
+      function syncNav() {
+        var y = window.scrollY + navOffset + 1;
+        for (var i = navSecs.length - 1; i >= 0; i--) {
+          var r = zoneOf(navSecs[i]).getBoundingClientRect();
+          var top = r.top + window.scrollY;
+          if (y >= top && y < top + r.height) { applyNav(navSecs[i].getAttribute('navbar-color')); return; }
+        }
+      }
       navSecs.forEach(function (sec) {
         ScrollTrigger.create({
           trigger: sec,
           start: 'top ' + navOffset + 'px',
           end: 'bottom ' + navOffset + 'px',
           refreshPriority: -1,
-          onToggle: function (self) { if (self.isActive) applyNav(sec.getAttribute('navbar-color')); }
+          onToggle: function (self) {
+            if (self.isActive) applyNav(sec.getAttribute('navbar-color'));
+            else syncNav(); // ушли из секции в «ничью» зону (спейсер pin) — берём секцию под линией
+          }
         });
       });
-      ScrollTrigger.addEventListener('refreshInit', function () {
-        var y = window.scrollY + navOffset + 1;
-        for (var i = navSecs.length - 1; i >= 0; i--) {
-          var r = navSecs[i].getBoundingClientRect();
-          var top = r.top + window.scrollY;
-          if (y >= top && y < top + r.height) { applyNav(navSecs[i].getAttribute('navbar-color')); break; }
-        }
-      });
+      ScrollTrigger.addEventListener('refreshInit', syncNav);
     }
   }
 
