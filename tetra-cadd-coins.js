@@ -15,6 +15,7 @@ import { TessellateModifier } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/e
     depthStep: 1.68,       // dense in projection, separated in 3D throughout the flip
     drift: 0.105,         // world units / second
     turnPeriod: 42,       // nominal spin period, with the spatial wave added below
+    redStart: -3.9,       // стартовая x красной монеты (−3.9 ≈ вторая слева; было 1.3 — правее центра)
     red: 0xff061c,
     silver: 0x858a8b,
   };
@@ -343,8 +344,8 @@ import { TessellateModifier } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/e
   function place(t) {
     const span = coins.length * CFG.spacing;
     coins.forEach(({ pivot, coin }, i) => {
-      // Start on the reference composition: the red coin sits just right of centre.
-      const x = modulo(1.3 + i * CFG.spacing + t * CFG.drift + span / 2, span) - span / 2;
+      // Start: the red coin (i = 0) sits second from the left edge, then drifts right.
+      const x = modulo(CFG.redStart + i * CFG.spacing + t * CFG.drift + span / 2, span) - span / 2;
       const y = 0.04 * x + 0.07 - 0.08 * Math.exp(-((x / .65) ** 2));
       pivot.position.set(x, y, x * CFG.depthStep / CFG.spacing);
       // One coordinated wave replaces competing rotations around unrelated axes.
