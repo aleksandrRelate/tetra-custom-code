@@ -46,3 +46,18 @@
     backdrop-filter: none;
   }
 }
+
+/* ===== mobile menu (<=479px) — Figma «Mobile menu — v3 Fullscreen compact»
+   (12410:148): белая шторка, крупные пункты с разделителями; текущая
+   страница (Webflow ставит .w--current) — 100% + красная точка, остальные 40%. */
+@media screen and (max-width: 479px) {
+  .nav-link.is-mob-item { opacity: 0.4; }
+  .nav-link.is-mob-item.w--current { opacity: 1; }
+  .nav-link.is-mob-item.w--current .mob-item_dot { display: block; }
+  /* маски выезда (tetra-navbar.js) — на всю ширину, иначе разделители
+     пунктов и кнопка сужаются до ширины текста */
+  .nav-menu-mobile .mob-menu-mask { width: 100%; }
+  /* меню открыто: в шапке остаётся только крестик на сером квадрате */
+  .mobile-nav-bttn-wrapper:has(.mobile-nav-bttn.active) { background-color: #f6f6f6; }
+  .mobile-nav-bttn-wrapper:has(.mobile-nav-bttn.active) .button { display: none; }
+}

@@ -333,10 +333,10 @@
     const navLogo = document.querySelector(".navbar-container .navbar-logo");
     let logoColorBefore = null;
 
-    function whitenLogo() {
+    function darkenLogo() { // шторка меню белая — лого тёмное
       if (!navLogo || logoColorBefore !== null) return;
       logoColorBefore = navLogo.style.color;
-      navLogo.style.color = "#FFFFFF";
+      navLogo.style.color = "#090E13";
     }
 
     function restoreLogo() {
@@ -432,7 +432,7 @@
       mobileNavBtn.classList.add("active");
       // Навбар раскрывается (баннер выезжает), шторка компенсирует сдвиг.
       if (navbarApi) navbarApi.openWith(mobileMenu);
-      whitenLogo();
+      darkenLogo();
       lockPageScroll();
       gsap.set(mobileMenu, { pointerEvents: "auto" });
 
