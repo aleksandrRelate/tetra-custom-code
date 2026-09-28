@@ -419,32 +419,22 @@
      *  • каждый качается по своей орбите вокруг CADD (±15–18°, свой период,
      *    соседи — в разные стороны); пунктир к центру поворачивается следом
      *  • hover — логотип плавно останавливается, чуть увеличивается и над ним
-     *    появляется плашка с названием сети (фидбэк Sept 21, «5. Networks»);
+     *    появляется плашка с названием сети из вёрстки (фидбэк Sept 21, «5. Networks»);
      *    на тач-экранах — по тапу
      *  • тикер крутится, только пока секция на экране
      * ------------------------------------------------------------------ */
     var netDiagram = document.querySelector('.section_cadd-networks .cadd-networks_diagram');
     if (netDiagram && !T.off('networks')) {
-      var NET_NAMES = { solana: 'Solana', ethereum: 'Ethereum', blue: 'Base', t: 'Tempo' };
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // плашки с названиями — в вёрстке Webflow (.cadd-networks_label.is-<сеть>,
+      // стоят над своим логотипом); тут прячем и дальше ведём за логотипом
       var nets = gsap.utils.toArray(netDiagram.querySelectorAll('.cadd-networks_badge')).map(function (badge, i) {
         var key = (badge.className.match(/\bis-([a-z0-9-]+)/) || [])[1] || '';
-        var alt = badge.getAttribute('alt') || '';
-        var name = NET_NAMES[key] || (alt && alt !== 'Network' ? alt : '');
-        var label = null;
-        if (name) {
-          label = document.createElement('div');
-          label.className = 'cadd-networks_label';
-          label.textContent = name;
+        var label = key ? netDiagram.querySelector('.cadd-networks_label.is-' + key) : null;
+        if (label) {
           label.setAttribute('aria-hidden', 'true');
-          Object.assign(label.style, {
-            position: 'absolute', zIndex: '5', pointerEvents: 'none', whiteSpace: 'nowrap',
-            padding: '0.375rem 0.625rem', borderRadius: '0.25rem',
-            background: '#fff', border: '1px solid #ebedf4', color: '#090e13',
-            fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '450',
-            visibility: 'hidden', opacity: '0'
-          });
-          netDiagram.appendChild(label);
+          // translate(-50%, -100%) из Webflow переводим в xPercent/yPercent GSAP
+          gsap.set(label, { x: 0, y: 0, xPercent: -50, yPercent: -100, autoAlpha: 0 });
         }
         return {
           badge: badge,
@@ -501,11 +491,10 @@
         gsap.to(n.badge, { scale: 1.08, duration: 0.4, ease: 'power2.out' });
         if (!n.label) return;
         // плашка — над логотипом, по центру; позиция на момент остановки
-        var w = n.badge.offsetWidth;
-        n.label.style.left = (n.badge.offsetLeft + w / 2 + n.x) + 'px';
-        n.label.style.top = (n.badge.offsetTop + n.y - w * 0.04) + 'px';
-        gsap.fromTo(n.label, { autoAlpha: 0, xPercent: -50, yPercent: -100, y: 6 },
-          { autoAlpha: 1, y: -8, duration: 0.35, ease: 'power2.out', overwrite: true });
+        n.label.style.left = (n.badge.offsetLeft + n.badge.offsetWidth / 2 + n.x) + 'px';
+        n.label.style.top = (n.badge.offsetTop + n.y) + 'px';
+        gsap.fromTo(n.label, { autoAlpha: 0, y: 0 },
+          { autoAlpha: 1, y: -10, duration: 0.35, ease: 'power2.out', overwrite: true });
       }
       function hideNet(n) {
         gsap.to(n, { factor: 1, duration: 0.8, ease: 'power2.inOut', overwrite: true });
