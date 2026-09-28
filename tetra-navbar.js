@@ -515,7 +515,9 @@
       isMenuOpen ? closeMenu() : openMenu();
     });
 
-    mobileMenu.querySelectorAll(".nav-link, .button-main").forEach((el) => {
+    // .is-nav-menu-bttn — «Contact Us» (якорь #contact): закрываем меню и
+    // снимаем блокировку скролла до перехода по якорю
+    mobileMenu.querySelectorAll(".nav-link, .button-main, .is-nav-menu-bttn").forEach((el) => {
       el.addEventListener("click", function () {
         if (isMenuOpen) closeMenu();
       });
