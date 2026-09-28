@@ -35,6 +35,12 @@
   background-color: rgba(37, 25, 21, 0.06);
 }
 
+/* --- мобильное меню открыто (класс ставит tetra-navbar.js): шторка белая,
+   лого тёмное независимо от темы секции под ним --- */
+.navbar.is-menu-open .navbar-container .navbar-logo-svg {
+  color: var(--_tetra-tokens---color-dark, #090e13);
+}
+
 /* ===== mobile scroll performance (<=479px) ===== */
 @media screen and (max-width: 479px) {
   /* backdrop-filter внутри фиксированной шапки — главный тормоз скролла на

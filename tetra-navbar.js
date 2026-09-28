@@ -329,20 +329,18 @@
       }
     }
 
-    /* ---------- Лого ---------- */
-    const navLogo = document.querySelector(".navbar-container .navbar-logo");
-    let logoColorBefore = null;
+    /* ---------- Лого ----------
+     * Шторка меню белая, поэтому пока меню открыто лого тёмное при любой теме
+     * навбара (в т.ч. над тёмной секцией). Цвет задаёт tetra-navbar.css по
+     * классу .is-menu-open на .navbar — он сильнее правил темы. */
+    const navBar = document.querySelector(".navbar");
 
-    function darkenLogo() { // шторка меню белая — лого тёмное
-      if (!navLogo || logoColorBefore !== null) return;
-      logoColorBefore = navLogo.style.color;
-      navLogo.style.color = "#090E13";
+    function darkenLogo() {
+      if (navBar) navBar.classList.add("is-menu-open");
     }
 
     function restoreLogo() {
-      if (!navLogo || logoColorBefore === null) return;
-      navLogo.style.color = logoColorBefore;
-      logoColorBefore = null;
+      if (navBar) navBar.classList.remove("is-menu-open");
     }
 
     function preventScroll(event) {
