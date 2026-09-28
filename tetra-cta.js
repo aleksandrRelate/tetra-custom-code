@@ -30,15 +30,15 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * Компонент CONTACT FORM (.section_cadd-contact, якорь #contact) — есть на
+   * Компонент CONTACT FORM (.section_contact, якорь #contact) — есть на
    * всех страницах. В Webflow кнопка — стандартный Form Button
-   * (input[type=submit]) с классами .button.cadd-contact_button; input не
+   * (input[type=submit]) с классами .button.contact_button; input не
    * может содержать разметку, поэтому меняем его на <button type=submit> с
    * теми же классами + текст + шеврон, как у остальных кнопок. Hover-reveal
    * (tetra-page.js) подхватывает её сам. Без GSAP — работает всегда.
    * ------------------------------------------------------------------ */
   function upgradeSubmit() {
-    document.querySelectorAll('.section_cadd-contact input[type="submit"]').forEach(function (input) {
+    document.querySelectorAll('.section_contact input[type="submit"]').forEach(function (input) {
       var btn = document.createElement('button');
       btn.type = 'submit';
       btn.className = input.className;
