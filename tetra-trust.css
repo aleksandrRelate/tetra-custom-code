@@ -33,6 +33,28 @@
    display:block; возвращаем колонку (цитата сверху, автор внизу) ===== */
 .tt-testimonial_slider .tt-testimonial_slide.swiper-slide { display: flex; }
 
+/* ===== CTA (общий компонент с Home) — на Trust заголовок крупнее здания
+   (фидбэк Sep 28, T8; Figma 12310:35410 — 72/76 Book, мобилка — 44).
+   Файл грузится только на Trust, поэтому Home не затрагивается. ===== */
+.cta_heading {
+  max-width: 33.4375rem;
+  font-size: 4.5rem;
+  line-height: 4.75rem;
+  font-weight: 450;
+  letter-spacing: -0.1125rem;
+}
+@media screen and (max-width: 991px) {
+  .cta_heading { font-size: 3.5rem; line-height: 3.75rem; letter-spacing: -0.0875rem; }
+}
+@media screen and (max-width: 479px) {
+  .cta_heading {
+    max-width: 19.7rem;
+    font-size: 2.6474rem;
+    line-height: 2.7937rem;
+    letter-spacing: -0.0662rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .section_tt-hero .tt-hero_shield { animation: none !important; }
   .section_tt-canada .tt-canada_video { display: none; }
