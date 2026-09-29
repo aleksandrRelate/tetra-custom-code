@@ -158,7 +158,8 @@
      * ------------------------------------------------------------------ */
     var peg = document.querySelector('.section_cadd-peg');
     if (peg && window.SplitText && !T.off('peg')) {
-      mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', function () {
+      // на всех ширинах, мобилка — так же, как десктоп
+      mm.add('(prefers-reduced-motion: no-preference)', function () {
         var label = peg.querySelector('.cadd-peg_label');
         var loonie = peg.querySelector('.cadd-peg_loonie');
         var coin = peg.querySelector('.cadd-peg_coin');
@@ -174,7 +175,11 @@
         var labelSplit = SplitText.create(label, { type: 'words' });
 
         // стартовое состояние надписи: крупная, по центру экрана
-        gsap.set(label, { y: rem(20), scale: 5.625, opacity: 1, transformOrigin: '50% 50%' });
+        // масштаб — до 5.625 (180px на десктопе), но не шире 92% экрана (мобилка)
+        function startScale() {
+          return Math.min(5.625, window.innerWidth * 0.92 / (label.offsetWidth || 1));
+        }
+        gsap.set(label, { y: rem(20), scale: startScale(), opacity: 1, transformOrigin: '50% 50%' });
 
         // 1) слова надписи — пока секция въезжает
         var intro = gsap.fromTo(labelSplit.words,
