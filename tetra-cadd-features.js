@@ -11,10 +11,10 @@
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ab657c928385fd73a637753_Phone%20%E2%80%94%20Send.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6aba6d2ca4c5761450244efd_Phone%20%E2%80%94%20Hold%20v2.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ab657ca28385fd73a637778_Phone%20%E2%80%94%20Swap.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6aba6d2cbb9c60a1503c5c83_Phone%20%E2%80%94%20Spend%20v2.avif'
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ff6b62555eb5f18d0a_Phone%20%E2%80%94%20Send.avif',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffe48f3c140d37f28e_Phone%20%E2%80%94%20Hold.avif',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffab80e537b6836e50_Phone%20%E2%80%94%20Swap.avif',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffa92eaa6729934682_Phone%20%E2%80%94%20Spend.avif'
   ];
 
   function init() {
