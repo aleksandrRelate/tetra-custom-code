@@ -178,12 +178,8 @@
       // ширина одного набора = расстояние между оригиналом и его клоном
       return nodes[0][0].getBoundingClientRect().left - nodes[0][1].getBoundingClientRect().left;
     }
-    function jump(dx) {
-      var snap = list.style.scrollSnapType;
-      list.style.scrollSnapType = 'none';
-      list.scrollLeft += dx;
-      list.style.scrollSnapType = snap;
-    }
+    // перестановка в средний набор — без анимации, снап не трогаем
+    function jump(dx) { list.scrollLeft += dx; }
     // держим позицию в среднем наборе, чтобы с обеих сторон всегда были слайды
     function normalize() {
       if (!mobileMq.matches) return;
@@ -196,25 +192,19 @@
       else if (first < -w + pitch / 2) jump(-w);  // уехали в правые клоны
     }
 
+    // автоплей: одна плавная прокрутка к ближайшему экземпляру слайда справа
     function scrollToTab(i) {
       if (!mobileMq.matches) return;
-      function go() {
-        // ближайший экземпляр слайда справа (или уже у края) — лента едет вперёд
-        var edge = edgeX(), best = null, bestD = Infinity;
-        nodes[i].forEach(function (n) {
-          var d = n.getBoundingClientRect().left - edge;
-          if (d > -2 && d < bestD) { bestD = d; best = d; }
-        });
-        if (best !== null) list.scrollTo({ left: list.scrollLeft + best, behavior: 'smooth' });
-      }
+      var edge = edgeX(), best = null;
+      nodes[i].forEach(function (n) {
+        var d = n.getBoundingClientRect().left - edge;
+        if (d > -2 && (best === null || d < best)) best = d;
+      });
+      if (best === null) return;
       autoScrolling = true;
       clearTimeout(autoScrollTimer);
-      go();
-      // ширина пунктов меняется вместе с кеглем (переход .5s) — доводим после него
-      autoScrollTimer = setTimeout(function () {
-        go();
-        autoScrollTimer = setTimeout(function () { normalize(); autoScrolling = false; }, 500);
-      }, 550);
+      list.scrollTo({ left: list.scrollLeft + best, behavior: 'smooth' });
+      autoScrollTimer = setTimeout(function () { autoScrolling = false; normalize(); }, 800);
     }
 
     // общая сцена справа (десктоп) на мобилке не нужна — у слайдов свои карточки.
@@ -239,18 +229,16 @@
       });
       return best;
     }
-    // активный слайд меняется прямо во время свайпа (текст успевает проявиться,
-    // пока слайд доезжает); перестановка в средний набор — после остановки
-    var swipeTimer = null, swipeRaf = 0;
+    // свайп: когда скролл остановился — активен слайд у левого края
+    var swipeTimer = null;
     list.addEventListener('scroll', function () {
       if (!mobileMq.matches || autoScrolling) return;
-      if (!swipeRaf) swipeRaf = requestAnimationFrame(function () {
-        swipeRaf = 0;
+      clearTimeout(swipeTimer);
+      swipeTimer = setTimeout(function () {
+        normalize();
         var best = nearestToEdge();
         if (best !== current) activate(best, true);
-      });
-      clearTimeout(swipeTimer);
-      swipeTimer = setTimeout(normalize, 150);
+      }, 120);
     }, { passive: true });
 
     function activate(i, fromSwipe) {

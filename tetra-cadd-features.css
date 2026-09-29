@@ -130,16 +130,27 @@
     flex: none;
     scroll-snap-align: start;
   }
-  /* на мобилке текст проявляется быстро — слайд не ждёт текста */
-  .section_cadd-features .cadd-features_tab-title {
-    transition: font-size .25s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+  /* на мобилке размеры слайда не меняются: у всех пунктов одинаковый кегль,
+     описание и бар всегда на месте; активный отличается только прозрачностью */
+  .section_cadd-features .cadd-features_tab-active,
+  .section_cadd-features .cadd-features_tab-active.is-active { margin-bottom: 0; transition: none; }
+  .section_cadd-features .cadd-features_tab-active .cadd-features_tab-title,
+  .section_cadd-features .cadd-features_tab-active.is-active .cadd-features_tab-title {
+    font-size: 4.476rem;
+    transition: opacity .3s ease;
   }
-  .section_cadd-features .cadd-features_tab-detail,
+  .section_cadd-features .cadd-features_tab-active .cadd-features_tab-detail,
   .section_cadd-features .cadd-features_tab-active.is-active .cadd-features_tab-detail {
-    transition: max-height .25s cubic-bezier(.22, 1, .36, 1),
-                padding .25s cubic-bezier(.22, 1, .36, 1),
-                opacity .2s ease;
+    max-height: none;
+    padding-top: 0.5595rem;
+    padding-bottom: 0.5595rem;
+    transition: opacity .3s ease;
   }
+  .section_cadd-features .cadd-features_tab-active .cadd-features_tab-media {
+    opacity: 0.4;
+    transition: opacity .3s ease;
+  }
+  .section_cadd-features .cadd-features_tab-active.is-active .cadd-features_tab-media { opacity: 1; }
   /* слайд = своя карточка с телефоном + заголовок/текст; общая сцена скрыта */
   .section_cadd-features.is-tabs-ready .cadd-features_stage { display: none; }
   .section_cadd-features .cadd-features_tab-media {
