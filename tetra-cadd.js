@@ -459,20 +459,25 @@
     var netDiagram = document.querySelector('.section_cadd-networks .cadd-networks_diagram');
     if (netDiagram && !T.off('networks')) {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      // плашки с названиями — в вёрстке Webflow (.cadd-networks_label.is-<сеть>,
-      // стоят над своим логотипом); тут прячем и дальше ведём за логотипом
+      // плашка с названием лежит внутри своего бейджа (.cadd-networks_badge >
+      // .cadd-networks_label, в Webflow — над логотипом по центру) и едет вместе
+      // с ним; JS только показывает/прячет. Фолбэк — старая вёрстка, где плашки
+      // лежали отдельно (.cadd-networks_label.is-<сеть>) и позиционировались JS.
       var nets = gsap.utils.toArray(netDiagram.querySelectorAll('.cadd-networks_badge')).map(function (badge, i) {
         var key = (badge.className.match(/\bis-([a-z0-9-]+)/) || [])[1] || '';
-        var label = key ? netDiagram.querySelector('.cadd-networks_label.is-' + key) : null;
+        var label = badge.querySelector('.cadd-networks_label');
+        var nested = !!label;
+        if (!label && key) label = netDiagram.querySelector('.cadd-networks_label.is-' + key);
         if (label) {
           label.setAttribute('aria-hidden', 'true');
-          // translate(-50%, -100%) из Webflow переводим в xPercent/yPercent GSAP
-          gsap.set(label, { x: 0, y: 0, xPercent: -50, yPercent: -100, autoAlpha: 0 });
+          // translate из Webflow переводим в xPercent/yPercent GSAP
+          gsap.set(label, { x: 0, y: 0, xPercent: -50, yPercent: nested ? 0 : -100, autoAlpha: 0 });
         }
         return {
           badge: badge,
           line: key ? netDiagram.querySelector('.cadd-networks_line.is-' + key) : null,
           label: label,
+          nested: nested,
           amp: (15 + (i % 3) * 1.5) * Math.PI / 180,   // размах качания, рад
           period: 20 + (i % 4) * 2.8,                  // сек на полный цикл
           dir: i % 2 ? -1 : 1,                          // соседи — в разные стороны
@@ -523,9 +528,11 @@
         n.badge.style.zIndex = '4';
         gsap.to(n.badge, { scale: 1.08, duration: 0.4, ease: 'power2.out' });
         if (!n.label) return;
-        // плашка — над логотипом, по центру; позиция на момент остановки
-        n.label.style.left = (n.badge.offsetLeft + n.badge.offsetWidth / 2 + n.x) + 'px';
-        n.label.style.top = (n.badge.offsetTop + n.y) + 'px';
+        if (!n.nested) {
+          // старая вёрстка: плашка — над логотипом, по центру; позиция на момент остановки
+          n.label.style.left = (n.badge.offsetLeft + n.badge.offsetWidth / 2 + n.x) + 'px';
+          n.label.style.top = (n.badge.offsetTop + n.y) + 'px';
+        }
         gsap.fromTo(n.label, { autoAlpha: 0, y: 0 },
           { autoAlpha: 1, y: -10, duration: 0.35, ease: 'power2.out', overwrite: true });
       }
