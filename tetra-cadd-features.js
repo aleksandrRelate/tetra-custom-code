@@ -217,6 +217,13 @@
       }, 550);
     }
 
+    // общая сцена справа (десктоп) на мобилке не нужна — у слайдов свои карточки.
+    // Прячем и из JS, чтобы не зависеть от того, успел ли обновиться CSS
+    var stageEl = section.querySelector('.cadd-features_stage');
+    function syncStage() { if (stageEl) stageEl.style.display = mobileMq.matches ? 'none' : ''; }
+    syncStage();
+    mobileMq.addEventListener && mobileMq.addEventListener('change', syncStage);
+
     if (mobileMq.matches) jump(setWidth()); // старт — на оригиналах (средний набор)
     mobileMq.addEventListener && mobileMq.addEventListener('change', function (e) {
       if (e.matches) { list.scrollLeft = 0; jump(setWidth()); scrollToTab(current); }

@@ -64,6 +64,27 @@
      пунктов и кнопка сужаются до ширины текста */
   .nav-menu-mobile .mob-menu-mask { width: 100%; }
   /* меню открыто: в шапке остаётся только крестик на сером квадрате */
+  /* кнопка не пропадает рывком, а плавно гаснет и схлопывается в ширину */
+  .mobile-nav-bttn-wrapper { transition: background-color .35s ease; }
+  .mobile-nav-bttn-wrapper .button.is-nav-bttn {
+    max-width: 12rem;
+    overflow: hidden;
+    white-space: nowrap;
+    transform-origin: 100% 50%;
+    transition: opacity .25s ease,
+                transform .35s cubic-bezier(.22, 1, .36, 1),
+                max-width .45s cubic-bezier(.22, 1, .36, 1),
+                padding .45s cubic-bezier(.22, 1, .36, 1),
+                margin .45s cubic-bezier(.22, 1, .36, 1);
+  }
   .mobile-nav-bttn-wrapper:has(.mobile-nav-bttn.active) { background-color: #f6f6f6; }
-  .mobile-nav-bttn-wrapper:has(.mobile-nav-bttn.active) .button { display: none; }
+  .mobile-nav-bttn-wrapper:has(.mobile-nav-bttn.active) .button.is-nav-bttn {
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: -0.25rem; /* съедаем gap обёртки, чтобы крестик встал на место */
+    opacity: 0;
+    transform: scale(0.92);
+    pointer-events: none;
+  }
 }
