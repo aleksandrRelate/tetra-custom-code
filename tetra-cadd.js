@@ -544,5 +544,32 @@
     ScrollTrigger.refresh();
   }
 
+  /* ------------------------------------------------------------------ *
+   * Get CADD (.cadd-platforms_grid) — карточки из CMS, лого приходит как
+   * <img src=".svg">. Hover-стили перекрашивают `svg path`, поэтому
+   * подменяем img на inline SVG в обёртке с тем же классом. Без GSAP.
+   * ------------------------------------------------------------------ */
+  function inlinePlatformLogos() {
+    document.querySelectorAll('.cadd-platforms_grid img.cadd-platform-card_logo-svg').forEach(function (img) {
+      fetch(img.src).then(function (r) { return r.ok ? r.text() : ''; }).then(function (svg) {
+        if (svg.indexOf('<svg') === -1) return;
+        var box = document.createElement('div');
+        box.className = img.className;
+        box.innerHTML = svg;
+        var el = box.querySelector('svg');
+        el.setAttribute('width', '100%');
+        el.setAttribute('height', '100%');
+        if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', img.alt);
+        el.setAttribute('role', 'img');
+        img.replaceWith(box);
+      }).catch(function () {});
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inlinePlatformLogos, { once: true });
+  } else {
+    inlinePlatformLogos();
+  }
+
   T.ready(init);
 })();
