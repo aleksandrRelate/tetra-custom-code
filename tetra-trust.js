@@ -564,6 +564,11 @@
      * (is-prev — назад), свои, не swiper-button-*. Swiper грузится с CDN.
      * ------------------------------------------------------------------ */
     var tSlider = document.querySelector('.section_tt-testimonial .tt-testimonial_slider');
+    // слайды из CMS (Testimonials): при одном отзыве листать нечего — прячем стрелки
+    if (tSlider && tSlider.querySelectorAll('.tt-testimonial_slide').length < 2) {
+      var tNav = document.querySelector('.section_tt-testimonial .tt-testimonial_nav');
+      if (tNav) tNav.style.display = 'none';
+    }
     if (tSlider && tSlider.querySelectorAll('.tt-testimonial_slide').length > 1 && !T.off('swiper')) {
       loadSwiper().then(function () {
         var section = tSlider.closest('.section_tt-testimonial');

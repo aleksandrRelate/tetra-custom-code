@@ -128,7 +128,45 @@
       requestAnimationFrame(tick);
     }
 
-    function activate(i) {
+    /* ---- мобилка (<=479): ряд пунктов листается свайпом; активный пункт
+       уезжает к левому краю, а пункт, остановившийся у края после свайпа,
+       становится активным ---- */
+    var mobileMq = window.matchMedia('(max-width: 479px)');
+    var autoScrolling = false;
+    var autoScrollTimer = null;
+
+    function scrollToTab(i) {
+      if (!mobileMq.matches) return;
+      function go() {
+        var left = list.scrollLeft + tabs[i].getBoundingClientRect().left - list.getBoundingClientRect().left;
+        list.scrollTo({ left: left, behavior: 'smooth' });
+      }
+      autoScrolling = true;
+      clearTimeout(autoScrollTimer);
+      go();
+      // ширина пунктов меняется вместе с кеглем (переход .5s) — доводим после него
+      autoScrollTimer = setTimeout(function () {
+        go();
+        autoScrollTimer = setTimeout(function () { autoScrolling = false; }, 500);
+      }, 550);
+    }
+
+    var swipeTimer = null;
+    list.addEventListener('scroll', function () {
+      if (!mobileMq.matches || autoScrolling) return;
+      clearTimeout(swipeTimer);
+      swipeTimer = setTimeout(function () {
+        var edge = list.getBoundingClientRect().left;
+        var best = 0, bestD = Infinity;
+        tabs.forEach(function (tab, j) {
+          var d = Math.abs(tab.getBoundingClientRect().left - edge);
+          if (d < bestD) { bestD = d; best = j; }
+        });
+        if (best !== current) activate(best, true);
+      }, 120);
+    }, { passive: true });
+
+    function activate(i, fromSwipe) {
       tabs.forEach(function (tab, j) {
         tab.classList.remove('is-active');
         tab.setAttribute('aria-selected', 'false');
@@ -140,7 +178,9 @@
 
       phones.forEach(function (p, j) { if (p) p.classList.toggle('is-hidden', j !== i); });
       if (current !== -1 && i !== current) setWord(titles[i]);
+      var wasStarted = current !== -1;
       current = i;
+      if (wasStarted && !fromSwipe) scrollToTab(i);
     }
 
     tabs.forEach(function (tab, i) {

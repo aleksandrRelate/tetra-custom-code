@@ -113,3 +113,22 @@
     animation: none;
   }
 }
+
+/* --- МОБИЛКА (<=479): пункты в ряд листаются свайпом (snap к левому краю);
+       активный пункт прокручивается на место первого — это делает JS --- */
+@media screen and (max-width: 479px) {
+  .section_cadd-features .cadd-features_tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-right: 40vw; /* запас, чтобы и последний пункт вставал к левому краю */
+  }
+  .section_cadd-features .cadd-features_tabs::-webkit-scrollbar { display: none; }
+  .section_cadd-features .cadd-features_tab-active {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
