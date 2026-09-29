@@ -179,7 +179,14 @@
         function startScale() {
           return Math.min(5.625, window.innerWidth * 0.92 / (label.offsetWidth || 1));
         }
-        gsap.set(label, { y: rem(20), scale: startScale(), opacity: 1, transformOrigin: '50% 50%' });
+        // сдвиг вниз: на десктопе — 20rem (по макету); на мобилке rem крупнее, поэтому
+        // считаем так, чтобы центр надписи встал в центр секции (экрана)
+        function startY() {
+          if (window.innerWidth > 479) return rem(20)();
+          var pr = peg.getBoundingClientRect(), lr = label.getBoundingClientRect();
+          return (pr.top + peg.clientHeight / 2) - (lr.top + lr.height / 2);
+        }
+        gsap.set(label, { y: startY(), scale: startScale(), opacity: 1, transformOrigin: '50% 50%' });
 
         // 1) слова надписи — пока секция въезжает
         var intro = gsap.fromTo(labelSplit.words,
