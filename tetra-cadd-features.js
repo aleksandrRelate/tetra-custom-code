@@ -229,16 +229,19 @@
       });
       return best;
     }
-    // свайп: когда скролл остановился — активен слайд у левого края
-    var swipeTimer = null;
+    // свайп: активен слайд, ближайший к левому краю — сразу по ходу свайпа
+    // (размеры слайдов не меняются, так что это безопасно); перестановка в
+    // средний набор — когда скролл остановился
+    var swipeTimer = null, swipeRaf = 0;
     list.addEventListener('scroll', function () {
       if (!mobileMq.matches || autoScrolling) return;
-      clearTimeout(swipeTimer);
-      swipeTimer = setTimeout(function () {
-        normalize();
+      if (!swipeRaf) swipeRaf = requestAnimationFrame(function () {
+        swipeRaf = 0;
         var best = nearestToEdge();
         if (best !== current) activate(best, true);
-      }, 120);
+      });
+      clearTimeout(swipeTimer);
+      swipeTimer = setTimeout(normalize, 150);
     }, { passive: true });
 
     function activate(i, fromSwipe) {
