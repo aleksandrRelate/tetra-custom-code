@@ -50,9 +50,47 @@
       });
     }
 
-    var bars = tabs.map(function (tab) { return tab.querySelector('.cadd-features_progress-bar'); });
+    // мобилка (<=479): у каждого пункта своя карточка с телефоном — слайд
+    // «фото + заголовок + текст» листается целиком (общая сцена скрыта в CSS)
+    if (basePhone) {
+      tabs.forEach(function (tab, i) {
+        var src = i === 0 ? basePhone : phones[i];
+        if (!src) return;
+        var media = document.createElement('div');
+        media.className = 'cadd-features_tab-media';
+        media.setAttribute('aria-hidden', 'true');
+        var img = src.cloneNode(false);
+        img.classList.remove('is-hidden');
+        img.classList.add('cadd-features_tab-phone');
+        media.appendChild(img);
+        tab.insertBefore(media, tab.firstChild);
+      });
+    }
+
     var list = tabs[0].parentNode;
     list.setAttribute('role', 'tablist');
+
+    // бесконечная лента на мобилке: [клоны][оригиналы][клоны]; после прокрутки
+    // позиция незаметно переставляется в средний набор. На десктопе клоны скрыты.
+    var nodes = tabs.map(function (tab, i) { tab.setAttribute('data-idx', i); return [tab]; });
+    var before = document.createDocumentFragment();
+    var after = document.createDocumentFragment();
+    tabs.forEach(function (tab, i) {
+      [before, after].forEach(function (frag) {
+        var c = tab.cloneNode(true);
+        c.classList.add('is-clone');
+        c.setAttribute('aria-hidden', 'true');
+        c.removeAttribute('id');
+        frag.appendChild(c);
+        nodes[i].push(c);
+      });
+    });
+    list.insertBefore(before, tabs[0]);
+    list.appendChild(after);
+
+    var bars = nodes.map(function (arr) {
+      return arr.map(function (n) { return n.querySelector('.cadd-features_progress-bar'); }).filter(Boolean);
+    });
 
     var current = -1;
     var wordTimer = null;
@@ -114,7 +152,7 @@
     var lastTs = null;
 
     function setBar(i, p) {
-      if (bars[i]) bars[i].style.transform = 'scaleX(' + p + ')';
+      (bars[i] || []).forEach(function (bar) { bar.style.transform = 'scaleX(' + p + ')'; });
     }
 
     function tick(now) {
@@ -128,18 +166,46 @@
       requestAnimationFrame(tick);
     }
 
-    /* ---- мобилка (<=479): ряд пунктов листается свайпом; активный пункт
-       уезжает к левому краю, а пункт, остановившийся у края после свайпа,
-       становится активным ---- */
+    /* ---- мобилка (<=479): слайды листаются свайпом, лента бесконечная;
+       активный слайд уезжает к левому краю, а слайд, остановившийся у края
+       после свайпа, становится активным ---- */
     var mobileMq = window.matchMedia('(max-width: 479px)');
     var autoScrolling = false;
     var autoScrollTimer = null;
 
+    function edgeX() { return list.getBoundingClientRect().left; }
+    function setWidth() {
+      // ширина одного набора = расстояние между оригиналом и его клоном
+      return nodes[0][0].getBoundingClientRect().left - nodes[0][1].getBoundingClientRect().left;
+    }
+    function jump(dx) {
+      var snap = list.style.scrollSnapType;
+      list.style.scrollSnapType = 'none';
+      list.scrollLeft += dx;
+      list.style.scrollSnapType = snap;
+    }
+    // держим позицию в среднем наборе, чтобы с обеих сторон всегда были слайды
+    function normalize() {
+      if (!mobileMq.matches) return;
+      var w = setWidth();
+      if (!w) return;
+      var pitch = w / tabs.length;
+      // сдвиг первого оригинала от края: в среднем наборе от 0 до -(w - pitch)
+      var first = nodes[0][0].getBoundingClientRect().left - edgeX();
+      if (first > pitch / 2) jump(w);             // уехали в левые клоны
+      else if (first < -w + pitch / 2) jump(-w);  // уехали в правые клоны
+    }
+
     function scrollToTab(i) {
       if (!mobileMq.matches) return;
       function go() {
-        var left = list.scrollLeft + tabs[i].getBoundingClientRect().left - list.getBoundingClientRect().left;
-        list.scrollTo({ left: left, behavior: 'smooth' });
+        // ближайший экземпляр слайда справа (или уже у края) — лента едет вперёд
+        var edge = edgeX(), best = null, bestD = Infinity;
+        nodes[i].forEach(function (n) {
+          var d = n.getBoundingClientRect().left - edge;
+          if (d > -2 && d < bestD) { bestD = d; best = d; }
+        });
+        if (best !== null) list.scrollTo({ left: list.scrollLeft + best, behavior: 'smooth' });
       }
       autoScrolling = true;
       clearTimeout(autoScrollTimer);
@@ -147,33 +213,40 @@
       // ширина пунктов меняется вместе с кеглем (переход .5s) — доводим после него
       autoScrollTimer = setTimeout(function () {
         go();
-        autoScrollTimer = setTimeout(function () { autoScrolling = false; }, 500);
+        autoScrollTimer = setTimeout(function () { normalize(); autoScrolling = false; }, 500);
       }, 550);
     }
+
+    if (mobileMq.matches) jump(setWidth()); // старт — на оригиналах (средний набор)
+    mobileMq.addEventListener && mobileMq.addEventListener('change', function (e) {
+      if (e.matches) { list.scrollLeft = 0; jump(setWidth()); scrollToTab(current); }
+    });
 
     var swipeTimer = null;
     list.addEventListener('scroll', function () {
       if (!mobileMq.matches || autoScrolling) return;
       clearTimeout(swipeTimer);
       swipeTimer = setTimeout(function () {
-        var edge = list.getBoundingClientRect().left;
-        var best = 0, bestD = Infinity;
-        tabs.forEach(function (tab, j) {
-          var d = Math.abs(tab.getBoundingClientRect().left - edge);
-          if (d < bestD) { bestD = d; best = j; }
+        var edge = edgeX(), best = 0, bestD = Infinity;
+        nodes.forEach(function (arr, j) {
+          arr.forEach(function (n) {
+            var d = Math.abs(n.getBoundingClientRect().left - edge);
+            if (d < bestD) { bestD = d; best = j; }
+          });
         });
+        normalize();
         if (best !== current) activate(best, true);
-      }, 120);
+      }, 150);
     }, { passive: true });
 
     function activate(i, fromSwipe) {
-      tabs.forEach(function (tab, j) {
-        tab.classList.remove('is-active');
-        tab.setAttribute('aria-selected', 'false');
+      nodes.forEach(function (arr, j) {
+        arr.forEach(function (n) { n.classList.remove('is-active'); });
+        tabs[j].setAttribute('aria-selected', 'false');
         setBar(j, 0);
       });
       elapsed = 0;
-      tabs[i].classList.add('is-active');
+      nodes[i].forEach(function (n) { n.classList.add('is-active'); });
       tabs[i].setAttribute('aria-selected', 'true');
 
       phones.forEach(function (p, j) { if (p) p.classList.toggle('is-hidden', j !== i); });
@@ -183,6 +256,9 @@
       if (wasStarted && !fromSwipe) scrollToTab(i);
     }
 
+    nodes.forEach(function (arr, i) {
+      arr.slice(1).forEach(function (c) { c.addEventListener('click', function () { activate(i); }); });
+    });
     tabs.forEach(function (tab, i) {
       tab.setAttribute('role', 'tab');
       tab.tabIndex = 0;
