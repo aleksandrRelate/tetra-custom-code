@@ -130,6 +130,16 @@
     flex: none;
     scroll-snap-align: start;
   }
+  /* на мобилке текст проявляется быстро — слайд не ждёт текста */
+  .section_cadd-features .cadd-features_tab-title {
+    transition: font-size .25s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+  }
+  .section_cadd-features .cadd-features_tab-detail,
+  .section_cadd-features .cadd-features_tab-active.is-active .cadd-features_tab-detail {
+    transition: max-height .25s cubic-bezier(.22, 1, .36, 1),
+                padding .25s cubic-bezier(.22, 1, .36, 1),
+                opacity .2s ease;
+  }
   /* слайд = своя карточка с телефоном + заголовок/текст; общая сцена скрыта */
   .section_cadd-features.is-tabs-ready .cadd-features_stage { display: none; }
   .section_cadd-features .cadd-features_tab-media {

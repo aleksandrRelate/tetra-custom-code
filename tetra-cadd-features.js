@@ -229,21 +229,28 @@
       if (e.matches) { list.scrollLeft = 0; jump(setWidth()); scrollToTab(current); }
     });
 
-    var swipeTimer = null;
+    function nearestToEdge() {
+      var edge = edgeX(), best = 0, bestD = Infinity;
+      nodes.forEach(function (arr, j) {
+        arr.forEach(function (n) {
+          var d = Math.abs(n.getBoundingClientRect().left - edge);
+          if (d < bestD) { bestD = d; best = j; }
+        });
+      });
+      return best;
+    }
+    // активный слайд меняется прямо во время свайпа (текст успевает проявиться,
+    // пока слайд доезжает); перестановка в средний набор — после остановки
+    var swipeTimer = null, swipeRaf = 0;
     list.addEventListener('scroll', function () {
       if (!mobileMq.matches || autoScrolling) return;
-      clearTimeout(swipeTimer);
-      swipeTimer = setTimeout(function () {
-        var edge = edgeX(), best = 0, bestD = Infinity;
-        nodes.forEach(function (arr, j) {
-          arr.forEach(function (n) {
-            var d = Math.abs(n.getBoundingClientRect().left - edge);
-            if (d < bestD) { bestD = d; best = j; }
-          });
-        });
-        normalize();
+      if (!swipeRaf) swipeRaf = requestAnimationFrame(function () {
+        swipeRaf = 0;
+        var best = nearestToEdge();
         if (best !== current) activate(best, true);
-      }, 150);
+      });
+      clearTimeout(swipeTimer);
+      swipeTimer = setTimeout(normalize, 150);
     }, { passive: true });
 
     function activate(i, fromSwipe) {
