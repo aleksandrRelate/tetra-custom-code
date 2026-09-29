@@ -179,5 +179,19 @@
     ScrollTrigger.refresh();
   }
 
+  // «Back to Top» — наверх на любой странице (в Webflow ссылка ведёт на
+  // #section-hero Home, которого на других страницах нет). Без зависимостей,
+  // вешаем сразу: capture-фаза, чтобы Webflow не увёл на якорь.
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('.footer_back-to-top');
+    if (!link) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(0, { immediate: reduce });
+    else window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  }, true);
+
   T.ready(init);
 })();
