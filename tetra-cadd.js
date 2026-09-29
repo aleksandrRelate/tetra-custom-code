@@ -355,18 +355,36 @@
       });
     }
 
-    // HERO — ряд логотипов консорциума: лента начинается от левого края экрана
+    // HERO — ряд логотипов консорциума (CMS «Consortium Members»): лента
+    // начинается от левого края экрана. Ширина логотипа = ширина из самого
+    // SVG (атрибут width, px на макете 1440) → rem; на мобилке ×0.5295, как
+    // было в Figma. Ширины ставим до замера ленты, поэтому ждём decode().
     var consortiumRow = document.querySelector('.section_cadd-hero .cadd-consortium_row');
     if (consortiumRow && !T.off('consortium')) {
-      scrollMarquee({
-        rows: [consortiumRow],
-        trigger: consortiumRow,
-        prepare: function (row) {
-          row.style.alignSelf = 'flex-start';
-          row.style.justifyContent = 'flex-start';
-          row.style.marginLeft = '0px';
-          row.style.marginLeft = -row.getBoundingClientRect().left + 'px';
-        }
+      var logoMq = window.matchMedia('(max-width: 479px)');
+      var sizeLogos = function () {
+        var k = logoMq.matches ? 0.5295 : 1;
+        consortiumRow.querySelectorAll('img.cadd-consortium_logo').forEach(function (img) {
+          if (img.naturalWidth) img.style.width = (img.naturalWidth / 16 * k) + 'rem';
+        });
+      };
+      var logoImgs = [].slice.call(consortiumRow.querySelectorAll('img.cadd-consortium_logo'));
+      Promise.all(logoImgs.map(function (img) {
+        img.loading = 'eager';
+        return img.decode ? img.decode()['catch'](function () {}) : Promise.resolve();
+      })).then(function () {
+        sizeLogos();
+        scrollMarquee({
+          rows: [consortiumRow],
+          trigger: consortiumRow,
+          prepare: function (row) {
+            row.style.alignSelf = 'flex-start';
+            row.style.justifyContent = 'flex-start';
+            row.style.marginLeft = '0px';
+            row.style.marginLeft = -row.getBoundingClientRect().left + 'px';
+          }
+        });
+        logoMq.addEventListener('change', function () { sizeLogos(); ScrollTrigger.refresh(); });
       });
     }
     /* ------------------------------------------------------------------ *
