@@ -134,9 +134,13 @@
         var p = sec.parentElement;
         return p && p.classList.contains('pin-spacer') ? p : sec;
       }
-      function syncNav() {
-        var y = window.scrollY + navOffset + 1;
+      // skip — секция, из которой только что вышли; dir — направление скролла.
+      // В момент выхода линия стоит ровно на границе двух зон, поэтому
+      // смотрим на 1px дальше по ходу скролла: вверх — выше линии, вниз — ниже.
+      function syncNav(skip, dir) {
+        var y = window.scrollY + navOffset + (dir === -1 ? -1 : 1);
         for (var i = navSecs.length - 1; i >= 0; i--) {
+          if (navSecs[i] === skip) continue;
           var r = zoneOf(navSecs[i]).getBoundingClientRect();
           var top = r.top + window.scrollY;
           if (y >= top && y < top + r.height) { applyNav(navSecs[i].getAttribute('navbar-color')); return; }
@@ -150,11 +154,11 @@
           refreshPriority: -1,
           onToggle: function (self) {
             if (self.isActive) applyNav(sec.getAttribute('navbar-color'));
-            else syncNav(); // ушли из секции в «ничью» зону (спейсер pin) — берём секцию под линией
+            else syncNav(sec, self.direction); // ушли из секции в «ничью» зону (спейсер pin) — берём секцию под линией
           }
         });
       });
-      ScrollTrigger.addEventListener('refreshInit', syncNav);
+      ScrollTrigger.addEventListener('refreshInit', function () { syncNav(); });
     }
   }
 
