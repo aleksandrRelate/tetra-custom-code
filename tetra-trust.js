@@ -357,10 +357,11 @@
       var SEC_DRAW = { lineDuration: 1.2, stagger: 0.04, fillsAt: 0.8 };
       var SEC_SPEED = 1.5; // схемы security проигрываются в 1.5 раза быстрее
 
-      // ДЕСКТОП (>=480): в закреплённой карточке 5 схем стопкой; активный пункт
-      // списка (закрепился наверху стопки) показывает свою схему — кроссфейд,
-      // при первом показе схема прорисовывается
-      if (secCard && secItems.length) {
+      // Общая карточка со схемами (старый десктоп-макет): 5 схем стопкой; активный
+      // пункт показывает свою схему — кроссфейд. Сейчас в Webflow она скрыта
+      // (display:none) — у каждого пункта своя схема справа, как на Home.
+      var cardShown = secCard && getComputedStyle(secCard).display !== 'none';
+      if (cardShown && secItems.length) {
         mm.add('(min-width: 480px) and ' + NO_MOTION, function () {
           var alive = true;
           var triggers = [];
@@ -413,10 +414,10 @@
         });
       }
 
-      // МОБИЛКА (<=479): у каждого пункта своя схема под текстом — прорисовываем
-      // её, когда она появляется на экране
-      if (secItems.length) {
-        mm.add('(max-width: 479px) and ' + NO_MOTION, function () {
+      // У каждого пункта своя схема (десктоп — справа, мобилка — под текстом):
+      // прорисовываем её, когда она появляется на экране
+      if (secItems.length && !cardShown) {
+        mm.add(NO_MOTION, function () {
           var alive = true;
           var tls = [];
           secItems.forEach(function (item) {
