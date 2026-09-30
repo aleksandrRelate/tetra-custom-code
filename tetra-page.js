@@ -284,7 +284,8 @@
             revealText(headerTimeline, trustSection.querySelector('.badge .eyebrow_text'), 0);
             revealText(headerTimeline, trustSection.querySelector('.trust_heading'), 0.08);
             revealText(headerTimeline, trustSection.querySelector('.trust_intro-text'), 0.22);
-            revealButtons(headerTimeline, trustSection.querySelectorAll('.button'), 0.3);
+            var trustBottom = trustSection.querySelector('.trust_bottom');
+            revealButtons(trustBottom ? timelineFor(trustBottom, 'top 95%') : headerTimeline, trustSection.querySelectorAll('.button'), trustBottom ? 0 : 0.3);
             trustSection.querySelectorAll('.trust_card').forEach(function (card, index) {
               var cardTimeline = timelineFor(card, 'top 95%');
               var delay = index * 0.12;
