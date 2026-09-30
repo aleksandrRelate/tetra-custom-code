@@ -1,5 +1,7 @@
-// Tetra — CADD: FAQ-аккордеон (.cadd-faq_list).
-//   • открыт максимум один пункт; клик по другому закрывает предыдущий
+// Tetra — FAQ-аккордеон (.cadd-faq_list) — CADD и страница FAQ.
+//   • на странице может быть несколько списков (FAQ: по одному на категорию,
+//     из CMS) — каждый работает сам по себе
+//   • открыт максимум один пункт в списке; клик по другому закрывает предыдущий
 //   • клик по открытому — закрывает его
 //   • по умолчанию открыт первый пункт (как в Figma); иконка − / +
 // Стили — tetra-cadd-faq.css. Без зависимостей; ?perf=faq выключает.
@@ -7,8 +9,12 @@
   function init() {
     if (window.Tetra && window.Tetra.off && window.Tetra.off('faq')) return;
 
-    var list = document.querySelector('.cadd-faq_list');
-    if (!list) return;
+    [].forEach.call(document.querySelectorAll('.cadd-faq_list'), function (list, li) {
+      initList(list, li);
+    });
+  }
+
+  function initList(list, li) {
     var items = [].slice.call(list.querySelectorAll('.cadd-faq_item'));
     if (!items.length) return;
 
@@ -17,7 +23,7 @@
       var a = item.querySelector('.cadd-faq_answer');
       var icon = item.querySelector('.cadd-faq_icon');
       if (!q || !a) return null;
-      var id = 'cadd-faq-answer-' + i;
+      var id = 'cadd-faq-answer-' + li + '-' + i;
       a.id = a.id || id;
       q.setAttribute('role', 'button');
       q.setAttribute('aria-controls', a.id);

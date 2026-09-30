@@ -47,3 +47,10 @@
     transition: none !important;
   }
 }
+
+/* ответ из CMS (Rich Text на странице FAQ): абзацы и ссылки */
+.cadd-faq_answer > :first-child { margin-top: 0; }
+.cadd-faq_answer > :last-child { margin-bottom: 0; }
+.cadd-faq_answer p { margin-top: 0; margin-bottom: 0; }
+.cadd-faq_answer p + p { margin-top: 1em; }
+.cadd-faq_answer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
