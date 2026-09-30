@@ -1,0 +1,68 @@
+/* Tetra — Legal Pages (CMS-шаблон /legal/{slug}).
+   Типографика Rich Text в .legal_content + оглавление .legal_toc (строит tetra-legal.js). */
+
+/* текст документа */
+.legal_content { font-size: 1rem; line-height: 1.6; }
+.legal_content h2 {
+  margin: 3rem 0 1.25rem;
+  padding-top: 3rem;
+  border-top: 1px solid currentColor;
+  border-top-color: rgba(128, 128, 128, .25);
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  scroll-margin-top: 7rem;
+}
+.legal_content h2:first-child { padding-top: 0; border-top: 0; }
+.legal_content h3 { margin: 2rem 0 .75rem; font-size: 1.25rem; line-height: 1.3; font-weight: 500; }
+.legal_content p { margin: 0 0 1em; }
+.legal_content ul, .legal_content ol { margin: 0 0 1em; padding-left: 1.25em; }
+.legal_content li { margin-bottom: .5em; }
+.legal_content strong { font-weight: 500; }
+.legal_content a { color: inherit; text-decoration: underline; text-underline-offset: .15em; }
+
+/* оглавление */
+.legal_toc { position: sticky; top: 7rem; align-self: start; }
+.legal_toc-label {
+  margin-bottom: 1rem;
+  font-size: .75rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .5;
+}
+.legal_toc-list { display: flex; flex-direction: column; gap: .5rem; }
+.legal_toc-link {
+  position: relative;
+  padding-left: .875rem;
+  color: inherit;
+  font-size: .875rem;
+  line-height: 1.35;
+  text-decoration: none;
+  opacity: .5;
+  transition: opacity .25s ease;
+}
+.legal_toc-link::before {
+  content: "";
+  position: absolute;
+  left: 0; top: .5em;
+  width: .25rem; height: .25rem;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.legal_toc-link:hover { opacity: .8; }
+.legal_toc-link.is-active { opacity: 1; }
+.legal_toc-link.is-active::before { opacity: 1; }
+.legal_toc.is-empty, .legal_updated.is-empty { display: none; }
+
+@media screen and (max-width: 479px) {
+  .legal_content { font-size: .9375rem; }
+  .legal_content h2 { margin-top: 2rem; padding-top: 2rem; font-size: 1.5rem; scroll-margin-top: 5rem; }
+  .legal_toc { position: static; }
+  .legal_toc-label { display: flex; justify-content: space-between; margin-bottom: 0; cursor: pointer; }
+  .legal_toc-label::after { content: "+"; }
+  .legal_toc.is-open .legal_toc-label::after { content: "–"; }
+  .legal_toc-list { display: none; padding-top: 1rem; }
+  .legal_toc.is-open .legal_toc-list { display: flex; }
+}
