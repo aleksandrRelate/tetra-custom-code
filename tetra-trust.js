@@ -436,15 +436,19 @@
         });
       }
 
-      var cusImg = document.querySelector('.section_tt-custody img.tt-custody_graphic');
+      // десктопная схема + мобильная (.tt-custody_graphic-mobile, видна только <=479);
+      // классы переезжают на инлайновый svg, так что CSS показывает нужную
+      var cusImgs = document.querySelectorAll('.section_tt-custody img.tt-custody_graphic, .section_tt-custody img.tt-custody_graphic-mobile');
       mm.add(NO_MOTION, function () {
         var tls = [];
-        inlineSvg(cusImg).then(function (svg) {
-          if (!svg) return;
-          tls.push(drawSvg(svg, svg.closest('.tt-custody_visual') || svg, {
-            start: 'top 75%', orderByX: true, lineDuration: 0.9, stagger: 0.09, fillsAt: 0.3
-          }));
-          ScrollTrigger.refresh();
+        Array.prototype.forEach.call(cusImgs, function (cusImg) {
+          inlineSvg(cusImg).then(function (svg) {
+            if (!svg) return;
+            tls.push(drawSvg(svg, svg.closest('.tt-custody_visual') || svg, {
+              start: 'top 75%', orderByX: true, lineDuration: 0.9, stagger: 0.09, fillsAt: 0.3
+            }));
+            ScrollTrigger.refresh();
+          });
         });
         return function () {
           tls.forEach(function (tl) { if (tl.scrollTrigger) tl.scrollTrigger.kill(); tl.progress(1).kill(); });
