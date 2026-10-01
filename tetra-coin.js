@@ -125,40 +125,40 @@ async function mount(root) {
     const grownSize = large;
     const gap = mobile ? 12 : grownSize * ratio * .47;
     // Centred on the coin, unless Introducing would cross the edge (narrow screens).
-    // Centred on the coin; if Introducing would cross the edge (narrow screens),
-    // centre the whole Introducing · coin · CADD group instead of pinning it left.
-    const coinCentredIntro = centerX - grownSize * ratio / 2 - gap - introSource.width;
-    const groupWidth = introSource.width + gap + grownSize * ratio + gap + caddSource.width;
-    const introBeside = coinCentredIntro >= stageRect.left + edge ? coinCentredIntro : centerX - groupWidth / 2;
-    const grownX = introBeside + introSource.width + gap + grownSize * ratio / 2;
+    const introBeside = Math.max(stageRect.left + edge, centerX - grownSize * ratio / 2 - gap - introSource.width);
+    let grownX = centerX;
     const caddBeside = grownX + grownSize * ratio / 2 + gap;
     // Words spread by the same distance on both sides, so the coin stays centred
     // between them; the widest spread still keeps both words on screen.
     const spreadMax = Math.max(0, Math.min(introBeside - stageRect.left - edge, stageRect.right - edge - caddBeside - caddSource.width));
     const spread = spreadMax * (1 - close);
-    const introStartX = introBeside - spread;
-    const caddStartX = caddBeside + spread;
+    // Mobile: no spread/join step — "Introducing CADD" sits joined at the left edge.
+    const introStartX = mobile ? stageRect.left + edge : introBeside - spread;
     // CADD slides onto Introducing; the coin hops over it to the far side.
     // Joined spacing at the starting font size: flight interpolates from here to the
     // paragraph, so the words keep their natural space while the font shrinks.
     const startRatio = initialFont / parseFloat(getComputedStyle(copy).fontSize);
     const joinedCaddX = introStartX + (caddEnd.left - introEnd.left) * startRatio;
+    const caddStartX = mobile ? joinedCaddX : caddBeside + spread;
     const settledSize = grownSize * .78;
     const hopSize = mix(grownSize, settledSize, hop);
     const originalHopX = Math.min(joinedCaddX + caddSource.width + gap + hopped * ratio / 2, stageRect.right - edge - hopped * ratio / 2);
     const hopX = Math.min(originalHopX + width * .15, stageRect.right - edge - hopped * ratio / 2);
 
-    let size = hopSize, x = mix(grownX, hopX, hop), y = anchorY;
+    // Mobile: the coin waits at the right edge (no hop over CADD) and only flips once, on landing.
+    const sideX = stageRect.right - edge - settledSize * ratio / 2;
+    if (mobile) grownX = sideX;
+    let size = mobile ? settledSize : hopSize, x = mobile ? sideX : mix(grownX, hopX, hop), y = anchorY;
     // One half-turn per move: a single edge-on moment spread across the whole phase.
-    let spin = 180 * hop, tilt = Math.sin(hop * Math.PI);
-    let roll = 12 * hop; // clockwise, retained after the first flip
+    let spin = mobile ? 0 : 180 * hop, tilt = mobile ? 0 : Math.sin(hop * Math.PI);
+    let roll = mobile ? 0 : 12 * hop; // clockwise, retained after the first flip
     if (land > 0) {
       size = mix(settledSize, target.height, land);
-      x = mix(hopX, target.left + target.width / 2, land);
+      x = mix(mobile ? sideX : hopX, target.left + target.width / 2, land);
       y = mix(anchorY, target.top + target.height / 2, land) - Math.sin(land * Math.PI) * height * .08;
-      spin = 180 + 180 * land;
+      spin = (mobile ? 0 : 180) + 180 * land;
       tilt = Math.sin(land * Math.PI);
-      roll = mix(12, 0, land) + 4 * Math.sin(land * Math.PI);
+      roll = mix(mobile ? 0 : 12, 0, land) + 4 * Math.sin(land * Math.PI);
     }
     if (heroLinked) {
       // Land straight into the growing state between the words, so nothing jumps when the scene sticks.
@@ -168,7 +168,7 @@ async function mount(root) {
       x = mix(source.left + source.width / 2, grownX, fall);
       y = mix(source.top - heroRect.top + source.height / 2, anchorY, fall) + Math.sin(fall * Math.PI) * height * .20;
       // Scale tracks the scroll directly, without the path's easing.
-      size = mix(source.height, grownSize, fallRaw);
+      size = mix(source.height, mobile ? settledSize : grownSize, fallRaw);
       spin = 0; tilt = 0; roll = 0;
     }
     coin.style.width = `${size * ratio}px`;
@@ -215,7 +215,7 @@ async function mount(root) {
 
     const introX = mix(introStartX, introEnd.left, flight);
     // Blend joining into the shared flight; never snap CADD to a new anchor.
-    const caddX = mix(mix(caddStartX, joinedCaddX, join), caddEnd.left, flight);
+    const caddX = mix(mix(caddStartX, joinedCaddX, mobile ? 1 : join), caddEnd.left, flight);
     const titleAnchorY = height / 2 - lift;
     const startY = titleAnchorY - introSource.height / 2;
     titleWords[0].style.transform = `translate(${introX-introSource.left}px, ${mix(startY,introEnd.top,flight)-introSource.top}px)`;
