@@ -1,0 +1,92 @@
+/* Reuse Tetra's tokens; defaults also support the standalone preview. */
+.cadd-scene {
+  --coin-ink: var(--_tetra-tokens---color-ink, #090e13);
+  --coin-muted: var(--_tetra-tokens---color-muted, #9e9e9e);
+  --coin-accent: var(--_tetra-tokens---color-nav-accent, #ce191d);
+  --coin-gutter: max(24px, calc((100vw - 1392px) / 2));
+  position: relative;
+  height: 360svh;
+  background: #fff;
+  color: var(--coin-ink);
+  font-family: 'Suisse intl', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.cadd-scene * { box-sizing: border-box; }
+.cadd-scene__stage { position: sticky; top: 0; height: 100svh; min-height: 480px; overflow: hidden; isolation: isolate; }
+.cadd-scene__canvas, .cadd-scene__fallback { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cadd-scene__canvas { z-index: 1; }
+.cadd-scene__fallback { inset: 28% 33%; width: 34%; height: 44%; object-fit: contain; }
+.cadd-scene.is-ready .cadd-scene__fallback { visibility: hidden; }
+.cadd-scene__title {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: .22em; margin: 0;
+  white-space: nowrap; font-size: clamp(28px, 2.78vw, 48px);
+  line-height: 1.3; letter-spacing: -.015em; font-weight: 400; z-index: 2;
+}
+.cadd-scene__title strong { font-weight: 400; }
+.cadd-scene__gap { width: 0; flex: none; }
+.cadd-scene__art { position: absolute; width: 100%; aspect-ratio: 1440 / 903; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.cadd-scene__grid { position: absolute; inset: 0; width: 150%; height: 199.3355%; opacity: 0; }
+.cadd-scene__mark { position: absolute; left: 78.0097%; top: 51.256%; width: 19.4444%; height: 31.0078%; opacity: 0; }
+.cadd-scene__copy {
+  position: absolute; z-index: 2; top: max(80px, calc(50% - 25.8vw)); left: 24px;
+  width: 63.6%; max-width: 1100px; margin: 0;
+  font-size: clamp(28px, 2.778vw, 48px); font-weight: 400;
+  line-height: 1.3; letter-spacing: -.015em;
+  color: var(--coin-muted); opacity: 0;
+}
+/* The scroll hint was dropped; hide it wherever old markup still has it. */
+.cadd-scene__hint { display: none; }
+
+/* Content remains readable if JS, WebGL or the module cannot load. */
+.cadd-scene:not(.is-ready) { height: 100svh; min-height: 620px; }
+.cadd-scene:not(.is-ready) .cadd-scene__stage { position: relative; height: 100%; }
+.cadd-scene:not(.is-ready) .cadd-scene__title, .cadd-scene:not(.is-ready) .cadd-scene__fallback { display: none; }
+.cadd-scene:not(.is-ready) .cadd-scene__copy, .cadd-scene:not(.is-ready) .cadd-scene__grid, .cadd-scene:not(.is-ready) .cadd-scene__mark { opacity: 1; }
+.cadd-scene.is-static { height: 100svh; min-height: 620px; }
+.cadd-scene.is-static .cadd-scene__stage { height: 100%; position: relative; }
+@media (min-width: 480px) and (max-width: 991px) {
+  .cadd-scene__copy { top: 100px; width: calc(100% - 48px); font-size: 32px; }
+  .cadd-scene__art { top: auto; bottom: -8%; transform: none; }
+}
+@media (max-width: 479px) {
+  .cadd-scene__title { font-size: 7.2vw; }
+  .cadd-scene__copy { top: 90px; width: calc(100% - 48px); font-size: 26px; line-height: 1.3; }
+  .cadd-scene__art { top: auto; bottom: -3%; left: -100%; width: 200%; transform: none; }
+}
+
+@media (max-width: 991px) { .cadd-scene__line-break { display: none; } }
+
+.cadd-scene__destination { white-space: nowrap; }
+.cadd-scene__destination strong { font-weight: 400; }
+.cadd-scene__title > span:first-child, .cadd-scene__title > strong { display: inline-block; }
+.cadd-scene.is-ready .cadd-scene__destination,
+.cadd-scene.is-ready .cadd-scene__remainder { opacity: 0; }
+.cadd-scene:not(.is-ready) .cadd-scene__destination,
+.cadd-scene:not(.is-ready) .cadd-scene__remainder { opacity: 1 !important; }
+
+/* One viewport canvas carries the coin across the hero/scene boundary. */
+.cadd-scene__canvas.is-hero-linked { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+.cadd-coin-taken { visibility: hidden !important; }
+.cadd-scene__shine { position: absolute; inset: 0; width: 150%; height: 199.3355%; overflow: hidden; opacity: 0; transition: opacity .6s; }
+.cadd-scene__shine circle { stroke: #ce191d; stroke-width: 1.2; stroke-opacity: .35; stroke-linecap: round; stroke-dasharray: 65 935; animation: cadd-grid-shimmer 6s linear infinite; animation-delay: var(--shine-delay); animation-play-state: paused; }
+.cadd-scene.is-shimmering .cadd-scene__shine { opacity: 1; }
+.cadd-scene.is-shimmering .cadd-scene__shine circle { animation-play-state: running; }
+@keyframes cadd-grid-shimmer { to { stroke-dashoffset: -1000; } }
+@media (prefers-reduced-motion: reduce) { .cadd-scene__shine { display: none; } }
+/* Flat SVG and independently positioned words around a true centre anchor. */
+.cadd-scene__moving-coin { position: fixed; left: 0; top: 0; z-index: 22; pointer-events: none; transform-style: preserve-3d; }
+.cadd-coin__face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; backface-visibility: hidden; }
+.cadd-coin__face--front { transform: translateZ(calc(var(--coin-depth) / 2)); }
+.cadd-coin__face--back { transform: translateZ(calc(var(--coin-depth) / -2)) rotateY(180deg); }
+.cadd-coin__wall { position: absolute; left: 0; top: 0; transform-origin: 0 0; background: #941216; backface-visibility: visible; }
+.cadd-scene__title { inset: 0; display: block; transform: none; pointer-events: none; }
+.cadd-scene__title > span:first-child, .cadd-scene__title > strong { position: absolute; left: 0; top: 0; }
+.cadd-scene__gap { display: none; }
+.cadd-scene__copy { top: 180px; }
+@media (max-width: 479px) { .cadd-scene__copy { top: 150px; font-size: 24px; } }
+
+/* The intro stays at one viewport height while its section enters underneath. */
+.cadd-scene__title.is-viewport-title { position: fixed; inset: 0; z-index: 21; margin: 0; pointer-events: none; }
+
+.cadd-coin__cast-shadow { position: fixed; left: 0; top: 0; z-index: 19; pointer-events: none; object-fit: contain; filter: brightness(0) blur(7px); opacity: 0; }
