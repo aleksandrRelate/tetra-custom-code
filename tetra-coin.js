@@ -152,18 +152,28 @@ async function mount(root) {
     const mobileSize = mix(settledSize, mobileBig, ramp(p, 0, .36));
     const sideX = stageRect.right - edge - mobileSize * ratio / 2;
     if (mobile) grownX = stageRect.right - edge - settledSize * ratio / 2;
-    const turn = mobile ? flight : hop;
     let size = mobile ? mobileSize : hopSize, x = mobile ? sideX : mix(grownX, hopX, hop), y = anchorY;
     // One half-turn per move: a single edge-on moment spread across the whole phase.
-    let spin = 180 * turn, tilt = Math.sin(turn * Math.PI);
-    let roll = 12 * turn; // clockwise, retained after the first flip
+    let spin = 180 * hop, tilt = Math.sin(hop * Math.PI);
+    let roll = 12 * hop; // clockwise, retained after the first flip
     if (land > 0) {
-      size = mix(mobile ? mobileBig : settledSize, target.height, land);
-      x = mix(mobile ? sideX : hopX, target.left + target.width / 2, land);
+      size = mix(settledSize, target.height, land);
+      x = mix(hopX, target.left + target.width / 2, land);
       y = mix(anchorY, target.top + target.height / 2, land) - Math.sin(land * Math.PI) * height * .08;
       spin = 180 + 180 * land;
       tilt = Math.sin(land * Math.PI);
       roll = mix(12, 0, land) + 4 * Math.sin(land * Math.PI);
+    }
+    if (mobile) {
+      // Mobile: one jump straight from the side into the grid — a single arc and half-turn
+      // spanning the heading's flight and the landing.
+      const jump = ramp(p, .36, .96);
+      size = mix(mobileSize, target.height, jump);
+      x = mix(sideX, target.left + target.width / 2, jump);
+      y = mix(anchorY, target.top + target.height / 2, jump) - Math.sin(jump * Math.PI) * height * .08;
+      spin = 180 * jump;
+      tilt = Math.sin(jump * Math.PI);
+      roll = 4 * Math.sin(jump * Math.PI);
     }
     if (heroLinked) {
       // Land straight into the growing state between the words, so nothing jumps when the scene sticks.
