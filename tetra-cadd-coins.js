@@ -203,15 +203,33 @@ import { TessellateModifier } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/e
   const grooveMat = new THREE.MeshStandardMaterial({ color: 0x290005, metalness: 1, roughness: 0.65 });
 
   // A shallow stamped leaf with a real bevel catches the light on either side of the coin.
-  const leafPoints = [
-    [0, .67], [.13, .42], [.27, .49], [.23, .15], [.36, .28],
-    [.41, .17], [.62, .22], [.55, .02], [.64, -.03], [.34, -.28],
-    [.39, -.39], [.08, -.35], [.045, -.58], [-.045, -.58], [-.08, -.35],
-    [-.39, -.39], [-.34, -.28], [-.64, -.03], [-.55, .02], [-.62, .22],
-    [-.41, .17], [-.36, .28], [-.23, .15], [-.27, .49], [-.13, .42],
-  ];
-  const leafShape = new THREE.Shape(leafPoints.map(([x, y]) => new THREE.Vector2(x * .98, y * .98)));
-  leafShape.closePath();
+  // Outline: the approved CADD maple leaf (tetra-coin-mark.svg, 198×198 artboard), unchanged.
+  const LEAF_PATH = 'M98.9802 38.8867C99.3958 38.8868 99.7124 39.1638 99.7917 39.5596C100.267 42.193 101.02 44.9064 101.911 47.5596C105.732 58.8452 117.572 65.3395 129.215 62.7656C129.947 62.5874 130.501 63.3791 130.105 64.0127C127.65 67.8936 112.167 87.9714 118.225 93.8916C124.541 100.069 143.411 81.0418 146.262 77.7148C146.658 77.2595 147.431 77.3381 147.669 77.9121C150.183 84.1689 160.399 83.9313 167.943 80.209H167.924C168.696 79.8131 169.487 80.7435 168.953 81.4365C162.736 89.6931 150.104 108.959 163.528 113.711C163.528 113.711 135.907 116.978 135.907 125.71C135.907 133.372 149.567 134.6 148.896 136.263C148.718 136.698 148.222 136.876 147.787 136.698C136.006 131.808 120.087 142.262 105.553 127.888C104.294 126.642 102.77 125.828 101.165 125.443L104.999 159.569H93.0007L96.8152 125.438C95.2022 125.821 93.6703 126.637 92.406 127.888C77.8729 142.262 61.9535 131.788 50.1726 136.698C49.7371 136.876 49.2424 136.698 49.0642 136.263C48.3933 134.6 62.0532 133.372 62.0535 125.71C62.0535 118.661 43.9962 115.156 37.0857 114.087C36.3531 113.968 36.1347 112.998 36.7683 112.582C46.2129 106.464 34.8278 89.1585 29.0066 81.4365C28.4726 80.7436 29.245 79.8131 30.0369 80.209C37.5608 83.9313 47.7772 84.1491 50.2917 77.9121C50.5295 77.3382 51.3021 77.2397 51.698 77.7148C54.5303 81.0421 73.4177 100.068 79.7341 93.8916C85.7929 87.9912 70.3094 67.8935 67.8542 64.0127C67.4586 63.3989 68.0332 62.6072 68.7458 62.7656C80.388 65.3394 92.228 58.8452 96.0496 47.5596C96.9406 44.9064 97.6935 42.193 98.1687 39.5596C98.248 39.1638 98.5646 38.8867 98.9802 38.8867Z';
+  // Sized to the previous stamp: ~1.25 wide, centred on the coin face (SVG y points down).
+  const LEAF_BOX = { x: 28.83, y: 38.89, w: 140.30, h: 120.68 };
+  const LEAF_SCALE = 1.25 / LEAF_BOX.w;
+  const leafPoint = (x, y) => new THREE.Vector2(
+    (x - LEAF_BOX.x - LEAF_BOX.w / 2) * LEAF_SCALE,
+    -(y - LEAF_BOX.y - LEAF_BOX.h / 2) * LEAF_SCALE,
+  );
+  // The path only uses absolute M, C, L, H and Z.
+  const leafShape = new THREE.Shape();
+  {
+    const tok = LEAF_PATH.match(/[MCLHZ]|-?\d*\.?\d+/g);
+    let i = 0, cmd = '', x = 0, y = 0;
+    const n = () => parseFloat(tok[i++]);
+    while (i < tok.length) {
+      if (/[MCLHZ]/.test(tok[i])) cmd = tok[i++];
+      if (cmd === 'M') { x = n(); y = n(); const p = leafPoint(x, y); leafShape.moveTo(p.x, p.y); cmd = 'L'; }
+      else if (cmd === 'L') { x = n(); y = n(); const p = leafPoint(x, y); leafShape.lineTo(p.x, p.y); }
+      else if (cmd === 'H') { x = n(); const p = leafPoint(x, y); leafShape.lineTo(p.x, p.y); }
+      else if (cmd === 'C') {
+        const a = leafPoint(n(), n()), b = leafPoint(n(), n());
+        x = n(); y = n(); const c = leafPoint(x, y);
+        leafShape.bezierCurveTo(a.x, a.y, b.x, b.y, c.x, c.y);
+      } else if (cmd === 'Z') { leafShape.closePath(); }
+    }
+  }
   let leafGeo = new THREE.ExtrudeGeometry(leafShape, {
     depth: 0.006, bevelEnabled: true, bevelSegments: 3,
     steps: 1, bevelSize: 0.009, bevelThickness: 0.006,
