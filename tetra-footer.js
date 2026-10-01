@@ -73,14 +73,18 @@
         var SVGNS = 'http://www.w3.org/2000/svg';
         var BASE = '#CE191D';
         var PULSE = '#EBEDF4';
-        var path = Array.prototype.slice.call(footerWordmark.children).filter(function (el) {
+        // Знак — набор path (по букве на path), нарисованных обводкой (stroke)
+        // или заливкой (fill, старый вариант). Красим тем же атрибутом все буквы.
+        var paths = Array.prototype.slice.call(footerWordmark.children).filter(function (el) {
           return el.tagName.toLowerCase() === 'path';
-        }).pop();
-        if (!path) return;
+        });
+        if (!paths.length) return;
+        var paint = paths[0].hasAttribute('stroke') ? 'stroke' : 'fill';
+        var originals = paths.map(function (el) { return el.getAttribute(paint) || BASE; });
+        function setPaint(value) { paths.forEach(function (el, i) { el.setAttribute(paint, value || originals[i]); }); }
         var vb = footerWordmark.viewBox && footerWordmark.viewBox.baseVal;
         var vbW = vb && vb.width ? vb.width : 1392;
         var vbH = vb && vb.height ? vb.height : 289;
-        var originalFill = path.getAttribute('fill') || BASE;
 
         var grad = document.createElementNS(SVGNS, 'radialGradient');
         var gid = 'footer-wordmark-pulse';
@@ -135,7 +139,7 @@
           if (pulse) { pulse.kill(); pulse = null; }
           var p = toSvgPoint(event);
           gsap.set(grad, { attr: { cx: p.x, cy: p.y, r: vbW * 1.4 } });
-          path.setAttribute('fill', 'url(#' + gid + ')');
+          setPaint('url(#' + gid + ')');
           gsap.to(grad, {
             attr: { r: R_MAX },
             duration: 0.55,
@@ -156,7 +160,7 @@
             attr: { r: vbW * 1.4 },
             duration: 0.55,
             ease: 'power2.out',
-            onComplete: function () { path.setAttribute('fill', originalFill); }
+            onComplete: function () { setPaint(); }
           });
         }
         footerWordmark.addEventListener('pointerenter', onEnter);
@@ -171,7 +175,7 @@
           footerWordmark.removeEventListener('pointerleave', onLeave);
           if (defs.parentNode) defs.parentNode.removeChild(defs);
           if (hit.parentNode) hit.parentNode.removeChild(hit);
-          path.setAttribute('fill', originalFill);
+          setPaint();
         };
       });
     }
