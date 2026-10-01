@@ -127,3 +127,21 @@ html.lenis, html.lenis body { height: auto; }
     backdrop-filter: none;
   }
 }
+
+/* ===== CADD peg: низкие экраны =====
+   Секция 100vh, overflow hidden: надпись + монеты + заголовок по высоте
+   не влезают на низких окнах. Блок монет (flex-shrink: 0 в Webflow) не
+   сжимается, поэтому уменьшаем его целиком через zoom — текст не наезжает
+   и не обрезается краями секции. */
+@media screen and (min-width: 480px) and (max-height: 820px) {
+  .cadd-peg_coins { zoom: 0.8; }
+}
+@media screen and (min-width: 480px) and (max-height: 680px) {
+  .cadd-peg_coins { zoom: 0.62; }
+}
+@media screen and (max-width: 479px) and (max-height: 700px) {
+  .cadd-peg_coins { zoom: 0.8; }
+}
+@media screen and (max-width: 479px) and (max-height: 580px) {
+  .cadd-peg_coins { zoom: 0.65; }
+}
