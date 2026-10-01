@@ -41,6 +41,23 @@
   color: var(--_tetra-tokens---color-dark, #090e13);
 }
 
+/* --- логотип (Tetra / CADD / Tetra Trust): цвета по утверждённым вариантам.
+   tetra-navbar.js встраивает SVG и ставит на заливки роли logo-ink (текст),
+   logo-mark (знак) и logo-leaf (лист в монете CADD).
+   Тёмная тема: всё белое, лист CADD красный. Светлая тема и открытое
+   меню: текст #121212, знак красный, лист белый. --- */
+.navbar-container .navbar-logo-svg { --logo-ink: #FFFFFF; --logo-mark: #FFFFFF; --logo-leaf: #CE191D; }
+.navbar.is-theme-light .navbar-container .navbar-logo-svg,
+.navbar.is-menu-open .navbar-container .navbar-logo-svg { --logo-ink: #121212; --logo-mark: #CE191D; --logo-leaf: #FFFFFF; }
+.navbar-logo-svg .logo-ink { fill: var(--logo-ink); }
+.navbar-logo-svg .logo-mark { fill: var(--logo-mark); }
+.navbar-logo-svg .logo-leaf { fill: var(--logo-leaf); }
+.navbar-logo-svg .logo-ink,
+.navbar-logo-svg .logo-mark,
+.navbar-logo-svg .logo-leaf { transition: fill .35s ease; }
+/* пока SVG не встроен (или JS не загрузился): на тёмной теме делаем <img> белым */
+.navbar:not(.is-theme-light):not(.is-menu-open) img.navbar-logo-svg { filter: brightness(0) invert(1); }
+
 /* ===== mobile scroll performance (<=479px) ===== */
 @media screen and (max-width: 479px) {
   /* backdrop-filter внутри фиксированной шапки — главный тормоз скролла на

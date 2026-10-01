@@ -4,6 +4,8 @@
 //   • скрытие banner + logo при скролле вниз (nav-menu и кнопки остаются)
 //   • переключение цвета навбара по атрибуту секций [navbar-color]
 //   • мобильное меню (<=479px): шторка + выезд пунктов из масок
+//   • логотип: <img> со SVG встраивается в страницу, чтобы его цвета
+//     переключались вместе с темой навбара (см. tetra-navbar.css)
 //
 // Reveal-строки на ссылках навбара по ховеру — в tetra-page.js
 // (общая система btn-reveal для всех кнопок сайта).
@@ -531,6 +533,33 @@
 
     window.addEventListener("resize", function () {
       if (window.innerWidth > BREAKPOINT && isMenuOpen) closeMenu();
+    });
+  })();
+
+  /* ------------------------------------------------------------------ *
+   * Логотип навбара. В Webflow лого — <img> с SVG (Tetra / CADD /
+   * Tetra Trust), а цвет картинки из CSS не поменять. Встраиваем SVG и
+   * раскладываем заливки по ролям: текст (#121212), знак (#CE191D) и
+   * лист в монете CADD (white). Цвета ролей задаёт tetra-navbar.css по
+   * теме навбара — как в утверждённых вариантах логотипов.
+   * ------------------------------------------------------------------ */
+  (function () {
+    var ROLES = { '#121212': 'logo-ink', '#ce191d': 'logo-mark', 'white': 'logo-leaf', '#ffffff': 'logo-leaf', '#fff': 'logo-leaf' };
+    document.querySelectorAll('img.navbar-logo-svg').forEach(function (img) {
+      if (!/\.svg(\?|$)/i.test(img.src)) return;
+      fetch(img.src).then(function (r) { return r.text(); }).then(function (text) {
+        var svg = new DOMParser().parseFromString(text, 'image/svg+xml').documentElement;
+        if (!svg || svg.nodeName.toLowerCase() !== 'svg') return;
+        svg.querySelectorAll('[fill]').forEach(function (el) {
+          var role = ROLES[(el.getAttribute('fill') || '').toLowerCase()];
+          if (role) { el.removeAttribute('fill'); el.classList.add(role); }
+        });
+        svg.removeAttribute('width'); svg.removeAttribute('height');
+        svg.setAttribute('class', img.className + ' is-inline');
+        svg.setAttribute('role', 'img');
+        svg.setAttribute('aria-label', img.alt || 'Tetra');
+        img.replaceWith(svg);
+      }).catch(function () { /* остаётся <img> с CSS-фолбэком */ });
     });
   })();
 })();
