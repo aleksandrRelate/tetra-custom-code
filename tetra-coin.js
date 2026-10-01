@@ -221,8 +221,10 @@ async function mount(root) {
     const shadow = ramp(p, .56, .64) * (1 - ramp(p, .66, .84));
     castShadow.style.width = `${size * ratio}px`;
     castShadow.style.height = `${size}px`;
-    castShadow.style.transform = `translate(${x+5}px, ${y+9}px) translate(-50%, -50%) rotate(${roll}deg)`;
-    castShadow.style.opacity = String(.20 * shadow);
+    // The shadow narrows with the turn, so an edge-on coin casts a thin sliver, not a full disc.
+    const facing = Math.max(.12, Math.abs(Math.cos(spin * Math.PI / 180)));
+    castShadow.style.transform = `translate(${x+5}px, ${y+9}px) translate(-50%, -50%) rotate(${roll}deg) scaleX(${facing})`;
+    castShadow.style.opacity = String((mobile ? .12 : .20) * shadow);
     // Keep the same SVG fully opaque through landing; no crossfade or swap.
     coin.style.opacity = '1';
     coin.style.visibility = still || rect.bottom < 0 ? 'hidden' : 'visible';
