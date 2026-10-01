@@ -148,4 +148,35 @@
       });
     });
   });
+
+  /* ------------------------------------------------------------------ *
+   * Стабильные точки ScrollTrigger. Высота страницы меняется уже после
+   * первого замера: догружаются шрифты и картинки, сцена CADD-монеты
+   * асинхронно растягивается со 100svh до 360svh. Без пересчёта все
+   * start/end ниже такого места съезжают — «раз через раз», в зависимости
+   * от того, что успело раньше. Следим за высотой документа и делаем один
+   * ScrollTrigger.refresh() после того, как она перестала меняться.
+   * Смену только высоты окна (адресная строка на мобилках) пропускаем —
+   * её ScrollTrigger обрабатывает сам.
+   * ------------------------------------------------------------------ */
+  T.ready(function () {
+    if (!window.ResizeObserver) return;
+    var root = document.documentElement;
+    var lastHeight = root.scrollHeight, lastWidth = window.innerWidth, timer;
+    function settle() {
+      timer = 0;
+      var height = root.scrollHeight;
+      if (Math.abs(height - lastHeight) < 2) return;
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+      // pin-spacer'ы пересчитаны — запоминаем итоговую высоту, чтобы не зациклиться
+      lastHeight = root.scrollHeight;
+    }
+    new ResizeObserver(function () {
+      if (window.innerWidth === lastWidth && Math.abs(root.scrollHeight - lastHeight) < 2) return;
+      lastWidth = window.innerWidth;
+      clearTimeout(timer);
+      timer = setTimeout(settle, 200);
+    }).observe(document.body);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { clearTimeout(timer); timer = setTimeout(settle, 200); });
+  });
 })();
