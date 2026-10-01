@@ -43,6 +43,8 @@
 .cadd-scene:not(.is-ready) .cadd-scene__stage { position: relative; height: 100%; }
 .cadd-scene:not(.is-ready) .cadd-scene__title, .cadd-scene:not(.is-ready) .cadd-scene__fallback { display: none; }
 .cadd-scene:not(.is-ready) .cadd-scene__copy, .cadd-scene:not(.is-ready) .cadd-scene__grid, .cadd-scene:not(.is-ready) .cadd-scene__mark { opacity: 1; }
+/* Without JS (and on the Webflow canvas) show the scene's final frame: paragraph fully in ink. */
+.cadd-scene:not(.is-ready) .cadd-scene__copy { color: var(--coin-ink); }
 .cadd-scene.is-static { height: 100svh; min-height: 620px; }
 .cadd-scene.is-static .cadd-scene__stage { height: 100%; position: relative; }
 @media (min-width: 480px) and (max-width: 991px) {
