@@ -90,3 +90,6 @@
 .cadd-scene__title.is-viewport-title { position: fixed; inset: 0; z-index: 21; margin: 0; pointer-events: none; }
 
 .cadd-coin__cast-shadow { position: fixed; left: 0; top: 0; z-index: 19; pointer-events: none; object-fit: contain; filter: brightness(0) blur(7px); opacity: 0; }
+
+/* Background arcs fade out at the stage's bottom edge instead of being cut off. */
+.cadd-scene__stage::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 18%; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,0), #fff); }
