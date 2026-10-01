@@ -70,7 +70,8 @@ async function mount(root) {
     });
     node.replaceWith(fragment);
   });
-  const fillWords = [...destinationWords, ...remainder.querySelectorAll('.cadd-scene__fill-word')];
+  // Introducing CADD docks already in ink; only the rest of the paragraph fills.
+  const fillWords = [...remainder.querySelectorAll('.cadd-scene__fill-word')];
   let frame = 0, visible = true, destroyed = false;
   function textRect(element) { const range = document.createRange(); range.selectNodeContents(element); return range.getBoundingClientRect(); }
   function draw() {
@@ -112,7 +113,7 @@ async function mount(root) {
     title.style.fontSize = '';
     const initialFont = parseFloat(getComputedStyle(title).fontSize);
     title.style.fontSize = `${mix(initialFont, parseFloat(getComputedStyle(copy).fontSize), flight)}px`;
-    title.style.color = `color-mix(in srgb, var(--coin-ink) ${100 * (1-flight)}%, var(--coin-muted))`;
+    title.style.color = 'var(--coin-ink)';
     titleWords.forEach(word => { word.style.transform = ''; });
     const fontRatio = parseFloat(getComputedStyle(title).fontSize) / parseFloat(getComputedStyle(copy).fontSize);
     const [introSource, caddSource] = titleWords.map(textRect);

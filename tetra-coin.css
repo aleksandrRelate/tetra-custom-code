@@ -57,7 +57,7 @@
 
 @media (max-width: 991px) { .cadd-scene__line-break { display: none; } }
 
-.cadd-scene__destination { white-space: nowrap; }
+.cadd-scene__destination { white-space: nowrap; color: var(--coin-ink); }
 .cadd-scene__destination strong { font-weight: 400; }
 .cadd-scene__title > span:first-child, .cadd-scene__title > strong { display: inline-block; }
 .cadd-scene.is-ready .cadd-scene__destination,
