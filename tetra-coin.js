@@ -85,7 +85,9 @@ async function mount(root) {
     const mobile = width <= 479;
     // Keep the copy below the whole navigation, including its announcement bar.
     const navBottom = navbar ? Math.max(0, navbar.getBoundingClientRect().bottom) : 0;
-    copy.style.top = `${Math.max(mobile ? 150 : 180, navBottom + 32)}px`;
+    // On mobile the whole scene sits ~2.5rem higher.
+    const lift = mobile ? 40 : 0;
+    copy.style.top = `${Math.max(mobile ? 150 - lift : 180, navBottom + 32 - lift)}px`;
     // Storyboard (Figma "3d scene v2"):
     // words at the edges → close in while the coin grows between them
     // → first flip: CADD joins Introducing, both fly into the complete grey copy
@@ -108,14 +110,13 @@ async function mount(root) {
     const centerX = stageRect.left + width / 2, centerY = stageRect.top + height / 2;
     // Words and coin share the viewport centre while the scene is still sliding in,
     // then follow the stage once it scrolls away.
-    const anchorY = Math.min(centerY, height / 2);
+    const anchorY = Math.min(centerY, height / 2) - lift;
 
     title.style.fontSize = '';
     const initialFont = parseFloat(getComputedStyle(title).fontSize);
     title.style.fontSize = `${mix(initialFont, parseFloat(getComputedStyle(copy).fontSize), flight)}px`;
     title.style.color = 'var(--coin-ink)';
     titleWords.forEach(word => { word.style.transform = ''; });
-    const fontRatio = parseFloat(getComputedStyle(title).fontSize) / parseFloat(getComputedStyle(copy).fontSize);
     const [introSource, caddSource] = titleWords.map(textRect);
     const [introEnd, caddEnd] = destinationWords.map(textRect);
     const edge = mobile ? 16 : Math.max(24, width * .064);
@@ -124,8 +125,12 @@ async function mount(root) {
     const grownSize = large;
     const gap = mobile ? 12 : grownSize * ratio * .47;
     // Centred on the coin, unless Introducing would cross the edge (narrow screens).
-    const introBeside = Math.max(stageRect.left + edge, centerX - grownSize * ratio / 2 - gap - introSource.width);
-    const grownX = centerX;
+    // Centred on the coin; if Introducing would cross the edge (narrow screens),
+    // centre the whole Introducing · coin · CADD group instead of pinning it left.
+    const coinCentredIntro = centerX - grownSize * ratio / 2 - gap - introSource.width;
+    const groupWidth = introSource.width + gap + grownSize * ratio + gap + caddSource.width;
+    const introBeside = coinCentredIntro >= stageRect.left + edge ? coinCentredIntro : centerX - groupWidth / 2;
+    const grownX = introBeside + introSource.width + gap + grownSize * ratio / 2;
     const caddBeside = grownX + grownSize * ratio / 2 + gap;
     // Words spread by the same distance on both sides, so the coin stays centred
     // between them; the widest spread still keeps both words on screen.
@@ -134,7 +139,10 @@ async function mount(root) {
     const introStartX = introBeside - spread;
     const caddStartX = caddBeside + spread;
     // CADD slides onto Introducing; the coin hops over it to the far side.
-    const joinedCaddX = introStartX + (caddEnd.left - introEnd.left) * fontRatio;
+    // Joined spacing at the starting font size: flight interpolates from here to the
+    // paragraph, so the words keep their natural space while the font shrinks.
+    const startRatio = initialFont / parseFloat(getComputedStyle(copy).fontSize);
+    const joinedCaddX = introStartX + (caddEnd.left - introEnd.left) * startRatio;
     const settledSize = grownSize * .78;
     const hopSize = mix(grownSize, settledSize, hop);
     const originalHopX = Math.min(joinedCaddX + caddSource.width + gap + hopped * ratio / 2, stageRect.right - edge - hopped * ratio / 2);
@@ -208,7 +216,7 @@ async function mount(root) {
     const introX = mix(introStartX, introEnd.left, flight);
     // Blend joining into the shared flight; never snap CADD to a new anchor.
     const caddX = mix(mix(caddStartX, joinedCaddX, join), caddEnd.left, flight);
-    const titleAnchorY = height / 2;
+    const titleAnchorY = height / 2 - lift;
     const startY = titleAnchorY - introSource.height / 2;
     titleWords[0].style.transform = `translate(${introX-introSource.left}px, ${mix(startY,introEnd.top,flight)-introSource.top}px)`;
     titleWords[1].style.transform = `translate(${caddX-caddSource.left}px, ${mix(startY,caddEnd.top,flight)-caddSource.top}px)`;
