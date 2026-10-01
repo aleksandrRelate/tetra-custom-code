@@ -145,20 +145,25 @@ async function mount(root) {
     const originalHopX = Math.min(joinedCaddX + caddSource.width + gap + hopped * ratio / 2, stageRect.right - edge - hopped * ratio / 2);
     const hopX = Math.min(originalHopX + width * .15, stageRect.right - edge - hopped * ratio / 2);
 
-    // Mobile: the coin waits at the right edge (no hop over CADD) and only flips once, on landing.
-    const sideX = stageRect.right - edge - settledSize * ratio / 2;
-    if (mobile) grownX = sideX;
-    let size = mobile ? settledSize : hopSize, x = mobile ? sideX : mix(grownX, hopX, hop), y = anchorY;
+    // Mobile: the coin sits at the right edge beside the joined words, grows with the scroll
+    // into the free space, then flips while the heading flies into the paragraph.
+    const freeSpace = stageRect.right - edge - (joinedCaddX + caddSource.width) - 2 * gap;
+    const mobileBig = Math.max(settledSize, Math.min(freeSpace, width * .36));
+    const mobileSize = mix(settledSize, mobileBig, ramp(p, 0, .36));
+    const sideX = stageRect.right - edge - mobileSize * ratio / 2;
+    if (mobile) grownX = stageRect.right - edge - settledSize * ratio / 2;
+    const turn = mobile ? flight : hop;
+    let size = mobile ? mobileSize : hopSize, x = mobile ? sideX : mix(grownX, hopX, hop), y = anchorY;
     // One half-turn per move: a single edge-on moment spread across the whole phase.
-    let spin = mobile ? 0 : 180 * hop, tilt = mobile ? 0 : Math.sin(hop * Math.PI);
-    let roll = mobile ? 0 : 12 * hop; // clockwise, retained after the first flip
+    let spin = 180 * turn, tilt = Math.sin(turn * Math.PI);
+    let roll = 12 * turn; // clockwise, retained after the first flip
     if (land > 0) {
-      size = mix(settledSize, target.height, land);
+      size = mix(mobile ? mobileBig : settledSize, target.height, land);
       x = mix(mobile ? sideX : hopX, target.left + target.width / 2, land);
       y = mix(anchorY, target.top + target.height / 2, land) - Math.sin(land * Math.PI) * height * .08;
-      spin = (mobile ? 0 : 180) + 180 * land;
+      spin = 180 + 180 * land;
       tilt = Math.sin(land * Math.PI);
-      roll = mix(mobile ? 0 : 12, 0, land) + 4 * Math.sin(land * Math.PI);
+      roll = mix(12, 0, land) + 4 * Math.sin(land * Math.PI);
     }
     if (heroLinked) {
       // Land straight into the growing state between the words, so nothing jumps when the scene sticks.
