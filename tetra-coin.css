@@ -26,8 +26,8 @@
 .cadd-scene__title strong { font-weight: 400; }
 .cadd-scene__gap { width: 0; flex: none; }
 .cadd-scene__art { position: absolute; width: 100%; aspect-ratio: 1440 / 903; top: 50%; transform: translateY(-50%); pointer-events: none; }
-.cadd-scene__grid { position: absolute; inset: 0; width: 150%; height: 199.3355%; opacity: 0; }
-.cadd-scene__mark { position: absolute; left: 78.0097%; top: 51.256%; width: 19.4444%; height: 31.0078%; opacity: 0; }
+.cadd-scene__grid { position: absolute; inset: 0; width: 150%; max-width: none; height: 199.3355%; opacity: 0; }
+.cadd-scene__mark { position: absolute; max-width: none; left: 78.0097%; top: 51.256%; width: 19.4444%; height: 31.0078%; opacity: 0; }
 .cadd-scene__copy {
   position: absolute; z-index: 2; top: max(80px, calc(50% - 25.8vw)); left: 24px;
   width: 63.6%; max-width: 1100px; margin: 0;
