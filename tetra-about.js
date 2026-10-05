@@ -2,8 +2,8 @@
 // и tetra-page.js.
 //   • hero — загрузка как на Tetra Trust / лендинге: слова заголовка из маски,
 //     текст, кнопка сверху через маску, navbar
-//   • section_about-story — как section_intro лендинга (слова из маски +
-//     пословная заливка muted → ink по scrub), но без pin
+//   • section_about-story — как section_intro лендинга (строки из маски +
+//     построчная заливка muted → ink по scrub), но без pin
 //   • section_about-team — шапка стандартно, карточки появляются лесенкой
 //     (текст внутри карточек не анимируется)
 //   • section_about-board — метка стандартно, логотип проявляется, строки
@@ -76,7 +76,7 @@
 
     /* ------------------------------------------------------------------ *
      * SECTION_ABOUT-STORY — как section_intro лендинга, без pin:
-     * каждый абзац выезжает словами из маски при входе в экран,
+     * каждый абзац выезжает построчно из маски при входе в экран,
      * а заливка muted → ink идёт по scrub, пока секция проходит экран
      * ------------------------------------------------------------------ */
     var story = document.querySelector('.section_about-story');
@@ -88,22 +88,22 @@
         var paragraphs = Array.from(storyText.querySelectorAll('.about-story_p'));
         var splits = [];
         var reveals = [];
-        var words = [];
+        var lines = [];
         paragraphs.forEach(function (p) {
-          var sp = SplitText.create(p, { type: 'lines,words', linesClass: 'section-reveal-line' });
+          var sp = SplitText.create(p, { type: 'lines', mask: 'lines' });
           splits.push(sp);
-          words = words.concat(sp.words);
-          reveals.push(gsap.from(sp.words, {
+          lines = lines.concat(sp.lines);
+          reveals.push(gsap.from(sp.lines, {
             yPercent: 101,
-            duration: 0.555,
-            stagger: 0.05,
+            duration: 0.7,
+            stagger: 0.08,
             ease: 'power4.out',
             immediateRender: true,
             lazy: false,
             scrollTrigger: { trigger: p, start: 'top 85%', once: true }
           }));
         });
-        gsap.set(words, { color: base });
+        gsap.set(lines, { color: base });
         var fillTl = gsap.timeline({
           scrollTrigger: {
             trigger: storyText,
@@ -113,7 +113,7 @@
             invalidateOnRefresh: true
           }
         });
-        fillTl.to(words, { color: fill, ease: 'none', duration: 0.6, stagger: 1 });
+        fillTl.to(lines, { color: fill, ease: 'none', duration: 0.6, stagger: 1 });
         return function () {
           reveals.forEach(function (a) {
             if (a.scrollTrigger) a.scrollTrigger.kill();
