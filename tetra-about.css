@@ -1,15 +1,28 @@
 /* Tetra — страница About. Подключается после tetra-core.css.
    Фото команды в CMS цветные; ч/б — фильтр grayscale(100%) на
    .about-team_photo (класс в Webflow, там же transition 800ms ease).
-   Наведение / фокус на карточке возвращает цвет. */
+   Наведение / фокус на карточке (команда и совет директоров) возвращает
+   цвет фото и делает иконку LinkedIn чёрной (opacity 0.5 → 1). */
+.about-linkedin {
+  transition: opacity 800ms ease;
+}
 @media (hover: hover) and (pointer: fine) {
   .about-team_card:hover .about-team_photo {
     filter: none;
+  }
+  .about-team_card:hover .about-linkedin,
+  .about-board_item:hover .about-linkedin {
+    opacity: 1;
   }
 }
 .about-team_card:focus-visible .about-team_photo {
   filter: none;
 }
+.about-team_card:focus-visible .about-linkedin,
+.about-board_item:focus-visible .about-linkedin {
+  opacity: 1;
+}
 @media (prefers-reduced-motion: reduce) {
-  .about-team_photo { transition: none; }
+  .about-team_photo,
+  .about-linkedin { transition: none; }
 }
