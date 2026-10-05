@@ -1,6 +1,6 @@
 /* Tetra — страница About. Подключается после tetra-core.css.
    Фото команды в CMS цветные; ч/б — фильтр grayscale(100%) на
-   .about-team_photo (класс в Webflow, там же transition 400ms).
+   .about-team_photo (класс в Webflow, там же transition 800ms ease).
    Наведение / фокус на карточке возвращает цвет. */
 @media (hover: hover) and (pointer: fine) {
   .about-team_card:hover .about-team_photo {
