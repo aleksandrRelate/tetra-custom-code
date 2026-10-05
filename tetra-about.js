@@ -90,7 +90,8 @@
         var reveals = [];
         var lines = [];
         paragraphs.forEach(function (p) {
-          var sp = SplitText.create(p, { type: 'lines', mask: 'lines' });
+          // reduceWhiteSpace: false — иначе SplitText превращает &nbsp; в обычные пробелы
+          var sp = SplitText.create(p, { type: 'lines', mask: 'lines', reduceWhiteSpace: false });
           splits.push(sp);
           lines = lines.concat(sp.lines);
           reveals.push(gsap.from(sp.lines, {
