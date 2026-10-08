@@ -179,4 +179,11 @@
     }).observe(document.body);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { clearTimeout(timer); timer = setTimeout(settle, 200); });
   });
+
+  // Поля формы контакта — без подсказок-плейсхолдеров (фидбек 7 окт.); в Webflow MCP placeholder не редактируется
+  T.ready(function () {
+    document.querySelectorAll('.contact_input[placeholder]').forEach(function (el) {
+      el.removeAttribute('placeholder');
+    });
+  });
 })();
