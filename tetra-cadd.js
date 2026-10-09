@@ -268,40 +268,19 @@
           });
 
         // 2) закреплённая часть — одна непрерывная сцена
-        // Если секция выше экрана (ноутбуки, узкое окно по высоте), хвост уходит
-        // за нижний край и виден только после пина. Не сжимаем вёрстку: пин
-        // удлиняется на недостающую высоту, и в этот отрезок содержимое
-        // сдвигается вверх, пока низ секции не встанет в низ экрана.
+        // Если секция выше экрана (ноутбуки, узкое окно по высоте), текст уходил
+        // за нижний край. Не сжимаем вёрстку: пока загораются строки, содержимое
+        // едет вверх на недостающую высоту — к финалу низ секции в низу экрана.
         var pad = peg.querySelector('.cadd-peg_pad');
-        function baseScroll() { return window.innerHeight * 2.6; }   // было 180% — добавился шаг со второй строкой
         function overflow() { return Math.max(0, peg.offsetHeight - window.innerHeight); }
-
-        var pinST = ScrollTrigger.create({
-          trigger: peg,
-          start: 'top top',
-          end: function () { return '+=' + (baseScroll() + overflow()); },
-          pin: true,
-          invalidateOnRefresh: true
-        });
-        var shift = pad && gsap.fromTo(pad, { y: 0 }, {
-          y: function () { return -overflow(); },
-          ease: 'none',
-          scrollTrigger: {
-            trigger: peg,
-            // числами от старта пина: 'top+=N' считался бы уже от сдвинутой пин-спейсером позиции
-            start: function () { return pinST.start + baseScroll(); },
-            end: function () { return pinST.start + baseScroll() + overflow(); },
-            scrub: 1,
-            invalidateOnRefresh: true
-          }
-        });
 
         var tl = gsap.timeline({
           defaults: { ease: 'none' },
           scrollTrigger: {
             trigger: peg,
             start: 'top top',
-            end: function () { return '+=' + baseScroll(); },
+            end: '+=260%',   // было 180% — добавился шаг со второй строкой
+            pin: true,
             scrub: 1,
             invalidateOnRefresh: true
           }
@@ -311,6 +290,8 @@
         // монеты выезжают снизу (стартуют полностью за нижним краем секции)
         tl.fromTo(loonie, { y: rem(60) }, { y: 0, duration: 0.7, ease: 'power2.out' }, 0.15);
         tl.fromTo(coin, { x: rem(-0.25), y: rem(72) }, { x: 0, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25);
+        // сдвиг — вровень со строками: от появления первой до конца второй
+        if (pad) tl.fromTo(pad, { y: 0 }, { y: function () { return -overflow(); }, duration: 1.0 }, 0.5);
         if (lines.length) {
           // строки загораются по очереди: первая — с середины движения монет
           // (снизу, синхронно с монетой), дальше по скроллу следующая, а
@@ -328,9 +309,7 @@
         }
 
         return function () {
-          pinST.kill();
-          [intro, tl, shift].forEach(function (a) {
-            if (!a) return;
+          [intro, tl].forEach(function (a) {
             if (a.scrollTrigger) a.scrollTrigger.kill();
             a.kill();
           });
