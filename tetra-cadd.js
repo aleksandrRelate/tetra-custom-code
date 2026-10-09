@@ -62,6 +62,22 @@
       });
     }
 
+    // раскадровка Figma 12793:3973: Sent (первая карточка) всегда справа
+    // от монеты, Received — слева; каждая идёт по своим 4 местам по кругу.
+    // Мобилка: карточки по горизонтали пересекаются на ~3rem, высота 2.89rem, центр
+    // сцены 12rem — поэтому все места выше центра (top ≤ 9), а у любой пары,
+    // что бывает на сцене вместе ((k,k) и (k+1,k)), разница top ≥ 4rem
+    var CADD_TX_SLOTS = {
+      desktop: [
+        [[50.8125, 6.6875], [53.1875, 20.75], [45.625, 3.75], [51.9375, 22.125]],
+        [[10.5625, 15.625], [6.5, 8.75], [14.8125, 21.3125], [6.25, 3.75]]
+      ],
+      mobile: [
+        [[0, 9], [0, 7], [0, 5], [0, 1]],
+        [[8.5439, 3], [8.5439, 1], [8.5439, 9], [8.5439, 5]]
+      ]
+    };
+
     /* ------------------------------------------------------------------ *
      * SECTION_CADD-HERO — хореография при загрузке, как HERO лендинга
      * (tetra-page.js 1b): визуал → eyebrow → слова заголовка из маски → текст
@@ -126,6 +142,10 @@
         chTl.to(chButtons, { yPercent: 0, duration: 0.9, stagger: 0.12, force3D: true }, 1.1);
       }
       if (chCards.length) {
+        // мобилка: вёрстка ставит первую карточку ниже центра — берём место 0 раскадровки
+        if (chCards.length === 2 && window.matchMedia('(max-width: 479px)').matches) {
+          chCards.forEach(function (c, i) { c.style.top = CADD_TX_SLOTS.mobile[i][0][1] + 'rem'; });
+        }
         gsap.set(chCards, { autoAlpha: 0, y: '1.5rem' });
         chTl.to(chCards, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12 }, 1.2);
       }
@@ -160,18 +180,6 @@
       var stage = hero.querySelector('.cadd-hero_stage');
       if (!stage) return;
 
-      // раскадровка Figma 12793:3973: Sent (первая карточка) всегда справа
-      // от монеты, Received — слева; каждая идёт по своим 4 местам по кругу
-      var SLOTS = {
-        desktop: [
-          [[50.8125, 6.6875], [53.1875, 20.75], [45.625, 3.75], [51.9375, 22.125]],
-          [[10.5625, 15.625], [6.5, 8.75], [14.8125, 21.3125], [6.25, 3.75]]
-        ],
-        mobile: [
-          [[0, 15.3321], [0, 8.6], [0, 19.9], [0, 12]],
-          [[8.5439, 3.911], [8.5439, 19.9], [8.5439, 1.2], [8.5439, 16.5]]
-        ]
-      };
       var VALUES = [
         ['250 CADD', '85 CADD', '2,000 CADD', '320 CADD'],
         ['4,500 CADD', '1,200 CADD', '15,000 CADD', '760 CADD']
@@ -183,7 +191,7 @@
       var pending = null;
 
       function place(i) {
-        var s = SLOTS[mqMobile.matches ? 'mobile' : 'desktop'][i][slotOf[i]];
+        var s = CADD_TX_SLOTS[mqMobile.matches ? 'mobile' : 'desktop'][i][slotOf[i]];
         cards[i].style.left = s[0] + 'rem';
         cards[i].style.top = s[1] + 'rem';
       }
