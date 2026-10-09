@@ -10,6 +10,8 @@
   // папка с файлами репозитория (GitHub Pages) — для живых SVG-скринов
   var ASSET_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^/]*$/, '') ||
     'https://aleksandrrelate.github.io/tetra-custom-code/';
+  // Bump when the component CSS contract changes; JS and CSS must ship together.
+  var STYLE_VERSION = '20261009-1';
   var DURATION = 5000;       // мс на пункт
   var MARQUEE_SPEED = 60;    // px/с — скорость бегущей строки
   var ZOOM_DELAY = 1000;     // мс от включения пункта до зума телефона
@@ -540,9 +542,36 @@
     return { play: play };
   }
 
+  // Webflow keeps the same asset URLs across GitHub Pages deployments. An open
+  // page (or browser cache) can therefore pair new JS with old CSS. Load the
+  // matching stylesheet before creating overlapping phone layers and SVGs.
+  function start() {
+    if (!document.querySelector('.section_cadd-features')) return;
+    if (window.Tetra && window.Tetra.off && window.Tetra.off('features')) return;
+    var link = document.querySelector('link[rel="stylesheet"][href*="tetra-cadd-features.css"]');
+    var url = new URL(link ? link.href : ASSET_BASE + 'tetra-cadd-features.css', document.baseURI);
+    if (link && url.searchParams.get('v') === STYLE_VERSION && link.sheet) {
+      init();
+      return;
+    }
+    var isNew = !link;
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+    }
+    link.addEventListener('load', init, { once: true });
+    link.addEventListener('error', function () {
+      // Keep the original static Webflow content if component styles fail.
+      console.warn('Tetra CADD features: stylesheet failed to load; keeping static content.');
+    }, { once: true });
+    url.searchParams.set('v', STYLE_VERSION);
+    link.href = url.href;
+    if (isNew) document.head.appendChild(link);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
+    document.addEventListener('DOMContentLoaded', start, { once: true });
   } else {
-    init();
+    start();
   }
 })();
