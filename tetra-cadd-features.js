@@ -18,9 +18,11 @@
   // зум по пунктам: точка фокуса (по высоте скрина), сила, длительность, кривая —
   // у каждого своё, чтобы слайды не повторяли друг друга
   var ZOOMS = [
-    { fy: '30%', scale: 1.85, dur: '1.6s', ease: 'cubic-bezier(0.23, 1, 0.32, 1)' },     // Send — сумма 100.00
-    { fy: '60%', scale: 1.6, dur: '2.6s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },     // Hold — Activity
-    { fy: '44%', scale: 1.75, dur: '2s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },      // Swap — You receive ETH
+    // Send and Hold preserve the top inset; Swap preserves the bottom inset.
+    // An origin inside the phone shifts its top up by originY * (scale - 1).
+    { fy: '0%', scale: 1.85, dur: '1.6s', ease: 'cubic-bezier(0.23, 1, 0.32, 1)' },      // Send — сумма 100.00
+    { fy: '0%', scale: 1.6, dur: '2.6s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },     // Hold — Activity
+    { fy: '100%', scale: 1.75, dur: '2s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },      // Swap — You receive ETH
     { fy: '82%', scale: 1.8, dur: '1.2s', ease: 'cubic-bezier(0.23, 1, 0.32, 1)' }      // Spend — кнопка Pay
   ];
 
