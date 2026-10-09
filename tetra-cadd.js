@@ -281,7 +281,8 @@
         // за нижний край. Не сжимаем вёрстку: пока загораются строки, содержимое
         // едет вверх на недостающую высоту — к финалу низ секции в низу экрана.
         var pad = peg.querySelector('.cadd-peg_pad');
-        function overflow() { return Math.max(0, peg.offsetHeight - window.innerHeight); }
+        // мобилка (≤479) — без сдвига, там анимация уже работает как задумано
+        function overflow() { return window.innerWidth <= 479 ? 0 : Math.max(0, peg.offsetHeight - window.innerHeight); }
 
         var tl = gsap.timeline({
           defaults: { ease: 'none' },
