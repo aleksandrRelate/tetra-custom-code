@@ -149,61 +149,64 @@
 
     /* ------------------------------------------------------------------ *
      * CADD HERO — «живые» транзакции (фидбек 7 окт., Figma 12792:1377)
-     *  На сцене максимум 2 плашки. По очереди: одна уходит, появляется
-     *  на другом свободном месте с новыми данными (снизу вверх), затем
-     *  то же со второй. Цикл бесконечный, на паузе вне экрана.
+     *  На сцене 2 плашки. По очереди: одна уходит вверх, появляется снизу
+     *  вверх на следующем месте раскадровки с новой суммой, затем то же
+     *  со второй. Цикл бесконечный, на паузе вне экрана.
      *  Места — в rem относительно .cadd-hero_stage (десктоп 82×30rem,
-     *  мобилка ≤479 — 21.54×24.07rem), первые два = позиции из вёрстки.
+     *  мобилка ≤479 — 21.54×24.07rem), место 0 = позиция из вёрстки.
      * ------------------------------------------------------------------ */
     function startCaddTxLoop(hero, cards) {
       if (T.off('hero') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var stage = hero.querySelector('.cadd-hero_stage');
       if (!stage) return;
 
+      // раскадровка Figma 12793:3973: Sent (первая карточка) всегда справа
+      // от монеты, Received — слева; каждая идёт по своим 4 местам по кругу
       var SLOTS = {
-        desktop: [[50.8125, 6.6875], [10.5625, 15.625], [52.5, 17.75], [8.5, 4]],
-        mobile: [[8.5439, 3.911], [0, 15.3321], [8.5439, 19.9], [0, 8.6]]
+        desktop: [
+          [[50.8125, 6.6875], [53.1875, 20.75], [45.625, 3.75], [51.9375, 22.125]],
+          [[10.5625, 15.625], [6.5, 8.75], [14.8125, 21.3125], [6.25, 3.75]]
+        ],
+        mobile: [
+          [[0, 15.3321], [0, 8.6], [0, 19.9], [0, 12]],
+          [[8.5439, 3.911], [8.5439, 19.9], [8.5439, 1.2], [8.5439, 16.5]]
+        ]
       };
-      var TXS = [
-        ['Received', '1,200 CADD'], ['Sent', '85 CADD'], ['Received', '15,000 CADD'],
-        ['Sent', '320 CADD'], ['Received', '4,500 CADD'], ['Sent', '250 CADD'],
-        ['Received', '760 CADD'], ['Sent', '2,000 CADD']
+      var VALUES = [
+        ['250 CADD', '85 CADD', '2,000 CADD', '320 CADD'],
+        ['4,500 CADD', '1,200 CADD', '15,000 CADD', '760 CADD']
       ];
       var mqMobile = window.matchMedia('(max-width: 479px)');
-      var slotOf = [0, 1];
-      var txIndex = 0;
+      var slotOf = [0, 0];
       var turn = 0;
       var visible = true;
       var pending = null;
 
-      function slots() { return mqMobile.matches ? SLOTS.mobile : SLOTS.desktop; }
-      function place(card, i) {
-        var s = slots()[i];
-        card.style.left = s[0] + 'rem';
-        card.style.top = s[1] + 'rem';
-        if (mqMobile.matches) card.style.width = '12.9964rem';
-        else card.style.removeProperty('width');
+      function place(i) {
+        var s = SLOTS[mqMobile.matches ? 'mobile' : 'desktop'][i][slotOf[i]];
+        cards[i].style.left = s[0] + 'rem';
+        cards[i].style.top = s[1] + 'rem';
       }
-      function fill(card) {
-        var tx = TXS[txIndex++ % TXS.length];
-        card.querySelector('.cadd-activity-card_label').textContent = tx[0];
-        card.querySelector('.cadd-activity-card_value').textContent = tx[1];
+      function fill(i) {
+        cards[i].querySelector('.cadd-activity-card_value').textContent = VALUES[i][slotOf[i]];
       }
-      mqMobile.addEventListener('change', function () { place(cards[0], slotOf[0]); place(cards[1], slotOf[1]); });
+      mqMobile.addEventListener('change', function () { place(0); place(1); });
 
       function step() {
         pending = null;
         if (!visible) return;
-        var i = turn % 2, card = cards[i], other = slotOf[1 - i];
-        var free = [0, 1, 2, 3].filter(function (s) { return s !== other && s !== slotOf[i]; });
-        var next = free[Math.floor(Math.random() * free.length)];
-        gsap.timeline({ onComplete: function () { turn++; pending = gsap.delayedCall(1.6, step); } })
-          .to(card, { autoAlpha: 0, y: '-1.25rem', duration: 0.6, ease: 'power3.out' })
-          .add(function () { slotOf[i] = next; place(card, next); fill(card); })
-          .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '+=0.15');
+        var i = turn % 2, card = cards[i];
+        turn++;
+        // смена каждые 3 с (от начала одной смены до начала следующей)
+        pending = gsap.delayedCall(3, step);
+        gsap.timeline()
+          // уход вверх — плавно, без рывка в начале (inOut), той же длины, что появление
+          .to(card, { autoAlpha: 0, y: '-1.25rem', duration: 0.7, ease: 'power2.inOut' })
+          .add(function () { slotOf[i] = (slotOf[i] + 1) % 4; place(i); fill(i); })
+          .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '+=0.1');
       }
 
-      pending = gsap.delayedCall(2.2, step);
+      pending = gsap.delayedCall(3, step);
       new IntersectionObserver(function (entries) {
         visible = entries[0].isIntersecting;
         if (visible && !pending && !gsap.isTweening(cards[0]) && !gsap.isTweening(cards[1])) pending = gsap.delayedCall(0.8, step);
