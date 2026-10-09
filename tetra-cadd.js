@@ -203,7 +203,10 @@
           // уход вверх — плавно, без рывка в начале (inOut), той же длины, что появление
           .to(card, { autoAlpha: 0, y: '-1.25rem', duration: 0.7, ease: 'power2.inOut' })
           .add(function () { slotOf[i] = (slotOf[i] + 1) % 4; place(i); fill(i); })
-          .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '+=0.1');
+          // immediateRender:false обязателен: иначе fromTo применяет своё стартовое
+          // состояние (opacity 0) в момент создания таймлайна и плашка пропадает
+          // мгновенно, а tween ухода анимирует уже невидимый элемент
+          .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out', immediateRender: false }, '+=0.1');
       }
 
       pending = gsap.delayedCall(3, step);
