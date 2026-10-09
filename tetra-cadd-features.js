@@ -13,10 +13,10 @@
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ff6b62555eb5f18d0a_Phone%20%E2%80%94%20Send.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffe48f3c140d37f28e_Phone%20%E2%80%94%20Hold.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8a89308b5ff402c264f5d_Phone%20%E2%80%94%20Swap%20v2%20(ETH).avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8a5645c7cb0f9ed925306_Phone%20%E2%80%94%20Spend1.avif'
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d67b9bf127ac228c66_Phone%20%E2%80%94%20Send.svg',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d6b8335498f0473c3b_Phone%20%E2%80%94%20Hold.svg',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d60430b919a564a6d5_Phone%20%E2%80%94%20Swap%20v2%20(ETH).svg',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d67286846792bd6b72_Phone%20%E2%80%94%20Spend1.svg'
   ];
 
   function init() {
@@ -37,6 +37,12 @@
     var phones = [];
     var basePhone = section.querySelector('.cadd-features_phone');
     if (basePhone) {
+      // первый скрин тоже берём из SCREENS (в Webflow может стоять старый файл)
+      if (SCREENS[0]) {
+        basePhone.removeAttribute('srcset');
+        basePhone.removeAttribute('sizes');
+        basePhone.src = SCREENS[0];
+      }
       tabs.forEach(function (tab, i) {
         if (i === 0) { phones.push(basePhone); return; }
         if (!SCREENS[i]) return;
