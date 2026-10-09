@@ -1,0 +1,203 @@
+<svg width="261" height="550" viewBox="0 0 261 550" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Phone — Hold">
+<rect width="260.416" height="549.838" rx="40.9856" fill="#090E13"/>
+<g id="Screen">
+<rect x="6.30518" y="6.30542" width="247.805" height="537.227" rx="34.6801" fill="white"/>
+<g id="Status bar" clip-path="url(#clip0_12451_2305)">
+<text id="9:41" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.82767" letter-spacing="0em"><tspan x="29.0049" y="27.8254">9:41</tspan></text>
+<g id="Wrapper">
+<g id="Iconset/iOS-network">
+<rect id="Rectangle" x="202.866" y="21.6826" width="1.72597" height="5.75325" rx="0.575325" fill="black"/>
+<rect id="Rectangle_2" x="194.236" y="25.1345" width="1.72597" height="2.3013" rx="0.575325" fill="black"/>
+<rect id="Rectangle_3" x="197.112" y="23.9839" width="1.72597" height="3.45195" rx="0.575325" fill="black"/>
+<rect id="Rectangle_4" x="199.989" y="22.8333" width="1.72597" height="4.6026" rx="0.575325" fill="black"/>
+</g>
+<g id="Iconset/iOS-wlan">
+<path id="Vector" d="M213.018 27.8077L211.923 26.7124C211.852 26.6415 211.867 26.5228 211.953 26.4712C212.734 26.0026 213.709 26.0026 214.491 26.4712C214.577 26.5228 214.591 26.6415 214.52 26.7124L213.425 27.8077C213.313 27.9201 213.13 27.9201 213.018 27.8077Z" fill="black"/>
+<path id="Vector_2" d="M210.531 25.3211L211.089 25.8789C211.156 25.9458 211.263 25.9499 211.335 25.8883C212.421 24.9579 214.022 24.9579 215.108 25.8883C215.179 25.9499 215.287 25.9458 215.354 25.8789L215.911 25.3211C216.013 25.2197 216.008 25.0539 215.902 24.9579C214.378 23.5865 212.065 23.5865 210.541 24.9579C210.434 25.0539 210.43 25.2197 210.531 25.3211Z" fill="black"/>
+<path id="Vector_3" d="M208.844 23.6341L209.33 24.1201C209.417 24.2067 209.554 24.2157 209.651 24.1409C211.756 22.522 214.687 22.522 216.791 24.1409C216.888 24.2157 217.026 24.2067 217.112 24.1201L217.598 23.6341C217.719 23.5135 217.709 23.3149 217.576 23.2074C215.04 21.1464 211.403 21.1464 208.866 23.2074C208.734 23.3149 208.724 23.5135 208.844 23.6341Z" fill="black"/>
+</g>
+<g id="Iconset/iOS-battery">
+<rect id="Rectangle_5" opacity="0.3" x="219.838" y="21.395" width="12.6571" height="6.32857" rx="1.43831" stroke="black" stroke-width="0.575325"/>
+<rect id="Rectangle_6" x="220.701" y="22.2579" width="10.9312" height="4.6026" rx="0.575325" fill="black"/>
+<path id="Ellipse" opacity="0.3" d="M233.358 25.7099C233.993 25.7099 234.509 25.1947 234.509 24.5592C234.509 23.9237 233.993 23.4086 233.358 23.4086V25.7099Z" fill="black"/>
+</g>
+</g>
+</g>
+<g id="Nav" clip-path="url(#clip1_12451_2305)">
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="16.3942" letter-spacing="0em"><tspan x="21.4385" y="58.3789">&#x2039;</tspan></text>
+<text id="CADD" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="10.0888" letter-spacing="0em"><tspan x="114.425" y="56.0458">CADD</tspan></text>
+</g>
+<g id="Balance">
+<text id="Balance_2" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.82767" letter-spacing="0em"><tspan x="113.208" y="96.5623">Balance</tspan></text>
+<text id="1,250.00" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="35.3107" letter-spacing="-0.03em"><tspan x="65.708" y="135.644">1,250.00</tspan></text>
+<text id="CADD · $1,250.00 CAD" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.82767" letter-spacing="0em"><tspan x="81.708" y="155.129">CADD  &#xb7;  $1,250.00 CAD</tspan></text>
+</g>
+<g id="Actions" clip-path="url(#clip2_12451_2305)">
+<g id="Action / Send" clip-path="url(#clip3_12451_2305)">
+<g id="Frame">
+<rect x="21.4385" y="174.518" width="40.3551" height="35.3107" rx="2.52219" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="13.8721" letter-spacing="0em"><tspan x="35.6162" y="197.306">&#x2191;</tspan></text>
+</g>
+<text id="Send" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="31.1162" y="222.406">Send</tspan></text>
+</g>
+<g id="Action / Receive" clip-path="url(#clip4_12451_2305)">
+<g id="Frame_2">
+<rect x="80.4995" y="174.518" width="40.3551" height="35.3107" rx="2.52219" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="13.8721" letter-spacing="0em"><tspan x="94.6772" y="197.306">&#x2193;</tspan></text>
+</g>
+<text id="Receive" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="85.1772" y="222.406">Receive</tspan></text>
+</g>
+<g id="Action / Swap" clip-path="url(#clip5_12451_2305)">
+<g id="Frame_3">
+<rect x="139.561" y="174.518" width="40.3551" height="35.3107" rx="2.52219" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="13.8721" letter-spacing="0em"><tspan x="152.239" y="197.306">&#x21c4;</tspan></text>
+</g>
+<text id="Swap" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="149.239" y="222.406">Swap</tspan></text>
+</g>
+<g id="Action / Move" clip-path="url(#clip6_12451_2305)">
+<g id="Frame_4">
+<rect x="198.623" y="174.518" width="40.3551" height="35.3107" rx="2.52219" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="13.8721" letter-spacing="0em"><tspan x="212.8" y="197.306">&#x2192;</tspan></text>
+</g>
+<text id="Move" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="208.3" y="222.406">Move</tspan></text>
+</g>
+</g>
+<g id="Activity header" clip-path="url(#clip7_12451_2305)">
+<text id="Activity" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="10.0888" letter-spacing="0em"><tspan x="21.4385" y="251.261">Activity</tspan></text>
+<text id="See all" fill="#CE191D" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.82767" letter-spacing="0em"><tspan x="210.978" y="249.795">See all</tspan></text>
+</g>
+<g id="Activity list" clip-path="url(#clip8_12451_2305)">
+<g id="Row / Received">
+<g clip-path="url(#clip9_12451_2305)">
+<g id="Icon">
+<rect x="21.4385" y="266.139" width="25" height="25" rx="12.5" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="11" letter-spacing="0em"><tspan x="29.4385" y="282.709">&#x2193;</tspan></text>
+</g>
+<g id="Frame_5" clip-path="url(#clip10_12451_2305)">
+<text id="Received" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="54.0049" y="277.008">Received</tspan></text>
+<text id="From Liam Chen" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="54.0049" y="287.803">From Liam Chen</tspan></text>
+</g>
+<g id="Frame_6" clip-path="url(#clip11_12451_2305)">
+<text id="+300.00" fill="#178C4D" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="199.978" y="277.008">+300.00</tspan></text>
+<text id="CADD_2" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="214.978" y="287.803">CADD</tspan></text>
+</g>
+</g>
+</g>
+<g id="Row / Swapped">
+<g clip-path="url(#clip12_12451_2305)">
+<g id="Icon_2">
+<rect x="21.4385" y="306.903" width="25" height="25" rx="12.5" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="11" letter-spacing="0em"><tspan x="27.9385" y="323.473">&#x21c4;</tspan></text>
+</g>
+<g id="Frame_7" clip-path="url(#clip13_12451_2305)">
+<text id="Swapped" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="54.0049" y="317.772">Swapped</tspan></text>
+<text fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="54.0049" y="328.566">CADD &#x2192; Digital asset</tspan></text>
+</g>
+<g id="Frame_8" clip-path="url(#clip14_12451_2305)">
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="202.978" y="317.772">&#x2212;100.00</tspan></text>
+<text id="CADD_3" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="214.978" y="328.566">CADD</tspan></text>
+</g>
+</g>
+</g>
+<g id="Row / Sent">
+<g clip-path="url(#clip15_12451_2305)">
+<g id="Icon_3">
+<rect x="21.4385" y="347.667" width="25" height="25" rx="12.5" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="11" letter-spacing="0em"><tspan x="29.4385" y="364.237">&#x2191;</tspan></text>
+</g>
+<g id="Frame_9" clip-path="url(#clip16_12451_2305)">
+<text id="Sent" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="54.0049" y="358.536">Sent</tspan></text>
+<text id="To Emma Martin" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="54.0049" y="369.33">To Emma Martin</tspan></text>
+</g>
+<g id="Frame_10" clip-path="url(#clip17_12451_2305)">
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="200.978" y="358.536">&#x2212;250.00</tspan></text>
+<text id="CADD_4" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="214.978" y="369.33">CADD</tspan></text>
+</g>
+</g>
+</g>
+<g id="Row / Received_2">
+<g clip-path="url(#clip18_12451_2305)">
+<g id="Icon_4">
+<rect x="21.4385" y="388.43" width="25" height="25" rx="12.5" fill="#F6F7F9"/>
+<text fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="11" letter-spacing="0em"><tspan x="29.4385" y="405">&#x2193;</tspan></text>
+</g>
+<g id="Frame_11" clip-path="url(#clip19_12451_2305)">
+<text id="Received_2" fill="#090E13" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="54.0049" y="399.299">Received</tspan></text>
+<text id="From Payroll" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="54.0049" y="410.094">From Payroll</tspan></text>
+</g>
+<g id="Frame_12" clip-path="url(#clip20_12451_2305)">
+<text id="+1,200.00" fill="#178C4D" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="9.45822" letter-spacing="0em"><tspan x="194.978" y="399.299">+1,200.00</tspan></text>
+<text id="CADD_5" fill="#666666" style="white-space: pre" xml:space="preserve" font-family="Suisse Intl" font-size="8.19712" letter-spacing="0em"><tspan x="214.978" y="410.094">CADD</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_12451_2305">
+<rect width="217.539" height="13.8078" fill="white" transform="translate(21.4385 17.6553)"/>
+</clipPath>
+<clipPath id="clip1_12451_2305">
+<rect width="217.539" height="41.6997" fill="white" transform="translate(21.4385 31.4631)"/>
+</clipPath>
+<clipPath id="clip2_12451_2305">
+<rect width="217.539" height="67.0104" fill="white" transform="translate(21.4385 174.518)"/>
+</clipPath>
+<clipPath id="clip3_12451_2305">
+<rect width="40.3551" height="49.3551" fill="white" transform="translate(21.4385 174.518)"/>
+</clipPath>
+<clipPath id="clip4_12451_2305">
+<rect width="40.3551" height="49.3551" fill="white" transform="translate(80.4995 174.518)"/>
+</clipPath>
+<clipPath id="clip5_12451_2305">
+<rect width="40.3551" height="49.3551" fill="white" transform="translate(139.561 174.518)"/>
+</clipPath>
+<clipPath id="clip6_12451_2305">
+<rect width="40.3551" height="49.3551" fill="white" transform="translate(198.623 174.518)"/>
+</clipPath>
+<clipPath id="clip7_12451_2305">
+<rect width="217.539" height="17.0444" fill="white" transform="translate(21.4385 241.528)"/>
+</clipPath>
+<clipPath id="clip8_12451_2305">
+<rect width="217.539" height="163.055" fill="white" transform="translate(21.4385 258.573)"/>
+</clipPath>
+<clipPath id="clip9_12451_2305">
+<path d="M21.4385 258.573H238.978V299.336H21.4385V258.573Z" fill="white"/>
+</clipPath>
+<clipPath id="clip10_12451_2305">
+<rect width="138.406" height="21.2611" fill="white" transform="translate(54.0049 268.009)"/>
+</clipPath>
+<clipPath id="clip11_12451_2305">
+<rect width="39" height="21.2611" fill="white" transform="translate(199.978 268.009)"/>
+</clipPath>
+<clipPath id="clip12_12451_2305">
+<path d="M21.4385 299.336H238.978V340.1H21.4385V299.336Z" fill="white"/>
+</clipPath>
+<clipPath id="clip13_12451_2305">
+<rect width="141.406" height="21.2611" fill="white" transform="translate(54.0049 308.772)"/>
+</clipPath>
+<clipPath id="clip14_12451_2305">
+<rect width="36" height="21.2611" fill="white" transform="translate(202.978 308.772)"/>
+</clipPath>
+<clipPath id="clip15_12451_2305">
+<path d="M21.4385 340.1H238.978V380.864H21.4385V340.1Z" fill="white"/>
+</clipPath>
+<clipPath id="clip16_12451_2305">
+<rect width="139.406" height="21.2611" fill="white" transform="translate(54.0049 349.536)"/>
+</clipPath>
+<clipPath id="clip17_12451_2305">
+<rect width="38" height="21.2611" fill="white" transform="translate(200.978 349.536)"/>
+</clipPath>
+<clipPath id="clip18_12451_2305">
+<path d="M21.4385 380.864H238.978V421.627H21.4385V380.864Z" fill="white"/>
+</clipPath>
+<clipPath id="clip19_12451_2305">
+<rect width="133.406" height="21.2611" fill="white" transform="translate(54.0049 390.3)"/>
+</clipPath>
+<clipPath id="clip20_12451_2305">
+<rect width="44" height="21.2611" fill="white" transform="translate(194.978 390.3)"/>
+</clipPath>
+</defs>
+</svg>

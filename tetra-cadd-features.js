@@ -7,6 +7,9 @@
 //   • фоновое слово — бесконечная бегущая строка
 // Стили — tetra-cadd-features.css. Без зависимостей; ?perf=features выключает.
 (function () {
+  // папка с файлами репозитория (GitHub Pages) — для живых SVG-скринов
+  var ASSET_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^/]*$/, '') ||
+    'https://aleksandrrelate.github.io/tetra-custom-code/';
   var DURATION = 5000;       // мс на пункт
   var MARQUEE_SPEED = 60;    // px/с — скорость бегущей строки
   var ZOOM_DELAY = 1000;     // мс от включения пункта до зума телефона
@@ -286,6 +289,7 @@
       phone.classList.remove('is-zoomed');
       phone.offsetWidth;
       phone.classList.remove('is-zoom-reset');
+      if (live) live.play(i);
       zoomTimer = setTimeout(function () { phone.classList.add('is-zoomed'); }, ZOOM_DELAY);
     }
 
@@ -333,9 +337,201 @@
       setPaused(false);
     }
 
+    // живые экраны (десктоп): SVG с текстом вместо картинок + анимация интерфейса
+    var live = window.matchMedia('(min-width: 480px)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? livePhones(phones) : null;
+
     section.classList.add('is-tabs-ready');
     activate(0);
     requestAnimationFrame(tick);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * ЖИВЫЕ ЭКРАНЫ ТЕЛЕФОНА (десктоп). Скрины — SVG из Figma с живым текстом
+   * и id слоёв (assets/cadd-phones/*.svg, экспорт 12451:2205 / 2305,
+   * 12789:1377, 12451:2483). Встраиваются в страницу вместо <img>, и на
+   * каждом пункте вместе с зумом проигрывается своя короткая сцена:
+   *   Send  — набор суммы на клавиатуре 1 → 10 → 100.00, нажатие кнопки
+   *   Hold  — в Activity въезжает новая строка, баланс растёт до 1,550.00
+   *   Swap  — стрелка делает оборот, сумма ETH «считается» до 0.0547
+   *   Spend — нажатие Pay → обработка → «Paid ✓» и подтверждение
+   * При смене пункта сцена сбрасывается в исходный кадр.
+   * ------------------------------------------------------------------ */
+  var LIVE_FILES = ['send.svg', 'hold.svg', 'swap.svg', 'spend.svg'];
+  var LIVE_START = 0.9; // с от включения пункта — почти вместе с зумом
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var CX = 130.2;       // центр экрана по x в координатах SVG
+
+  function livePhones(phones) {
+    var screens = [];   // { svg, build(): timeline } по пунктам
+    var tl = null;
+    var wanted = -1;
+
+    function q(svg, id) { return svg.querySelector('[id="' + id + '"]'); }
+    // текст по центру экрана: якорь middle, чтобы смена цифр не сдвигала строку
+    function center(text) {
+      if (!text) return null;
+      var ts = text.querySelector('tspan');
+      text.setAttribute('text-anchor', 'middle');
+      ts.setAttribute('x', CX);
+      text.style.fontVariantNumeric = 'tabular-nums';
+      return ts;
+    }
+    function money(v, d) {
+      return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function el(tag, attrs, parent) {
+      var n = document.createElementNS(SVGNS, tag);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      if (parent) parent.appendChild(n);
+      return n;
+    }
+
+    var BUILD = [
+      // Send — набор 1 → 10 → 100, затем .00, чип «100», нажатие кнопки
+      function (svg) {
+        var amt = center(q(svg, '100.00'));
+        var cad = center(q(svg, '$100.00 CAD'));
+        var chip = q(svg, 'Chip_3');
+        var chipRect = chip && chip.querySelector('rect');
+        var btn = q(svg, 'Send button');
+        var keypad = q(svg, 'Keypad');
+        // подсветка клавиш: прямоугольники под цифрами (ряд 1 и ряд 4)
+        function keyBg(col, row) {
+          return el('rect', {
+            x: 21.44 + col * 81.02, y: [279.8, 336.5, 393.2, 449.9][row],
+            width: 55.4, height: 28.33, rx: 4, fill: '#EBEDF4', opacity: 0
+          }, null);
+        }
+        var k1 = keyBg(0, 0), k0a = keyBg(1, 3);
+        keypad.insertBefore(k1, keypad.firstChild);
+        keypad.insertBefore(k0a, keypad.firstChild);
+        function set(v) { amt.textContent = v; cad.textContent = '$' + v + ' CAD'; }
+        function press(r) {
+          return gsap.timeline().to(r, { opacity: 1, duration: 0.08 }).to(r, { opacity: 0, duration: 0.35, ease: 'power2.out' });
+        }
+        return function () {
+          set('0.00'); amt.parentNode.setAttribute('fill', '#B8BCC6');
+          if (chipRect) chipRect.setAttribute('stroke', '#EBEDF4');
+          gsap.set(btn, { scale: 1, svgOrigin: CX + ' 506' });
+          return gsap.timeline()
+            .add(press(k1)).call(function () { set('1'); amt.parentNode.setAttribute('fill', '#090E13'); }, null, 0.05)
+            .add(press(k0a), 0.45).call(function () { set('10'); }, null, 0.5)
+            .add(press(k0a), 0.85).call(function () { set('100'); }, null, 0.9)
+            .call(function () { set('100.00'); if (chipRect) chipRect.setAttribute('stroke', '#090E13'); }, null, 1.3)
+            .to(btn, { scale: 0.96, duration: 0.12, ease: 'power2.out' }, 2.2)
+            .to(btn, { scale: 1, duration: 0.3, ease: 'power3.out' }, 2.32);
+        };
+      },
+      // Hold — новая строка сверху в Activity, баланс 1,250 → 1,550
+      function (svg) {
+        var bal = center(q(svg, '1,250.00'));
+        var sub = center(q(svg, 'CADD · $1,250.00 CAD'));
+        var list = q(svg, 'Activity list');
+        var rows = [].slice.call(list.children);
+        var row = rows[0].cloneNode(true);
+        row.removeAttribute('id');
+        var texts = row.querySelectorAll('text');
+        texts.forEach(function (tx) {
+          var s = tx.textContent;
+          if (s === 'From Liam Chen') tx.querySelector('tspan').textContent = 'From Noah Patel';
+        });
+        list.insertBefore(row, list.firstChild);
+        var PITCH = 40.76;
+        var val = { v: 1250 };
+        function setBal(v) { bal.textContent = money(v, 2); sub.textContent = 'CADD  ·  $' + money(v, 2) + ' CAD'; }
+        return function () {
+          setBal(1250); val.v = 1250;
+          gsap.set(row, { y: -PITCH, opacity: 0 });
+          gsap.set(rows, { y: 0 });
+          return gsap.timeline()
+            .to(rows, { y: PITCH, duration: 0.7, ease: 'power3.inOut' }, 0)
+            .to(row, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.inOut' }, 0.1)
+            .to(val, { v: 1550, duration: 1.1, ease: 'power2.out', onUpdate: function () { setBal(val.v); } }, 0.6);
+        };
+      },
+      // Swap — стрелка полный оборот, ETH считается 0.0000 → 0.0547, плашка ETH вспыхивает
+      function (svg) {
+        var arrow = q(svg, 'Swap arrow');
+        var eth = q(svg, '0.0547');
+        var ethTs = eth.querySelector('tspan');
+        eth.style.fontVariantNumeric = 'tabular-nums';
+        var token = q(svg, 'Token_2');
+        var val = { v: 0 };
+        return function () {
+          ethTs.textContent = '0.0000'; val.v = 0;
+          gsap.set(arrow, { rotation: 0, svgOrigin: '130.21 179.96' });
+          gsap.set(token, { scale: 1, svgOrigin: '203.5 237.77' });
+          return gsap.timeline()
+            .to(arrow, { rotation: 360, duration: 0.8, ease: 'power3.inOut' }, 0)
+            .to(val, { v: 0.0547, duration: 1.2, ease: 'power2.out', onUpdate: function () { ethTs.textContent = val.v.toFixed(4); } }, 0.3)
+            .to(token, { scale: 1.08, duration: 0.18, ease: 'power2.out' }, 1.4)
+            .to(token, { scale: 1, duration: 0.4, ease: 'power3.out' }, 1.58);
+        };
+      },
+      // Spend — нажатие Pay → «Processing…» → зелёная «Paid ✓» и подтверждение над кнопкой
+      function (svg) {
+        var btn = q(svg, 'Button');
+        var rect = btn.querySelector('rect');
+        var label = center(q(svg, 'Pay 42.50 CADD'));
+        var screen = q(svg, 'Screen');
+        var done = el('g', { opacity: 0 }, screen);
+        el('circle', { cx: CX, cy: 420, r: 16, fill: '#E8F5EE' }, done);
+        el('path', { d: 'M123.2 420.2l4.6 4.6 9.6-9.8', stroke: '#178C4D', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, done);
+        var dt = el('text', { x: CX, y: 452, 'text-anchor': 'middle', fill: '#090E13', 'font-family': 'Suisse Intl', 'font-size': 10.09 }, done);
+        dt.textContent = 'Paid to Northern Coffee Co.';
+        var dt2 = el('text', { x: CX, y: 465, 'text-anchor': 'middle', fill: '#666666', 'font-family': 'Suisse Intl', 'font-size': 8.2 }, done);
+        dt2.textContent = 'Order #4821  ·  just now';
+        return function () {
+          label.textContent = 'Pay 42.50 CADD';
+          rect.setAttribute('fill', '#CE191D');
+          gsap.set(btn, { scale: 1, svgOrigin: CX + ' 506' });
+          gsap.set(done, { opacity: 0, y: 8 });
+          return gsap.timeline()
+            .to(btn, { scale: 0.96, duration: 0.12, ease: 'power2.out' }, 0.2)
+            .to(btn, { scale: 1, duration: 0.3, ease: 'power3.out' }, 0.32)
+            .call(function () { label.textContent = 'Processing…'; }, null, 0.3)
+            .call(function () { label.textContent = 'Paid ✓'; rect.setAttribute('fill', '#178C4D'); }, null, 1.2)
+            .to(done, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 1.3);
+        };
+      }
+    ];
+
+    // подгружаем SVG и подменяем картинки (классы сохраняем — позиция и зум из CSS)
+    LIVE_FILES.forEach(function (file, i) {
+      var img = phones[i];
+      if (!img || !BUILD[i]) return;
+      fetch(ASSET_BASE + 'assets/cadd-phones/' + file).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.text();
+      }).then(function (markup) {
+        var box = document.createElement('div');
+        box.className = img.className;
+        box.setAttribute('role', 'img');
+        box.setAttribute('aria-label', img.alt || '');
+        box.innerHTML = markup;
+        var svg = box.querySelector('svg');
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.cssText = 'display:block;width:100%;height:auto;overflow:visible';
+        // стили зума (CSS-переменные) уже могли быть выставлены на картинке
+        box.style.cssText = img.style.cssText;
+        img.parentNode.replaceChild(box, img);
+        phones[i] = box;
+        screens[i] = { svg: svg, start: BUILD[i](svg) };
+        if (wanted === i) play(i);
+      }).catch(function () { /* остаётся обычная картинка */ });
+    });
+
+    function play(i) {
+      wanted = i;
+      if (tl) { tl.kill(); tl = null; }
+      if (!window.gsap) return;
+      var s = screens[i];
+      if (!s) return;
+      tl = gsap.timeline({ delay: LIVE_START }).add(s.start());
+    }
+    return { play: play };
   }
 
   if (document.readyState === 'loading') {
