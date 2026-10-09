@@ -13,7 +13,7 @@
   var SCREENS = [
     'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ff6b62555eb5f18d0a_Phone%20%E2%80%94%20Send.avif',
     'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffe48f3c140d37f28e_Phone%20%E2%80%94%20Hold.avif',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6abb70ffab80e537b6836e50_Phone%20%E2%80%94%20Swap.avif',
+    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8a89308b5ff402c264f5d_Phone%20%E2%80%94%20Swap%20v2%20(ETH).avif',
     'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8a5645c7cb0f9ed925306_Phone%20%E2%80%94%20Spend1.avif'
   ];
 
