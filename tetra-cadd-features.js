@@ -2,12 +2,14 @@
 //   • автоплей: бар активного пункта заполняется за DURATION, затем включается
 //     следующий пункт (по кругу); пока секция вне экрана — бар на паузе
 //   • клик / Enter / Space по пункту — переключает на него и перезапускает бар
-//   • справа: кроссфейд скрина телефона и смена фонового слова (Send → Hold…)
+//   • справа: кроссфейд скрина телефона и смена фонового слова (Send → Hold…);
+//     через 1 с после включения пункта телефон плавно зумится (десктоп)
 //   • фоновое слово — бесконечная бегущая строка
 // Стили — tetra-cadd-features.css. Без зависимостей; ?perf=features выключает.
 (function () {
   var DURATION = 5000;       // мс на пункт
   var MARQUEE_SPEED = 60;    // px/с — скорость бегущей строки
+  var ZOOM_DELAY = 1000;     // мс от включения пункта до зума телефона
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
@@ -244,6 +246,30 @@
       swipeTimer = setTimeout(normalize, 150);
     }, { passive: true });
 
+    // зум телефона: новый — с обычного размера, через ZOOM_DELAY увеличивается;
+    // уходящий остаётся увеличенным, пока гаснет, потом сбрасывается без анимации
+    var zoomTimer = null;
+    function zoomPhone(i) {
+      clearTimeout(zoomTimer);
+      phones.forEach(function (p, j) {
+        if (!p || j === i || !p.classList.contains('is-zoomed')) return;
+        setTimeout(function () {
+          if (!p.classList.contains('is-hidden')) return;
+          p.classList.add('is-zoom-reset');
+          p.classList.remove('is-zoomed');
+          p.offsetWidth;
+          p.classList.remove('is-zoom-reset');
+        }, 550);
+      });
+      var phone = phones[i];
+      if (!phone) return;
+      phone.classList.add('is-zoom-reset');
+      phone.classList.remove('is-zoomed');
+      phone.offsetWidth;
+      phone.classList.remove('is-zoom-reset');
+      zoomTimer = setTimeout(function () { phone.classList.add('is-zoomed'); }, ZOOM_DELAY);
+    }
+
     function activate(i, fromSwipe) {
       nodes.forEach(function (arr, j) {
         arr.forEach(function (n) { n.classList.remove('is-active'); });
@@ -255,6 +281,7 @@
       tabs[i].setAttribute('aria-selected', 'true');
 
       phones.forEach(function (p, j) { if (p) p.classList.toggle('is-hidden', j !== i); });
+      zoomPhone(i);
       if (current !== -1 && i !== current) setWord(titles[i]);
       var wasStarted = current !== -1;
       current = i;

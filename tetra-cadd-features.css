@@ -68,6 +68,21 @@
 .section_cadd-features .cadd-features_phone {
   transition: opacity .5s ease;
 }
+/* зум телефона (десктоп): через 1 с после включения пункта телефон плавно
+   увеличивается от верхнего края до кадра Figma 12790:3636 (≈77% ширины
+   сцены, низ уходит за край). translateX(-50%) — центрирование из Webflow */
+@media screen and (min-width: 480px) {
+  .section_cadd-features .cadd-features_stage .cadd-features_phone {
+    transform-origin: 50% 0;
+    transition: opacity .5s ease, transform 2s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  .section_cadd-features .cadd-features_stage .cadd-features_phone.is-zoomed {
+    transform: translateX(-50%) translateY(-1rem) scale(1.83);
+  }
+  .section_cadd-features .cadd-features_stage .cadd-features_phone.is-zoom-reset {
+    transition: opacity .5s ease;
+  }
+}
 .section_cadd-features .cadd-features_phone.is-hidden {
   opacity: 0;
 }
@@ -108,6 +123,9 @@
   .section_cadd-features .cadd-features_phone,
   .section_cadd-features .cadd-features_stage-word {
     transition: none !important;
+  }
+  .section_cadd-features .cadd-features_phone.is-zoomed {
+    transform: translateX(-50%) !important;
   }
   .section_cadd-features .cadd-features_stage-track {
     animation: none;
