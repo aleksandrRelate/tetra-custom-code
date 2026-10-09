@@ -268,13 +268,39 @@
           });
 
         // 2) закреплённая часть — одна непрерывная сцена
+        // Если секция выше экрана (ноутбуки, узкое окно по высоте), хвост уходит
+        // за нижний край и виден только после пина. Не сжимаем вёрстку: пин
+        // удлиняется на недостающую высоту, и в этот отрезок содержимое
+        // сдвигается вверх, пока низ секции не встанет в низ экрана.
+        var pad = peg.querySelector('.cadd-peg_pad');
+        function baseScroll() { return window.innerHeight * 2.6; }   // было 180% — добавился шаг со второй строкой
+        function overflow() { return Math.max(0, peg.offsetHeight - window.innerHeight); }
+
+        var pinST = ScrollTrigger.create({
+          trigger: peg,
+          start: 'top top',
+          end: function () { return '+=' + (baseScroll() + overflow()); },
+          pin: true,
+          invalidateOnRefresh: true
+        });
+        var shift = pad && gsap.fromTo(pad, { y: 0 }, {
+          y: function () { return -overflow(); },
+          ease: 'none',
+          scrollTrigger: {
+            trigger: peg,
+            start: function () { return 'top+=' + baseScroll() + ' top'; },
+            end: function () { return '+=' + overflow(); },
+            scrub: 1,
+            invalidateOnRefresh: true
+          }
+        });
+
         var tl = gsap.timeline({
           defaults: { ease: 'none' },
           scrollTrigger: {
             trigger: peg,
             start: 'top top',
-            end: '+=260%',   // было 180% — добавился шаг со второй строкой
-            pin: true,
+            end: function () { return '+=' + baseScroll(); },
             scrub: 1,
             invalidateOnRefresh: true
           }
@@ -301,10 +327,13 @@
         }
 
         return function () {
-          [intro, tl].forEach(function (a) {
+          pinST.kill();
+          [intro, tl, shift].forEach(function (a) {
+            if (!a) return;
             if (a.scrollTrigger) a.scrollTrigger.kill();
             a.kill();
           });
+          if (pad) gsap.set(pad, { clearProps: 'transform' });
           labelSplit.revert();
           gsap.set([label, loonie, coin], { clearProps: 'transform,opacity' });
           if (lines.length) gsap.set(lines, { clearProps: 'transform,opacity' });
