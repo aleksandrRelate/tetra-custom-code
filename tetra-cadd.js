@@ -141,8 +141,73 @@
         gsap.set(chConsortium, { autoAlpha: 0, y: '1.5rem' });
         chTl.to(chConsortium, { autoAlpha: 1, y: 0, duration: 0.9 }, 1.5);
       }
+      // после интро — «живые» транзакции вокруг монеты
+      if (chCards.length === 2) chTl.eventCallback('onComplete', function () { startCaddTxLoop(caddHero, chCards); });
       // играем сразу, не ждём window load (как на лендинге)
       chTl.play(0);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * CADD HERO — «живые» транзакции (фидбек 7 окт., Figma 12792:1377)
+     *  На сцене максимум 2 плашки. По очереди: одна уходит, появляется
+     *  на другом свободном месте с новыми данными (снизу вверх), затем
+     *  то же со второй. Цикл бесконечный, на паузе вне экрана.
+     *  Места — в rem относительно .cadd-hero_stage (десктоп 82×30rem,
+     *  мобилка ≤479 — 21.54×24.07rem), первые два = позиции из вёрстки.
+     * ------------------------------------------------------------------ */
+    function startCaddTxLoop(hero, cards) {
+      if (T.off('hero') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var stage = hero.querySelector('.cadd-hero_stage');
+      if (!stage) return;
+
+      var SLOTS = {
+        desktop: [[50.8125, 6.6875], [10.5625, 15.625], [52.5, 17.75], [8.5, 4]],
+        mobile: [[8.5439, 3.911], [0, 15.3321], [8.5439, 19.9], [0, 8.6]]
+      };
+      var TXS = [
+        ['Received', '1,200 CADD'], ['Sent', '85 CADD'], ['Received', '15,000 CADD'],
+        ['Sent', '320 CADD'], ['Received', '4,500 CADD'], ['Sent', '250 CADD'],
+        ['Received', '760 CADD'], ['Sent', '2,000 CADD']
+      ];
+      var mqMobile = window.matchMedia('(max-width: 479px)');
+      var slotOf = [0, 1];
+      var txIndex = 0;
+      var turn = 0;
+      var visible = true;
+      var pending = null;
+
+      function slots() { return mqMobile.matches ? SLOTS.mobile : SLOTS.desktop; }
+      function place(card, i) {
+        var s = slots()[i];
+        card.style.left = s[0] + 'rem';
+        card.style.top = s[1] + 'rem';
+        if (mqMobile.matches) card.style.width = '12.9964rem';
+        else card.style.removeProperty('width');
+      }
+      function fill(card) {
+        var tx = TXS[txIndex++ % TXS.length];
+        card.querySelector('.cadd-activity-card_label').textContent = tx[0];
+        card.querySelector('.cadd-activity-card_value').textContent = tx[1];
+      }
+      mqMobile.addEventListener('change', function () { place(cards[0], slotOf[0]); place(cards[1], slotOf[1]); });
+
+      function step() {
+        pending = null;
+        if (!visible) return;
+        var i = turn % 2, card = cards[i], other = slotOf[1 - i];
+        var free = [0, 1, 2, 3].filter(function (s) { return s !== other && s !== slotOf[i]; });
+        var next = free[Math.floor(Math.random() * free.length)];
+        gsap.timeline({ onComplete: function () { turn++; pending = gsap.delayedCall(1.6, step); } })
+          .to(card, { autoAlpha: 0, y: '-0.75rem', duration: 0.35, ease: 'power2.out' })
+          .add(function () { slotOf[i] = next; place(card, next); fill(card); })
+          .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '+=0.15');
+      }
+
+      pending = gsap.delayedCall(2.2, step);
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible && !pending && !gsap.isTweening(cards[0]) && !gsap.isTweening(cards[1])) pending = gsap.delayedCall(0.8, step);
+      }).observe(stage);
     }
 
     /* ------------------------------------------------------------------ *
