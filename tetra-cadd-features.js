@@ -10,6 +10,14 @@
   var DURATION = 5000;       // мс на пункт
   var MARQUEE_SPEED = 60;    // px/с — скорость бегущей строки
   var ZOOM_DELAY = 1000;     // мс от включения пункта до зума телефона
+  // зум по пунктам: точка фокуса (по высоте скрина), сила, длительность, кривая —
+  // у каждого своё, чтобы слайды не повторяли друг друга
+  var ZOOMS = [
+    { fy: '30%', scale: 1.85, dur: '1.6s', ease: 'cubic-bezier(0.23, 1, 0.32, 1)' },     // Send — сумма 100.00
+    { fy: '60%', scale: 1.6, dur: '2.6s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },     // Hold — Activity
+    { fy: '44%', scale: 1.75, dur: '2s', ease: 'cubic-bezier(0.77, 0, 0.175, 1)' },      // Swap — You receive ETH
+    { fy: '82%', scale: 1.8, dur: '1.2s', ease: 'cubic-bezier(0.23, 1, 0.32, 1)' }      // Spend — кнопка Pay
+  ];
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
@@ -269,6 +277,11 @@
       });
       var phone = phones[i];
       if (!phone) return;
+      var z = ZOOMS[i] || ZOOMS[0];
+      phone.style.setProperty('--zoom-fy', z.fy);
+      phone.style.setProperty('--zoom-scale', z.scale);
+      phone.style.setProperty('--zoom-dur', z.dur);
+      phone.style.setProperty('--zoom-ease', z.ease);
       phone.classList.add('is-zoom-reset');
       phone.classList.remove('is-zoomed');
       phone.offsetWidth;
