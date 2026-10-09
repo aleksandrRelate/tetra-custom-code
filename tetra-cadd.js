@@ -198,7 +198,7 @@
         var free = [0, 1, 2, 3].filter(function (s) { return s !== other && s !== slotOf[i]; });
         var next = free[Math.floor(Math.random() * free.length)];
         gsap.timeline({ onComplete: function () { turn++; pending = gsap.delayedCall(1.6, step); } })
-          .to(card, { autoAlpha: 0, y: '-0.75rem', duration: 0.35, ease: 'power2.out' })
+          .to(card, { autoAlpha: 0, y: '-1.25rem', duration: 0.6, ease: 'power3.out' })
           .add(function () { slotOf[i] = next; place(card, next); fill(card); })
           .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '+=0.15');
       }
