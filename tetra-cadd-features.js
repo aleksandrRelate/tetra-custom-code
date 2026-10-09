@@ -266,6 +266,7 @@
     // зум телефона: новый — с обычного размера, через ZOOM_DELAY увеличивается;
     // уходящий остаётся увеличенным, пока гаснет, потом сбрасывается без анимации
     var zoomTimer = null;
+    var zoomPending = -1;
     function zoomPhone(i) {
       clearTimeout(zoomTimer);
       phones.forEach(function (p, j) {
@@ -289,8 +290,12 @@
       phone.classList.remove('is-zoomed');
       phone.offsetWidth;
       phone.classList.remove('is-zoom-reset');
+      // секция не на экране — зум и сцену запускаем, когда её покажут
+      if (paused) { zoomPending = i; return; }
+      zoomPending = -1;
       if (live) live.play(i);
-      zoomTimer = setTimeout(function () { phone.classList.add('is-zoomed'); }, ZOOM_DELAY);
+      // берём phones[i] в момент срабатывания: картинку к этому времени мог заменить живой SVG
+      zoomTimer = setTimeout(function () { (phones[i] || phone).classList.add('is-zoomed'); }, ZOOM_DELAY);
     }
 
     function activate(i, fromSwipe) {
@@ -327,6 +332,7 @@
     function setPaused(v) {
       paused = v;
       section.classList.toggle('is-paused', v);
+      if (!v && zoomPending !== -1) zoomPhone(zoomPending);
     }
     setPaused(true);
     if ('IntersectionObserver' in window) {
