@@ -288,8 +288,9 @@
           ease: 'none',
           scrollTrigger: {
             trigger: peg,
-            start: function () { return 'top+=' + baseScroll() + ' top'; },
-            end: function () { return '+=' + overflow(); },
+            // числами от старта пина: 'top+=N' считался бы уже от сдвинутой пин-спейсером позиции
+            start: function () { return pinST.start + baseScroll(); },
+            end: function () { return pinST.start + baseScroll() + overflow(); },
             scrub: 1,
             invalidateOnRefresh: true
           }
