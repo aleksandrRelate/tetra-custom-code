@@ -264,7 +264,8 @@
         function startY() {
           if (window.innerWidth > 479) return rem(20)();
           var pr = peg.getBoundingClientRect(), lr = label.getBoundingClientRect();
-          return (pr.top + peg.clientHeight / 2) - (lr.top + lr.height / 2);
+          // секция может быть выше экрана — центруем по видимой части (пин по top top)
+          return (pr.top + Math.min(peg.clientHeight, window.innerHeight) / 2) - (lr.top + lr.height / 2);
         }
         gsap.set(label, { y: startY(), scale: startScale(), opacity: 1, transformOrigin: '50% 50%' });
 
