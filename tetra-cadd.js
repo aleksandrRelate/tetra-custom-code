@@ -209,7 +209,8 @@
           .fromTo(card, { autoAlpha: 0, y: '1.25rem' }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out', immediateRender: false }, '+=0.1');
       }
 
-      pending = gsap.delayedCall(3, step);
+      // первый уход — через 1 с после интро, дальше каденс 3 с
+      pending = gsap.delayedCall(1, step);
       new IntersectionObserver(function (entries) {
         visible = entries[0].isIntersecting;
         if (visible && !pending && !gsap.isTweening(cards[0]) && !gsap.isTweening(cards[1])) pending = gsap.delayedCall(0.8, step);
