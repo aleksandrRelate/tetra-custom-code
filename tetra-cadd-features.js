@@ -28,8 +28,8 @@
 
   // скрины телефона в порядке пунктов: Send, Hold, Swap, Spend
   var SCREENS = [
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d67b9bf127ac228c66_Phone%20%E2%80%94%20Send.svg',
-    'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d6b8335498f0473c3b_Phone%20%E2%80%94%20Hold.svg',
+    ASSET_BASE + 'assets/cadd-phones/send-img.svg',
+    ASSET_BASE + 'assets/cadd-phones/hold-img.svg',
     'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d60430b919a564a6d5_Phone%20%E2%80%94%20Swap%20v2%20(ETH).svg',
     'https://cdn.prod.website-files.com/6a97dd991f9eeb224f3914fa/6ac8b0d67286846792bd6b72_Phone%20%E2%80%94%20Spend1.svg'
   ];
@@ -358,7 +358,7 @@
 
   /* ------------------------------------------------------------------ *
    * ЖИВЫЕ ЭКРАНЫ ТЕЛЕФОНА (десктоп). Скрины — SVG из Figma с живым текстом
-   * и id слоёв (assets/cadd-phones/*.svg, экспорт 12451:2205 / 2305,
+   * и id слоёв (assets/cadd-phones/*.svg, экспорт Send/Hold 12854:3224 / 3329,
    * 12789:1377, 12451:2483). Встраиваются в страницу вместо <img>, и на
    * каждом пункте вместе с зумом проигрывается своя короткая сцена:
    *   Send  — набор суммы на клавиатуре 1 → 10 → 100.00, нажатие кнопки
