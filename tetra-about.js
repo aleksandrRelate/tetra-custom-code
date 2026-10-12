@@ -1,7 +1,7 @@
 // Tetra — страница About (Figma 12684:962). Подключается после tetra-core.js
 // и tetra-page.js.
 //   • hero — загрузка как на Tetra Trust / лендинге: слова заголовка из маски,
-//     текст, кнопка сверху через маску, navbar
+//     текст, кнопка сверху через маску, плитки CADD / Tetra Trust, navbar
 //   • section_about-story — как section_intro лендинга (строки из маски +
 //     построчная заливка muted → ink по scrub), но без pin
 //   • section_about-team — шапка стандартно, карточки появляются лесенкой
@@ -20,7 +20,7 @@
     var hero = document.querySelector('.section_about-hero');
     if (!hero) return;
     if (!T.off('hero')) {
-      gsap.set(hero.querySelectorAll('.about-hero_heading, .about-hero_text, .about-hero_content .button'), { autoAlpha: 0 });
+      gsap.set(hero.querySelectorAll('.about-hero_heading, .about-hero_text, .about-hero_content .button, .about-hero_brand'), { autoAlpha: 0 });
     }
     var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
     fontsReady.then(init, init);
@@ -39,6 +39,7 @@
     var heading = hero.querySelector('.about-hero_heading');
     var heroText = hero.querySelector('.about-hero_text');
     var heroButtons = hero.querySelectorAll('.about-hero_content .button');
+    var heroBrands = hero.querySelectorAll('.about-hero_brand');
     var navbar = document.querySelector('.navbar-wrapper');
 
     if (heading && window.SplitText && !T.off('hero')) {
@@ -61,6 +62,11 @@
         gsap.set(heroButtons, { yPercent: -110, autoAlpha: 1 });
         tl.to(heroButtons, { yPercent: 0, duration: 0.9, stagger: 0.12, force3D: true }, 0.95);
       }
+      // плитки CADD / Tetra Trust — проявляются снизу лесенкой вместе с кнопкой
+      if (heroBrands.length) {
+        gsap.set(heroBrands, { autoAlpha: 0, y: 24 });
+        tl.to(heroBrands, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12, force3D: true }, 0.95);
+      }
       if (navbar) {
         gsap.set(navbar, { clipPath: 'inset(0% 0% 100% 0%)' });
         tl.to(navbar, {
@@ -71,7 +77,7 @@
       }
       tl.play(0);
     } else {
-      gsap.set(hero.querySelectorAll('.about-hero_heading, .about-hero_text, .about-hero_content .button'), { clearProps: 'opacity,visibility' });
+      gsap.set(hero.querySelectorAll('.about-hero_heading, .about-hero_text, .about-hero_content .button, .about-hero_brand'), { clearProps: 'opacity,visibility' });
     }
 
     /* ------------------------------------------------------------------ *
