@@ -161,7 +161,11 @@
         });
       });
       ScrollTrigger.addEventListener('refreshInit', function () { syncNav(); });
+      syncNav(); // тема сразу по секции под шапкой, не дожидаясь refresh ScrollTrigger
     }
+    // до этого момента подложка лого скрыта и переходы цвета выключены
+    // (tetra-navbar.css), чтобы при загрузке не мигала тёмная тема
+    if (navRoot) requestAnimationFrame(function () { navRoot.classList.add('is-theme-ready'); });
   }
 
   (T.ready || function (fn) {

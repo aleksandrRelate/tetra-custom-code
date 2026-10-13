@@ -72,6 +72,15 @@
   background-color: var(--_tetra-tokens---color-dark, #090e13);
   transition: background-color .35s ease;
 }
+/* пока tetra-navbar.js не выставил тему по секции (.is-theme-ready) —
+   плашку не показываем и цвет не анимируем: иначе на светлых страницах
+   она сначала тёмная, а потом плавно белеет */
+.navbar:not(.is-theme-ready) .navbar-container .navbar-logo::before { opacity: 0; }
+.navbar:not(.is-theme-ready) .navbar-container .navbar-logo::before,
+.navbar:not(.is-theme-ready) .navbar-container .navbar-logo-svg,
+.navbar:not(.is-theme-ready) .navbar-logo-svg *,
+.navbar:not(.is-theme-ready) .nav-menu,
+.navbar:not(.is-theme-ready) .nav-link { transition: none !important; }
 .navbar.is-theme-light .navbar-container .navbar-logo::before,
 .navbar.is-menu-open .navbar-container .navbar-logo::before {
   background-color: var(--_tetra-tokens---color-white, #fff);
