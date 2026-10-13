@@ -1,8 +1,12 @@
 /* Tetra — Newsroom: внешние записи ведут на источник, табы-фильтр списка
    (All / Announcements / News / Media, ?tab=… в URL), share-ссылки статьи. */
 (function () {
-  // карточки external-link → External URL в новой вкладке
+  // карточки → /newsroom/<slug> (MCP не умеет ставить ссылку на текущий элемент);
+  // external-link → External URL в новой вкладке
   function routeCards() {
+    document.querySelectorAll('.news-card[data-slug]').forEach(function (a) {
+      a.href = '/newsroom/' + a.getAttribute('data-slug');
+    });
     document.querySelectorAll('.news-card[data-type="external-link"]').forEach(function (a) {
       var url = a.getAttribute('data-ext');
       if (!url) return;
