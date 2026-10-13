@@ -45,7 +45,7 @@
       function updateScrollLogo() {
         if (!scrollLogo) return;
         var hidden = navCompact;                       // прячется одинаково на всех ширинах
-        scrollLogo.style.willChange = 'transform, opacity';
+        scrollLogo.style.willChange = 'transform';
         scrollLogo.style.transition = 'transform 350ms ease, opacity 250ms ease';
         scrollLogo.style.opacity = hidden ? '0' : '1';
         scrollLogo.style.transform = hidden ? 'translate3d(0, -100%, 0)' : 'none';

@@ -58,35 +58,27 @@
 /* пока SVG не встроен (или JS не загрузился): на тёмной теме делаем <img> белым */
 .navbar:not(.is-theme-light):not(.is-menu-open) img.navbar-logo-svg { filter: brightness(0) invert(1); }
 
-/* ===== подложка логотипа: полупрозрачная плашка с блюром, как у меню
-   (.nav-menu): тёмная тема — белый 6%, светлая — rgba(37,25,21,.04), blur 12px.
-   Логотип не сливается с контентом под шапкой. Меню не меняется. --- */
+/* ===== подложка логотипа: только блюр 12px (как у меню), без цвета —
+   на белом и чёрном фоне её не видно, над контентом логотип читается.
+   Псевдоэлементом, чтобы не трогать размеры и положение логотипа.
+   Важно: у .navbar-logo нельзя will-change: opacity (tetra-navbar.js) —
+   это backdrop root, и блюр видел бы только содержимое логотипа. --- */
 .navbar-container .navbar-logo { position: relative; isolation: isolate; }
-/* плашка — псевдоэлементом, чтобы не трогать размеры и положение логотипа */
 .navbar-container .navbar-logo::before {
   content: "";
   position: absolute;
   inset: -.435rem -1rem;
   z-index: -1;
   border-radius: .38rem;
-  background-color: rgba(255, 255, 255, 0.06);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  transition: background-color .35s ease;
 }
 /* пока tetra-navbar.js не выставил тему по секции (.is-theme-ready) —
-   плашку не показываем и цвет не анимируем: иначе на светлых страницах
-   она сначала тёмная, а потом плавно белеет */
-.navbar:not(.is-theme-ready) .navbar-container .navbar-logo::before { opacity: 0; }
-.navbar:not(.is-theme-ready) .navbar-container .navbar-logo::before,
+   цвета не анимируем, иначе на светлых страницах лого сначала белое */
 .navbar:not(.is-theme-ready) .navbar-container .navbar-logo-svg,
 .navbar:not(.is-theme-ready) .navbar-logo-svg *,
 .navbar:not(.is-theme-ready) .nav-menu,
 .navbar:not(.is-theme-ready) .nav-link { transition: none !important; }
-.navbar.is-theme-light .navbar-container .navbar-logo::before,
-.navbar.is-menu-open .navbar-container .navbar-logo::before {
-  background-color: rgba(37, 25, 21, 0.04);
-}
 
 /* ===== mobile scroll performance (<=479px) ===== */
 @media screen and (max-width: 479px) {
