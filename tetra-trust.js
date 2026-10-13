@@ -12,6 +12,8 @@
 //   • SECTION_TT-SECURITY — sticky-стопка пунктов (как benefits на Home)
 //   • SECTION_TT-TESTIMONIAL — Swiper (CDN); классы swiper/-wrapper/-slide — в Webflow, стрелки из вёрстки
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
+//   • HERO — щиты в цветах флага Канады (красный | белый | красный, Figma 12845:68):
+//     src <img> подменяется на assets/trust-shields/shield-N.svg из репо
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger + SplitText.
 // ?perf=trust выключает весь файл.
@@ -20,6 +22,17 @@
   if (!T) { console.warn('[tetra-trust] window.Tetra не найден — подключи tetra-core.js первым'); return; }
 
   var NO_MOTION = '(prefers-reduced-motion: no-preference)';
+
+  var ASSET_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^/]*$/, '') ||
+    'https://aleksandrrelate.github.io/tetra-custom-code/';
+
+  // щиты hero: серые SVG из Webflow → красный | белый | красный (Figma 12845:68)
+  function canadaShields() {
+    document.querySelectorAll('.section_tt-hero .tt-hero_shield').forEach(function (img) {
+      var m = img.className.match(/is-(\d)/);
+      if (m) img.src = ASSET_BASE + 'assets/trust-shields/shield-' + m[1] + '.svg';
+    });
+  }
 
   var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
   var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
@@ -125,6 +138,7 @@
   // загрузки веб-шрифтов — иначе строки считаются по fallback-шрифту и после
   // подмены шрифта переносятся заново (висячие слова)
   function boot() {
+    canadaShields();
     if (!window.gsap || !window.ScrollTrigger || T.off('trust')) return;
     var hero = document.querySelector('.section_tt-hero');
     if (!hero) return;
