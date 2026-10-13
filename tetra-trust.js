@@ -116,9 +116,15 @@
     } : { defaults: { ease: 'power2.inOut' }, paused: true });
     var dashed = strokes.filter(function (el) { return el.getAttribute('stroke-dasharray'); });
     var solid = strokes.filter(function (el) { return !el.getAttribute('stroke-dasharray'); });
-    tl.to(solid, { strokeDashoffset: 0, duration: opts.lineDuration || 1.1, stagger: opts.stagger || 0.06 }, 0);
-    if (dashed.length) tl.to(dashed, { opacity: 1, duration: 0.6, stagger: opts.stagger || 0.06 }, 0.3);
-    tl.to(fills, { opacity: 1, duration: 0.5, stagger: (opts.stagger || 0.06) / 2, ease: 'power1.out' }, opts.fillsAt || 0.45);
+    // opts.spread — потолок общего разброса stagger (сек), чтобы схема из
+    // десятков линий не рисовалась секундами
+    function stg(base, n) {
+      return opts.spread && n > 1 ? Math.min(base, opts.spread / (n - 1)) : base;
+    }
+    var st = opts.stagger || 0.06;
+    tl.to(solid, { strokeDashoffset: 0, duration: opts.lineDuration || 1.1, stagger: stg(st, solid.length) }, 0);
+    if (dashed.length) tl.to(dashed, { opacity: 1, duration: 0.6, stagger: stg(st, dashed.length) }, 0.3);
+    tl.to(fills, { opacity: 1, duration: 0.5, stagger: stg(st / 2, fills.length), ease: 'power1.out' }, opts.fillsAt || 0.45);
     return tl;
   }
 
@@ -459,7 +465,7 @@
           inlineSvg(cusImg).then(function (svg) {
             if (!svg) return;
             tls.push(drawSvg(svg, svg.closest('.tt-custody_visual') || svg, {
-              start: 'top 75%', orderByX: true, lineDuration: 0.9, stagger: 0.09, fillsAt: 0.3
+              start: 'top 75%', orderByX: true, lineDuration: 0.9, stagger: 0.09, spread: 1.8, fillsAt: 0.3
             }));
             ScrollTrigger.refresh();
           });
