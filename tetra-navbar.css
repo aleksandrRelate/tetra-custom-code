@@ -58,9 +58,9 @@
 /* пока SVG не встроен (или JS не загрузился): на тёмной теме делаем <img> белым */
 .navbar:not(.is-theme-light):not(.is-menu-open) img.navbar-logo-svg { filter: brightness(0) invert(1); }
 
-/* ===== подложка логотипа: плашка цвета фона секции под шапкой (белая на
-   светлой теме, #090e13 на тёмной), чтобы логотип не сливался с контентом,
-   но сама плашка на фоне не выделялась. Меню не меняется. --- */
+/* ===== подложка логотипа: полупрозрачная плашка с блюром, как у меню
+   (.nav-menu): тёмная тема — белый 6%, светлая — rgba(37,25,21,.04), blur 12px.
+   Логотип не сливается с контентом под шапкой. Меню не меняется. --- */
 .navbar-container .navbar-logo { position: relative; isolation: isolate; }
 /* плашка — псевдоэлементом, чтобы не трогать размеры и положение логотипа */
 .navbar-container .navbar-logo::before {
@@ -69,7 +69,9 @@
   inset: -.435rem -1rem;
   z-index: -1;
   border-radius: .38rem;
-  background-color: var(--_tetra-tokens---color-dark, #090e13);
+  background-color: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   transition: background-color .35s ease;
 }
 /* пока tetra-navbar.js не выставил тему по секции (.is-theme-ready) —
@@ -83,7 +85,7 @@
 .navbar:not(.is-theme-ready) .nav-link { transition: none !important; }
 .navbar.is-theme-light .navbar-container .navbar-logo::before,
 .navbar.is-menu-open .navbar-container .navbar-logo::before {
-  background-color: var(--_tetra-tokens---color-white, #fff);
+  background-color: rgba(37, 25, 21, 0.04);
 }
 
 /* ===== mobile scroll performance (<=479px) ===== */
