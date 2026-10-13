@@ -36,13 +36,31 @@
       if (window.ScrollTrigger) window.ScrollTrigger.refresh();
     }
 
+    // сетка уходит вниз, подменяется и въезжает снизу на место
+    var busy = false;
+    function swap(name) {
+      if (busy) return;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return set(name, true);
+      busy = true;
+      var ease = 'cubic-bezier(.2, .7, .2, 1)';
+      groups.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(40px)' }],
+        { duration: 250, easing: 'ease-in', fill: 'forwards' }).finished.then(function () {
+        set(name, true);
+        return groups.animate([{ opacity: 0, transform: 'translateY(40px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 450, easing: ease }).finished;
+      }).then(function () {
+        groups.getAnimations().forEach(function (a) { a.cancel(); });
+        busy = false;
+      });
+    }
+
     tabs.forEach(function (t) {
-      t.addEventListener('click', function (e) { e.preventDefault(); set(t.getAttribute('data-tab'), true); });
+      t.addEventListener('click', function (e) { e.preventDefault(); swap(t.getAttribute('data-tab')); });
     });
     document.querySelectorAll('.news-viewall[data-tab]').forEach(function (a) {
       a.addEventListener('click', function (e) {
         e.preventDefault();
-        set(a.getAttribute('data-tab'), true);
+        swap(a.getAttribute('data-tab'));
         var top = document.querySelector('.news-tabs');
         if (top) top.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
