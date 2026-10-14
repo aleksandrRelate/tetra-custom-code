@@ -38,7 +38,7 @@
    * (tetra-page.js) подхватывает её сам. Без GSAP — работает всегда.
    * ------------------------------------------------------------------ */
   function upgradeSubmit() {
-    document.querySelectorAll('.section_contact input[type="submit"]').forEach(function (input) {
+    document.querySelectorAll('.contact_layout input[type="submit"], .section_contact input[type="submit"]').forEach(function (input) {
       var btn = document.createElement('button');
       btn.type = 'submit';
       btn.className = input.className;
@@ -53,10 +53,42 @@
       input.replaceWith(btn);
     });
   }
+  /* ------------------------------------------------------------------ *
+   * Свитч General Inquiry / CADD Redemption (компонент "Contact layout").
+   * Две отдельные Webflow-формы: "General Inquiry" и "CADD Redemption".
+   * Кнопки [data-contact-tab="general|cadd"] ставят data-contact-mode на
+   * .contact_layout; CSS (tetra-page.css) прячет [data-contact-show] чужого
+   * режима (интро-текст и форму). ?form=cadd или #cadd открывает CADD сразу
+   * (ссылка "CADD Redemptions" в футере).
+   * ------------------------------------------------------------------ */
+  function initContactSwitch() {
+    var initial = new URLSearchParams(location.search).get('form') === 'cadd' ||
+      location.hash === '#cadd' ? 'cadd' : 'general';
+    document.querySelectorAll('.contact_layout').forEach(function (layout) {
+      var tabs = layout.querySelectorAll('[data-contact-tab]');
+      if (!tabs.length) return;
+
+      function setMode(mode) {
+        layout.setAttribute('data-contact-mode', mode);
+        tabs.forEach(function (tab) {
+          var on = tab.getAttribute('data-contact-tab') === mode;
+          tab.classList.toggle('is-active', on);
+          tab.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () { setMode(tab.getAttribute('data-contact-tab')); });
+      });
+      setMode(initial);
+    });
+  }
+
+  function initContact() { upgradeSubmit(); initContactSwitch(); }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', upgradeSubmit, { once: true });
+    document.addEventListener('DOMContentLoaded', initContact, { once: true });
   } else {
-    upgradeSubmit();
+    initContact();
   }
 
   T.ready(init);

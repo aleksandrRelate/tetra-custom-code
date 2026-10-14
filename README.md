@@ -14,7 +14,7 @@
 | `tetra-page.css` / `tetra-page.js` | анимации всей страницы: Lenis, hero-хореография, `section_intro` (pin + заливка), benefits (sticky), trust (scale), about-card-animation, reveal benefits/trust/about, hover-reveal всех кнопок, image parallax, About-swiper, контроллер CADD |
 | `tetra-navbar.css` / `tetra-navbar.js` | навбар: скрытие banner+logo на скролле, переключение цвета по `[navbar-color]`, мобильное меню (шторка + выезд пунктов) |
 | `tetra-footer.js` | футер: reveal колонок/wordmark/legal, пульс обводки wordmark по ховеру |
-| `tetra-cta.js` | CTA: reveal heading → text → кнопки |
+| `tetra-cta.js` | CTA: reveal heading → text → кнопки; Contact layout (компонент): фирменная submit-кнопка + свитч между двумя формами General Inquiry / CADD Redemption (`[data-contact-tab]`, `[data-contact-show]`, `?form=cadd`) |
 | `tetra-partners.js` | partners: бесконечная лента логотипов + reveal заголовка |
 | `tetra-cadd.js` | только для страницы **CADD**: залипающая стопка карточек `section_cadd-practice` (>=992px) + reveal секций cadd-gap / cadd-fundamentals / cadd-practice |
 
