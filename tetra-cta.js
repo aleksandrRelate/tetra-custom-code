@@ -77,11 +77,52 @@
         });
       }
 
+      // Анимированная смена: текущие интро-текст и форма уходят вниз с
+      // затуханием, новые приходят снизу вверх; обёртка форм плавно меняет
+      // высоту. Web Animations API — без зависимости от GSAP.
+      var busy = false;
+      function switchTo(mode) {
+        var current = layout.getAttribute('data-contact-mode');
+        if (mode === current || busy) return;
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var outs = layout.querySelectorAll('[data-contact-show="' + current + '"]');
+        if (reduce || !Element.prototype.animate || !outs.length) { setMode(mode); return; }
+        busy = true;
+        var wrap = layout.querySelector('[data-contact-forms]');
+        var h0 = wrap ? wrap.offsetHeight : 0;
+        var outAnims = Array.prototype.map.call(outs, function (el) {
+          return el.animate([
+            { opacity: 1, transform: 'translateY(0)' },
+            { opacity: 0, transform: 'translateY(24px)' }
+          ], { duration: 280, easing: 'cubic-bezier(0.55, 0, 1, 0.45)', fill: 'forwards' });
+        });
+        outAnims[0].onfinish = function () {
+          setMode(mode);
+          outAnims.forEach(function (a) { a.cancel(); });
+          if (wrap) {
+            var h1 = wrap.offsetHeight;
+            wrap.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }],
+              { duration: 450, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+          }
+          var ins = layout.querySelectorAll('[data-contact-show="' + mode + '"]');
+          Array.prototype.forEach.call(ins, function (el, i) {
+            el.animate([
+              { opacity: 0, transform: 'translateY(24px)' },
+              { opacity: 1, transform: 'translateY(0)' }
+            ], { duration: 520, delay: i * 60, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' });
+          });
+          setTimeout(function () {
+            busy = false;
+            if (window.ScrollTrigger) ScrollTrigger.refresh();
+          }, 600);
+        };
+      }
+
       tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () { setMode(tab.getAttribute('data-contact-tab')); });
+        tab.addEventListener('click', function () { switchTo(tab.getAttribute('data-contact-tab')); });
       });
       setMode(initial);
-      switchers.push({ layout: layout, setMode: setMode });
+      switchers.push({ layout: layout, setMode: switchTo });
     });
 
     // Ссылки на ?form=cadd (футер "CADD Redemptions"): если форма есть на
