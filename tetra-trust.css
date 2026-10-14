@@ -6,8 +6,10 @@
    Волна яркости изнутри наружу: каждый щит поднимает opacity в ~3.2 раза
    от базовой и возвращается; базовые значения заданы в Webflow (.is-1…6).
    Проценты и изинги — из get_motion_context, без изменений.
-   2026-10-13: щиты в цветах флага (красный | белый | красный, Figma 12845:68) —
-   база поднята ближе к макету (0.45…0.1), пик ×2 (не выше 0.9), иначе красный не виден. */
+   База 0.45…0.1, пик ×2 (не выше 0.9).
+   2026-10-14 (фидбэк Bobby): не «красный-белый-красный как флаг», а пульс белый → красный:
+   SVG — сплошной красный штрих; в покое он белый через filter saturate(0) brightness(4),
+   на пике фильтр снят → красный. */
 .section_tt-hero.is-pulsing .tt-hero_shield { animation: 3s linear infinite; }
 .section_tt-hero.is-pulsing .tt-hero_shield.is-1 { animation-name: tt-shield-pulse-1; }
 .section_tt-hero.is-pulsing .tt-hero_shield.is-2 { animation-name: tt-shield-pulse-2; }
@@ -17,19 +19,19 @@
 .section_tt-hero.is-pulsing .tt-hero_shield.is-6 { animation-name: tt-shield-pulse-6; }
 .section_tt-hero.is-paused .tt-hero_shield { animation-play-state: paused; }
 /* база в покое и при reduced-motion (перекрывает значения из Webflow) */
-.section_tt-hero .tt-hero_shield.is-1 { opacity: 0.45; }
-.section_tt-hero .tt-hero_shield.is-2 { opacity: 0.36; }
-.section_tt-hero .tt-hero_shield.is-3 { opacity: 0.28; }
-.section_tt-hero .tt-hero_shield.is-4 { opacity: 0.21; }
-.section_tt-hero .tt-hero_shield.is-5 { opacity: 0.15; }
-.section_tt-hero .tt-hero_shield.is-6 { opacity: 0.1; }
+.section_tt-hero .tt-hero_shield.is-1 { opacity: 0.45; filter: saturate(0) brightness(4); }
+.section_tt-hero .tt-hero_shield.is-2 { opacity: 0.36; filter: saturate(0) brightness(4); }
+.section_tt-hero .tt-hero_shield.is-3 { opacity: 0.28; filter: saturate(0) brightness(4); }
+.section_tt-hero .tt-hero_shield.is-4 { opacity: 0.21; filter: saturate(0) brightness(4); }
+.section_tt-hero .tt-hero_shield.is-5 { opacity: 0.15; filter: saturate(0) brightness(4); }
+.section_tt-hero .tt-hero_shield.is-6 { opacity: 0.1; filter: saturate(0) brightness(4); }
 
-@keyframes tt-shield-pulse-1 { 0% { opacity: 0.45; } 5% { animation-timing-function: ease-out; opacity: 0.45; } 16.667% { animation-timing-function: ease-in-out; opacity: 0.9; } 48.333% { opacity: 0.45; } 100% { opacity: 0.45; } }
-@keyframes tt-shield-pulse-2 { 0% { opacity: 0.36; } 12.333% { animation-timing-function: ease-out; opacity: 0.36; } 24% { animation-timing-function: ease-in-out; opacity: 0.72; } 55.667% { opacity: 0.36; } 100% { opacity: 0.36; } }
-@keyframes tt-shield-pulse-3 { 0% { opacity: 0.28; } 19.667% { animation-timing-function: ease-out; opacity: 0.28; } 31.333% { animation-timing-function: ease-in-out; opacity: 0.56; } 63% { opacity: 0.28; } 100% { opacity: 0.28; } }
-@keyframes tt-shield-pulse-4 { 0% { opacity: 0.21; } 27% { animation-timing-function: ease-out; opacity: 0.21; } 38.667% { animation-timing-function: ease-in-out; opacity: 0.42; } 70.333% { opacity: 0.21; } 100% { opacity: 0.21; } }
-@keyframes tt-shield-pulse-5 { 0% { opacity: 0.15; } 34.333% { animation-timing-function: ease-out; opacity: 0.15; } 46% { animation-timing-function: ease-in-out; opacity: 0.3; } 77.667% { opacity: 0.15; } 100% { opacity: 0.15; } }
-@keyframes tt-shield-pulse-6 { 0% { opacity: 0.1; } 41.667% { animation-timing-function: ease-out; opacity: 0.1; } 53.333% { animation-timing-function: ease-in-out; opacity: 0.2; } 85% { opacity: 0.1; } 100% { opacity: 0.1; } }
+@keyframes tt-shield-pulse-1 { 0% { opacity: 0.45; filter: saturate(0) brightness(4); } 5% { animation-timing-function: ease-out; opacity: 0.45; filter: saturate(0) brightness(4); } 16.667% { animation-timing-function: ease-in-out; opacity: 0.9; filter: none; } 48.333% { opacity: 0.45; filter: saturate(0) brightness(4); } 100% { opacity: 0.45; filter: saturate(0) brightness(4); } }
+@keyframes tt-shield-pulse-2 { 0% { opacity: 0.36; filter: saturate(0) brightness(4); } 12.333% { animation-timing-function: ease-out; opacity: 0.36; filter: saturate(0) brightness(4); } 24% { animation-timing-function: ease-in-out; opacity: 0.72; filter: none; } 55.667% { opacity: 0.36; filter: saturate(0) brightness(4); } 100% { opacity: 0.36; filter: saturate(0) brightness(4); } }
+@keyframes tt-shield-pulse-3 { 0% { opacity: 0.28; filter: saturate(0) brightness(4); } 19.667% { animation-timing-function: ease-out; opacity: 0.28; filter: saturate(0) brightness(4); } 31.333% { animation-timing-function: ease-in-out; opacity: 0.56; filter: none; } 63% { opacity: 0.28; filter: saturate(0) brightness(4); } 100% { opacity: 0.28; filter: saturate(0) brightness(4); } }
+@keyframes tt-shield-pulse-4 { 0% { opacity: 0.21; filter: saturate(0) brightness(4); } 27% { animation-timing-function: ease-out; opacity: 0.21; filter: saturate(0) brightness(4); } 38.667% { animation-timing-function: ease-in-out; opacity: 0.42; filter: none; } 70.333% { opacity: 0.21; filter: saturate(0) brightness(4); } 100% { opacity: 0.21; filter: saturate(0) brightness(4); } }
+@keyframes tt-shield-pulse-5 { 0% { opacity: 0.15; filter: saturate(0) brightness(4); } 34.333% { animation-timing-function: ease-out; opacity: 0.15; filter: saturate(0) brightness(4); } 46% { animation-timing-function: ease-in-out; opacity: 0.3; filter: none; } 77.667% { opacity: 0.15; filter: saturate(0) brightness(4); } 100% { opacity: 0.15; filter: saturate(0) brightness(4); } }
+@keyframes tt-shield-pulse-6 { 0% { opacity: 0.1; filter: saturate(0) brightness(4); } 41.667% { animation-timing-function: ease-out; opacity: 0.1; filter: saturate(0) brightness(4); } 53.333% { animation-timing-function: ease-in-out; opacity: 0.2; filter: none; } 85% { opacity: 0.1; filter: saturate(0) brightness(4); } 100% { opacity: 0.1; filter: saturate(0) brightness(4); } }
 
 /* ===== CANADA — фоновое видео проявляется поверх фото, когда пошло ===== */
 .section_tt-canada .tt-canada_video {

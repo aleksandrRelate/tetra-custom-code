@@ -12,7 +12,7 @@
 //   • SECTION_TT-SECURITY — sticky-стопка пунктов (как benefits на Home)
 //   • SECTION_TT-TESTIMONIAL — Swiper (CDN); классы swiper/-wrapper/-slide — в Webflow, стрелки из вёрстки
 //   • HERO — пульс щитов из прототипа Figma 12255:6 (кейфреймы в tetra-trust.css)
-//   • HERO — щиты в цветах флага Канады (красный | белый | красный, Figma 12845:68):
+//   • HERO — щиты: красный штрих, пульс белый → красный (tetra-trust.css):
 //     src <img> подменяется на assets/trust-shields/shield-N.svg из репо
 //
 // Depends on: window.Tetra (tetra-core.js), GSAP + ScrollTrigger + SplitText.
@@ -26,7 +26,7 @@
   var ASSET_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^/]*$/, '') ||
     'https://aleksandrrelate.github.io/tetra-custom-code/';
 
-  // щиты hero: серые SVG из Webflow → красный | белый | красный (Figma 12845:68)
+  // щиты hero: серые SVG из Webflow → красные SVG из репо (белый/красный задаёт CSS-фильтр)
   function canadaShields() {
     document.querySelectorAll('.section_tt-hero .tt-hero_shield').forEach(function (img) {
       var m = img.className.match(/is-(\d)/);
