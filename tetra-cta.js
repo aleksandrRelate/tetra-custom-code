@@ -53,10 +53,55 @@
       input.replaceWith(btn);
     });
   }
+  /* ------------------------------------------------------------------ *
+   * Свитч General Inquiry / CADD Redemption (страница Contact).
+   * Кнопки [data-contact-tab="general|cadd"] ставят data-contact-mode на
+   * .section_contact; CSS (tetra-page.css) прячет [data-contact-show] чужого
+   * режима. Скрытые поля disabled — не уходят в сабмит. В форму пишется
+   * hidden-поле "Form type" (для роутинга заявок). ?form=cadd или #cadd
+   * открывает CADD сразу (ссылка из футера).
+   * ------------------------------------------------------------------ */
+  function initContactSwitch() {
+    document.querySelectorAll('.section_contact').forEach(function (section) {
+      var tabs = section.querySelectorAll('[data-contact-tab]');
+      if (!tabs.length) return;
+      var form = section.querySelector('form');
+      var typeInput = null;
+      if (form) {
+        typeInput = document.createElement('input');
+        typeInput.type = 'hidden';
+        typeInput.name = 'Form type';
+        form.appendChild(typeInput);
+      }
+
+      function setMode(mode) {
+        section.setAttribute('data-contact-mode', mode);
+        tabs.forEach(function (tab) {
+          var on = tab.getAttribute('data-contact-tab') === mode;
+          tab.classList.toggle('is-active', on);
+          tab.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        section.querySelectorAll('[data-contact-show]').forEach(function (el) {
+          var off = el.getAttribute('data-contact-show') !== mode;
+          el.querySelectorAll('input, textarea, select').forEach(function (f) { f.disabled = off; });
+        });
+        if (typeInput) typeInput.value = mode === 'cadd' ? 'CADD Redemption' : 'General Inquiry';
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () { setMode(tab.getAttribute('data-contact-tab')); });
+      });
+
+      var q = new URLSearchParams(location.search).get('form');
+      setMode(q === 'cadd' || location.hash === '#cadd' ? 'cadd' : 'general');
+    });
+  }
+
+  function initContact() { upgradeSubmit(); initContactSwitch(); }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', upgradeSubmit, { once: true });
+    document.addEventListener('DOMContentLoaded', initContact, { once: true });
   } else {
-    upgradeSubmit();
+    initContact();
   }
 
   T.ready(init);
