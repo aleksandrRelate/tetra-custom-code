@@ -137,5 +137,4 @@ html.lenis, html.lenis body { height: auto; }
 [data-contact-mode="cadd"] [data-contact-show="general"] { display: none; }
 [data-contact-mode="cadd"] [data-contact-show="cadd"] { display: block; }
 .contact_switch-btn { border: 0; font-family: inherit; }
-.contact_switch-btn:hover { color: #090e13; }
-.contact_switch-btn.is-active { background-color: #090e13; color: #fff; }
+.contact_switch-btn.is-active { background-color: #fff; color: #131315; }
