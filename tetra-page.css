@@ -129,13 +129,13 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 /* ------------------------------------------------------------------ *
- * Contact form: свитч General Inquiry / CADD Redemption (tetra-cta.js).
+ * Contact layout: свитч General Inquiry / CADD Redemption (tetra-cta.js).
  * Элементы с [data-contact-show] видны только в своём режиме; режим —
- * атрибут data-contact-mode на .section_contact (по умолчанию general).
+ * атрибут data-contact-mode на .contact_layout (по умолчанию general).
  * ------------------------------------------------------------------ */
 [data-contact-show="cadd"] { display: none; }
-.section_contact[data-contact-mode="cadd"] [data-contact-show="general"] { display: none; }
-.section_contact[data-contact-mode="cadd"] [data-contact-show="cadd"] { display: block; }
+[data-contact-mode="cadd"] [data-contact-show="general"] { display: none; }
+[data-contact-mode="cadd"] [data-contact-show="cadd"] { display: block; }
 .contact_switch-btn { border: 0; font-family: inherit; }
 .contact_switch-btn:hover { color: #090e13; }
 .contact_switch-btn.is-active { background-color: #090e13; color: #fff; }

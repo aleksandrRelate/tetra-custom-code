@@ -38,7 +38,7 @@
    * (tetra-page.js) подхватывает её сам. Без GSAP — работает всегда.
    * ------------------------------------------------------------------ */
   function upgradeSubmit() {
-    document.querySelectorAll('.section_contact input[type="submit"]').forEach(function (input) {
+    document.querySelectorAll('.contact_layout input[type="submit"], .section_contact input[type="submit"]').forEach(function (input) {
       var btn = document.createElement('button');
       btn.type = 'submit';
       btn.className = input.className;
@@ -54,46 +54,33 @@
     });
   }
   /* ------------------------------------------------------------------ *
-   * Свитч General Inquiry / CADD Redemption (страница Contact).
+   * Свитч General Inquiry / CADD Redemption (компонент "Contact layout").
+   * Две отдельные Webflow-формы: "General Inquiry" и "CADD Redemption".
    * Кнопки [data-contact-tab="general|cadd"] ставят data-contact-mode на
-   * .section_contact; CSS (tetra-page.css) прячет [data-contact-show] чужого
-   * режима. Скрытые поля disabled — не уходят в сабмит. В форму пишется
-   * hidden-поле "Form type" (для роутинга заявок). ?form=cadd или #cadd
-   * открывает CADD сразу (ссылка из футера).
+   * .contact_layout; CSS (tetra-page.css) прячет [data-contact-show] чужого
+   * режима (интро-текст и форму). ?form=cadd или #cadd открывает CADD сразу
+   * (ссылка "CADD Redemptions" в футере).
    * ------------------------------------------------------------------ */
   function initContactSwitch() {
-    document.querySelectorAll('.section_contact').forEach(function (section) {
-      var tabs = section.querySelectorAll('[data-contact-tab]');
+    var initial = new URLSearchParams(location.search).get('form') === 'cadd' ||
+      location.hash === '#cadd' ? 'cadd' : 'general';
+    document.querySelectorAll('.contact_layout').forEach(function (layout) {
+      var tabs = layout.querySelectorAll('[data-contact-tab]');
       if (!tabs.length) return;
-      var form = section.querySelector('form');
-      var typeInput = null;
-      if (form) {
-        typeInput = document.createElement('input');
-        typeInput.type = 'hidden';
-        typeInput.name = 'Form type';
-        form.appendChild(typeInput);
-      }
 
       function setMode(mode) {
-        section.setAttribute('data-contact-mode', mode);
+        layout.setAttribute('data-contact-mode', mode);
         tabs.forEach(function (tab) {
           var on = tab.getAttribute('data-contact-tab') === mode;
           tab.classList.toggle('is-active', on);
           tab.setAttribute('aria-selected', on ? 'true' : 'false');
         });
-        section.querySelectorAll('[data-contact-show]').forEach(function (el) {
-          var off = el.getAttribute('data-contact-show') !== mode;
-          el.querySelectorAll('input, textarea, select').forEach(function (f) { f.disabled = off; });
-        });
-        if (typeInput) typeInput.value = mode === 'cadd' ? 'CADD Redemption' : 'General Inquiry';
       }
 
       tabs.forEach(function (tab) {
         tab.addEventListener('click', function () { setMode(tab.getAttribute('data-contact-tab')); });
       });
-
-      var q = new URLSearchParams(location.search).get('form');
-      setMode(q === 'cadd' || location.hash === '#cadd' ? 'cadd' : 'general');
+      setMode(initial);
     });
   }
 
