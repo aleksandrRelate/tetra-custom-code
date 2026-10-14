@@ -81,8 +81,26 @@
         tab.addEventListener('click', function () { setMode(tab.getAttribute('data-contact-tab')); });
       });
       setMode(initial);
+      switchers.push({ layout: layout, setMode: setMode });
+    });
+
+    // Ссылки на ?form=cadd (футер "CADD Redemptions"): если форма есть на
+    // этой странице — не уходим, а включаем CADD и скроллим к форме;
+    // иначе обычный переход на страницу Contact.
+    if (!switchers.length) return;
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href*="form=cadd"]');
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      var s = switchers[0];
+      s.setMode('cadd');
+      var target = s.layout.closest('.section_contact') || s.layout;
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(target, { offset: -80, immediate: reduce });
+      else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
     });
   }
+  var switchers = [];
 
   function initContact() { upgradeSubmit(); initContactSwitch(); }
   if (document.readyState === 'loading') {
