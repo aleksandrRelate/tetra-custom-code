@@ -149,7 +149,14 @@
     var legal = document.querySelector('.footer_legal');
     if (!legal) return;
     var b = el('<div class="footer_legal-text"><button type="button" class="tc-settings-link" data-cookie-settings>Cookie settings</button></div>');
-    legal.appendChild(b);
+    // ссылка — под последней строкой (Tetra Trust …), а не третьей колонкой
+    // в flex-ряду .footer_legal (space-between)
+    var last = legal.lastElementChild;
+    if (!last) { legal.appendChild(b); return; }
+    var col = el('<div class="tc-legal-col"></div>');
+    last.before(col);
+    col.appendChild(last);
+    col.appendChild(b);
   }
 
   function init() {

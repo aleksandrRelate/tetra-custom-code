@@ -203,3 +203,10 @@
     line-height: 1.5rem;
   }
 }
+
+/* правая колонка футера: текст Tetra Trust + под ним Cookie settings */
+.tc-legal-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
