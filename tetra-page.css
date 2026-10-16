@@ -136,5 +136,13 @@ html.lenis, html.lenis body { height: auto; }
 [data-contact-show="cadd"] { display: none; }
 [data-contact-mode="cadd"] [data-contact-show="general"] { display: none; }
 [data-contact-mode="cadd"] [data-contact-show="cadd"] { display: block; }
+/* HubSpot-формы (приложение HubSpot V2) внутри Contact layout: только CSS —
+ * разметку менять нельзя (мост HubSpot сверяет её хэш). Фокус как у .contact_input,
+ * ряд имени/фамилии в строку (у HubSpot инлайн display:block). */
+.contact_layout [data-hsfc-id="Renderer"] .contact_input:focus,
+.contact_layout [data-hsfc-id="Renderer"] .contact_input:focus-visible {
+  border-color: #090e13 !important; outline: none !important; box-shadow: none !important;
+}
+.contact_layout [data-hsfc-id="Renderer"] .contact_row { display: flex !important; }
 .contact_switch-btn { border: 0; font-family: inherit; }
 .contact_switch-btn.is-active { background-color: #fff; color: #131315; }
