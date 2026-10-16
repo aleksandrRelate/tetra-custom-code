@@ -76,6 +76,14 @@
 .tetra-anim .cadd-hero_glow,
 .tetra-anim .cadd-activity-card,
 .tetra-anim .cadd-consortium,
+.tetra-anim .careers-hero_heading,
+.tetra-anim .careers-hero_text,
+.tetra-anim .careers-hero_content .button,
+.tetra-anim .careers-values_heading,
+.tetra-anim .careers-values_text,
+.tetra-anim .careers-values_card,
+.tetra-anim .careers-cta_heading,
+.tetra-anim .careers-cta_text,
 .tetra-anim [data-reveal] {
   opacity: 0 !important;
 }
