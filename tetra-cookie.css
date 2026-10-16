@@ -208,5 +208,9 @@
 .tc-legal-col {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
+}
+/* на мобилке строки футера идут столбиком по левому краю */
+@media screen and (max-width: 479px) {
+  .tc-legal-col { align-items: flex-start; }
 }
