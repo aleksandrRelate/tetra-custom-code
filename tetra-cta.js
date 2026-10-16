@@ -37,6 +37,10 @@
    * теми же классами + текст + шеврон, как у остальных кнопок. Hover-reveal
    * (tetra-page.js) подхватывает её сам. Без GSAP — работает всегда.
    * ------------------------------------------------------------------ */
+  var CHEVRON =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 16 16" fill="none" class="button_icon" aria-hidden="true">' +
+    '<path d="M6 2.6665L10.8619 7.52842C11.1223 7.78877 11.1223 8.21088 10.8619 8.47123L6 13.3332" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
   function upgradeSubmit() {
     document.querySelectorAll('.contact_layout input[type="submit"], .section_contact input[type="submit"]').forEach(function (input) {
       var btn = document.createElement('button');
@@ -47,10 +51,18 @@
       var label = document.createElement('span');
       label.textContent = input.value;
       btn.appendChild(label);
-      btn.insertAdjacentHTML('beforeend',
-        '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 16 16" fill="none" class="button_icon" aria-hidden="true">' +
-        '<path d="M6 2.6665L10.8619 7.52842C11.1223 7.78877 11.1223 8.21088 10.8619 8.47123L6 13.3332" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
+      btn.insertAdjacentHTML('beforeend', CHEVRON);
       input.replaceWith(btn);
+    });
+    // HubSpot-формы (приложение HubSpot, developer embed): кнопка уже
+    // <button> с классами .button.contact_button — добавляем span + шеврон.
+    document.querySelectorAll('.contact_layout button[data-hsfc-id="Button"]').forEach(function (btn) {
+      if (btn.querySelector('.button_icon')) return;
+      var label = document.createElement('span');
+      label.textContent = btn.textContent.trim();
+      btn.textContent = '';
+      btn.appendChild(label);
+      btn.insertAdjacentHTML('beforeend', CHEVRON);
     });
   }
   /* ------------------------------------------------------------------ *
