@@ -2,10 +2,10 @@
 // Подключается после tetra-core.js и tetra-page.js.
 //   • hero — загрузка как на About: слова заголовка из маски, текст,
 //     кнопка сверху через маску, navbar
-//   • section_careers-values — reveal как у cadd-practice (метка, заголовок,
-//     абзацы, карточки, цифры) + залипающая стопка карточек как на CADD
+//   • section_careers-values — как tt-clients на Tetra Trust: метка, абзацы,
+//     карточки сетки лесенкой (Figma v4 12919:750, мобилка 12919:832)
 //   • section_careers-cta — reveal как у компонента CTA (tetra-cta.js)
-// ?perf=careers выключает всё, ?perf=hero / reveal / stack — отдельные части.
+// ?perf=careers выключает всё, ?perf=hero / reveal — отдельные части.
 (function () {
   var T = window.Tetra || (window.Tetra = {});
   var NO_MOTION = '(prefers-reduced-motion: no-preference)';
@@ -68,42 +68,8 @@
       gsap.set(hero.querySelectorAll(HERO_ITEMS), { clearProps: 'opacity,visibility' });
     }
 
-    /* ------------------------------------------------------------------ *
-     * SECTION_CAREERS-VALUES — стэк карточек (механика CADD practice):
-     * карточки залипают на 4rem и стэкаются, у уходящей гаснет вся
-     * карточка (opacity + лёгкий scale). Последнюю не гасим.
-     * ------------------------------------------------------------------ */
     var values = document.querySelector('.section_careers-values');
     var cards = values ? gsap.utils.toArray(values.querySelectorAll('.careers-values_card')) : [];
-    if (cards.length > 1 && !T.off('stack')) {
-      mm.add(NO_MOTION, function () {
-        var rootFontSize = parseFloat(s.fontSize) || 16;
-        var cardTop = 4 * rootFontSize;
-        var tw = [];
-        cards.forEach(function (card, i) {
-          card.style.position = 'sticky';
-          card.style.top = cardTop + 'px';
-          if (i === cards.length - 1) return;
-          tw.push(gsap.to(card, {
-            opacity: 0.18, scale: 0.985, transformOrigin: '50% 0%', ease: 'none',
-            scrollTrigger: {
-              trigger: cards[i + 1],
-              start: 'top center',
-              end: 'top 2.5rem',
-              scrub: true,
-              invalidateOnRefresh: true
-            }
-          }));
-        });
-        return function () {
-          tw.forEach(function (t) { if (t.scrollTrigger) t.scrollTrigger.kill(); t.kill(); });
-          cards.forEach(function (card) {
-            card.style.position = ''; card.style.top = '';
-            gsap.set(card, { clearProps: 'opacity,transform' });
-          });
-        };
-      });
-    }
 
     /* ------------------------------------------------------------------ *
      * REVEAL — values и CTA
@@ -114,24 +80,24 @@
         var timelineFor = r.timelineFor;
         var revealText = r.revealText;
 
-        // VALUES — как cadd-practice: шапка, абзацы, карточки и цифры
+        // VALUES — как tt-clients на Tetra Trust: метка и абзацы построчно,
+        // карточки сетки появляются лесенкой (на мобилке — каждая по своему скроллу)
         if (values) {
-          var left = values.querySelector('.careers-values_left') || values;
-          var header = timelineFor(left);
-          revealText(header, left.querySelector('.badge .eyebrow_text'), 0);
-          revealText(header, left.querySelector('.careers-values_heading'), 0.08);
-          left.querySelectorAll('.careers-values_text').forEach(function (p, i) {
-            revealText(header, p, 0.16 + i * 0.08);
+          var split = values.querySelector('.careers-values_split') || values;
+          var header = timelineFor(split);
+          revealText(header, split.querySelector('.badge .eyebrow_text'), 0);
+          split.querySelectorAll('.careers-values_text').forEach(function (p, i) {
+            revealText(header, p, 0.08 + i * 0.08);
           });
-          cards.forEach(function (card) {
-            var entry = timelineFor(card);
-            gsap.set(card, { autoAlpha: 0, y: 32, scale: 0.98, transformOrigin: '50% 100%' });
-            entry.to(card, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7 }, 0);
-            revealText(entry, card.querySelector('.careers-values_card-heading'), 0.12);
-            revealText(entry, card.querySelector('.careers-values_copy'), 0.22);
-            var number = card.querySelector('.careers-values_number');
-            if (number) revealText(timelineFor(number), number, 0, true);
-          });
+          gsap.set(cards, { autoAlpha: 0, y: 32 });
+          if (window.matchMedia('(max-width: 479px)').matches) {
+            cards.forEach(function (card) {
+              timelineFor(card, 'top 92%').to(card, { autoAlpha: 1, y: 0, duration: 0.7 }, 0);
+            });
+          } else {
+            timelineFor(values.querySelector('.careers-values_grid') || values, 'top 85%')
+              .to(cards, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.12 }, 0);
+          }
         }
 
         // CTA — как компонент CTA: заголовок пословно → текст → кнопка
@@ -146,8 +112,7 @@
 
         return function () {
           r.destroy();
-          // stack-твины гасят opacity/transform карточек — их не трогаем
-          gsap.set(cards, { clearProps: 'visibility' });
+          gsap.set(cards, { clearProps: 'opacity,visibility,transform' });
         };
       });
     }
