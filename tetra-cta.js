@@ -55,15 +55,16 @@
   }
   /* ------------------------------------------------------------------ *
    * Свитч General Inquiry / CADD Redemption (компонент "Contact layout").
-   * Две отдельные Webflow-формы: "General Inquiry" и "CADD Redemption".
-   * Кнопки [data-contact-tab="general|cadd"] ставят data-contact-mode на
+   * Отдельные формы: "General Inquiry", "CADD Redemption", "Request Proof of Reserves".
+   * Кнопки [data-contact-tab="general|cadd|proof"] ставят data-contact-mode на
    * .contact_layout; CSS (tetra-page.css) прячет [data-contact-show] чужого
    * режима (интро-текст и форму). ?form=cadd или #cadd открывает CADD сразу
-   * (ссылка "CADD Redemptions" в футере).
+   * (ссылка "CADD Redemptions" в футере); ?form=proof или #proof — Proof of Reserves.
    * ------------------------------------------------------------------ */
   function initContactSwitch() {
-    var initial = new URLSearchParams(location.search).get('form') === 'cadd' ||
-      location.hash === '#cadd' ? 'cadd' : 'general';
+    var q = new URLSearchParams(location.search).get('form');
+    var initial = q === 'cadd' || location.hash === '#cadd' ? 'cadd' :
+      q === 'proof' || location.hash === '#proof' ? 'proof' : 'general';
     document.querySelectorAll('.contact_layout').forEach(function (layout) {
       var tabs = layout.querySelectorAll('[data-contact-tab]');
       if (!tabs.length) return;
@@ -121,20 +122,22 @@
       tabs.forEach(function (tab) {
         tab.addEventListener('click', function () { switchTo(tab.getAttribute('data-contact-tab')); });
       });
-      setMode(initial);
+      setMode(layout.querySelector('[data-contact-tab="' + initial + '"]') ? initial : 'general');
       switchers.push({ layout: layout, setMode: switchTo });
     });
 
-    // Ссылки на ?form=cadd (футер "CADD Redemptions"): если форма есть на
+    // Ссылки на ?form=cadd|proof (футер "CADD Redemptions" / "Request Proof of Reserves"): если форма есть на
     // этой странице — не уходим, а включаем CADD и скроллим к форме;
     // иначе обычный переход на страницу Contact.
     if (!switchers.length) return;
     document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('a[href*="form=cadd"]');
+      var a = e.target.closest && e.target.closest('a[href*="form=cadd"], a[href*="form=proof"]');
       if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-      e.preventDefault();
+      var mode = a.getAttribute('href').indexOf('form=proof') > -1 ? 'proof' : 'cadd';
       var s = switchers[0];
-      s.setMode('cadd');
+      if (!s.layout.querySelector('[data-contact-tab="' + mode + '"]')) return;
+      e.preventDefault();
+      s.setMode(mode);
       var target = s.layout.closest('.section_contact') || s.layout;
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(target, { offset: -80, immediate: reduce });

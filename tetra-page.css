@@ -133,9 +133,14 @@ html.lenis, html.lenis body { height: auto; }
  * Элементы с [data-contact-show] видны только в своём режиме; режим —
  * атрибут data-contact-mode на .contact_layout (по умолчанию general).
  * ------------------------------------------------------------------ */
-[data-contact-show="cadd"] { display: none; }
-[data-contact-mode="cadd"] [data-contact-show="general"] { display: none; }
-[data-contact-mode="cadd"] [data-contact-show="cadd"] { display: block; }
+[data-contact-show="cadd"],
+[data-contact-show="proof"] { display: none; }
+[data-contact-mode="cadd"] [data-contact-show="general"],
+[data-contact-mode="cadd"] [data-contact-show="proof"],
+[data-contact-mode="proof"] [data-contact-show="general"],
+[data-contact-mode="proof"] [data-contact-show="cadd"] { display: none; }
+[data-contact-mode="cadd"] [data-contact-show="cadd"],
+[data-contact-mode="proof"] [data-contact-show="proof"] { display: block; }
 /* HubSpot-формы (приложение HubSpot V2) внутри Contact layout: только CSS —
  * разметку менять нельзя (мост HubSpot сверяет её хэш). Фокус как у .contact_input,
  * ряд имени/фамилии в строку (у HubSpot инлайн display:block). */
