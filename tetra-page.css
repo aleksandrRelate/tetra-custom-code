@@ -153,7 +153,7 @@ html.lenis, html.lenis body { height: auto; }
  * (имя/фамилия и textarea в General/Proof) — задаём то же, что у .contact_row в Webflow. */
 .contact_layout [data-hsfc-id="Renderer"] [data-hsfc-id="Row"] { display: flex !important; gap: 1rem; }
 @media screen and (max-width: 479px) {
-  .contact_layout [data-hsfc-id="Renderer"] [data-hsfc-id="Row"] { gap: 0.722rem; }
+  .contact_layout [data-hsfc-id="Renderer"] [data-hsfc-id="Row"] { flex-direction: column; gap: 0.722rem; }
 }
 /* Шеврон на submit, как .button_icon у остальных кнопок (svg в кнопку не вставляем). */
 .contact_layout [data-hsfc-id="Button"]::after {
