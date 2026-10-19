@@ -47,6 +47,8 @@
 
 /* «All»: в каждой группе по 3 карточки */
 .news-groups:not([data-filter]) .news-grid_item:nth-child(n + 4) { display: none; }
+/* «All»: группа без статей (Insights до первой публикации) не показывается */
+.news-groups:not([data-filter]) .news-group:not(:has(.news-grid_item)) { display: none; }
 /* фильтр: только выбранная группа, все карточки, без «View all» */
 .news-groups[data-filter] .news-group { display: none; }
 .news-groups[data-filter] .news-group.is-shown { display: flex; }
