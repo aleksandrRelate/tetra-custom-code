@@ -149,6 +149,12 @@ html.lenis, html.lenis body { height: auto; }
   border-color: #090e13 !important; outline: none !important; box-shadow: none !important;
 }
 .contact_layout [data-hsfc-id="Renderer"] .contact_row { display: flex !important; }
+/* Фолбэк: мост HubSpot v1.4.0 не переносит contact_row на ряды с одинаковым primaryInputName
+ * (имя/фамилия и textarea в General/Proof) — задаём то же, что у .contact_row в Webflow. */
+.contact_layout [data-hsfc-id="Renderer"] [data-hsfc-id="Row"] { display: flex !important; gap: 1rem; }
+@media screen and (max-width: 479px) {
+  .contact_layout [data-hsfc-id="Renderer"] [data-hsfc-id="Row"] { gap: 0.722rem; }
+}
 /* Шеврон на submit, как .button_icon у остальных кнопок (svg в кнопку не вставляем). */
 .contact_layout [data-hsfc-id="Button"]::after {
   content: ""; flex-shrink: 0; width: 1rem; height: 1rem; background-color: currentColor;
