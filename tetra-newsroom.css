@@ -62,8 +62,4 @@
   .news-article_content .w-richtext h3 { font-size: 1.444rem; line-height: 1.925rem; }
   .news-article_content .w-richtext blockquote { padding-left: 1rem; font-size: 1.204rem; line-height: 1.805rem; }
   .news-groups[data-filter] .news-group.is-shown { display: flex; }
-  /* табы: без скролла; при переносе (5 пунктов) вторая строка — по левому краю */
-  .news-tabs { overflow: hidden; scrollbar-width: none; }
-  .news-tabs::-webkit-scrollbar { display: none; }
-  .news-tab { flex: 0 0 auto; padding-left: 8px; padding-right: 8px; text-align: left; white-space: nowrap; }
 }
