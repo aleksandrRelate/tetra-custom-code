@@ -42,10 +42,13 @@
   }
 
   function choose(c) {
+    var prev = read();
     save(c);
     apply(c);
     closeBanner();
     closeModal();
+    // Tags already loaded can't be unloaded; reload so GTM starts without them.
+    if (prev && ((prev.analytics && !c.analytics) || (prev.marketing && !c.marketing))) location.reload();
   }
 
   function el(html) {
